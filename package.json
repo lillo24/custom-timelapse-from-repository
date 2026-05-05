@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "extract:git": "tsx scripts/extract-git-history.ts",
+    "filter:animation-data": "tsx scripts/filter-repo-animation-data.ts",
     "generate:units": "tsx scripts/generate-change-units.ts",
     "reconstruct:states": "tsx scripts/reconstruct-file-states.ts",
     "lint": "eslint .",
