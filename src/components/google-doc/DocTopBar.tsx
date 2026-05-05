@@ -20,7 +20,7 @@ export function DocTopBar({ documentTitle }: DocTopBarProps) {
               {documentTitle}
             </p>
             <p className="truncate text-sm text-slate-500">
-              Saved · Presentation mock
+              Saved {'\u00B7'} Presentation mock
             </p>
           </div>
         </div>

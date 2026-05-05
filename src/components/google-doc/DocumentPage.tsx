@@ -1,113 +1,267 @@
-import type { DocComment, DocSection } from '../../data/staticDocMock'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import type { DocBlockWithEmphasis, DocMarginNote } from '../../data/docTimeline'
+import { useLayoutEffect, useRef, useState } from 'react'
+import {
+  getFadeSlideUp,
+  getStaggerDelay,
+  springSoft,
+} from '../../lib/motionPresets'
 import { CommentBubble } from './CommentBubble'
-import { FakeTextBlock } from './FakeTextBlock'
-import { StatusPill } from './StatusPill'
 
 type DocumentPageProps = {
   documentTitle: string
-  sections: DocSection[]
-  comments: DocComment[]
+  blocks: DocBlockWithEmphasis[]
+  notes: DocMarginNote[]
 }
 
 export function DocumentPage({
   documentTitle,
-  sections,
-  comments,
+  blocks,
+  notes,
 }: DocumentPageProps) {
-  const commentsBySection = new Map(comments.map((comment) => [comment.sectionId, comment]))
+  const shouldReduceMotion = useReducedMotion() ?? false
+  const blockPresence = getFadeSlideUp(shouldReduceMotion, 18)
+  const viewportRef = useRef<HTMLDivElement>(null)
+  const paperRef = useRef<HTMLElement>(null)
+  const [paperScale, setPaperScale] = useState(1)
+  const [scaledPaperSize, setScaledPaperSize] = useState<{
+    width: number
+    height: number
+  } | null>(null)
+  const notesByBlock = notes.reduce<Map<string, DocMarginNote[]>>(
+    (map, note) => {
+      const existingNotes = map.get(note.blockId) ?? []
+      map.set(note.blockId, [...existingNotes, note])
+      return map
+    },
+    new Map(),
+  )
+  const leftColumnBlocks = blocks.filter((block) => block.column === 'left')
+  const rightColumnBlocks = blocks.filter((block) => block.column === 'right')
+
+  useLayoutEffect(() => {
+    function measurePaper() {
+      if (!viewportRef.current || !paperRef.current) {
+        return
+      }
+
+      const viewportWidth = viewportRef.current.clientWidth
+      const viewportHeight = viewportRef.current.clientHeight
+      const naturalWidth = paperRef.current.offsetWidth
+      const naturalHeight = paperRef.current.offsetHeight
+
+      if (viewportWidth === 0 || viewportHeight === 0 || naturalWidth === 0 || naturalHeight === 0) {
+        return
+      }
+
+      const nextScale = Math.min(
+        viewportWidth / naturalWidth,
+        viewportHeight / naturalHeight,
+        1,
+      )
+
+      setPaperScale(nextScale)
+      setScaledPaperSize({
+        width: naturalWidth * nextScale,
+        height: naturalHeight * nextScale,
+      })
+    }
+
+    measurePaper()
+
+    const resizeObserver = new ResizeObserver(() => {
+      measurePaper()
+    })
+
+    if (viewportRef.current) {
+      resizeObserver.observe(viewportRef.current)
+    }
+
+    if (paperRef.current) {
+      resizeObserver.observe(paperRef.current)
+    }
+
+    window.addEventListener('resize', measurePaper)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', measurePaper)
+    }
+  }, [blocks, notes])
+
+  function renderBlock(block: DocBlockWithEmphasis, blockIndex: number) {
+    const blockNotes = notesByBlock.get(block.id) ?? []
+    const highlighted = block.emphasis === 'highlight'
+    const revealed = block.revealed !== false
+
+    return (
+      <motion.section
+        key={block.id}
+        layout
+        initial={
+          revealed ? blockPresence.initial : false
+        }
+        animate={
+          revealed
+            ? shouldReduceMotion
+              ? blockPresence.animate
+              : {
+                  ...blockPresence.animate,
+                  y: highlighted ? -1 : 0,
+                }
+            : shouldReduceMotion
+              ? { opacity: 0 }
+              : { opacity: 0, y: 0, scale: 1 }
+        }
+        transition={{
+          ...springSoft,
+          delay: shouldReduceMotion ? 0 : getStaggerDelay(blockIndex, 0.035),
+        }}
+        className={[
+          'relative border-l px-3',
+          revealed
+            ? highlighted
+              ? 'border-amber-300'
+              : 'border-slate-200/90'
+            : 'border-transparent',
+        ].join(' ')}
+        aria-hidden={!revealed}
+      >
+        <div className="space-y-1">
+          <h2
+            className={[
+              'font-display font-semibold text-slate-900',
+              block.level === 1
+                ? 'text-[1.03rem] tracking-[-0.03em]'
+                : block.level === 2
+                  ? 'text-[12.5px] tracking-[-0.02em]'
+                  : 'text-[10.25px] uppercase tracking-[0.2em] text-slate-500',
+            ].join(' ')}
+          >
+            <span
+              className={
+                highlighted
+                  ? 'box-decoration-clone bg-[linear-gradient(180deg,rgba(254,240,138,0.18),rgba(253,224,71,0.42))] px-1 py-0.5 -ml-1'
+                  : ''
+              }
+            >
+              {block.title}
+            </span>
+          </h2>
+
+          {block.paragraphs?.map((paragraph) => (
+            <p
+              key={paragraph}
+              className="text-[10.25px] leading-[1.36] text-slate-600"
+            >
+              {paragraph}
+            </p>
+          ))}
+
+          {block.bullets?.length ? (
+            <ul className="list-disc space-y-1 pl-3.5 text-[10px] leading-[1.34] text-slate-600 marker:text-slate-400">
+              {block.bullets.map((bullet) => (
+                <li key={bullet}>{bullet}</li>
+              ))}
+            </ul>
+          ) : null}
+
+          {block.numberedItems?.length ? (
+            <ol className="list-decimal space-y-1 pl-3.5 text-[10px] leading-[1.34] text-slate-600 marker:text-slate-400">
+              {block.numberedItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          ) : null}
+
+          {block.codeLines?.length ? (
+            <div className="border border-slate-200/80 bg-slate-50/90 px-2 py-1.5 font-mono text-[9.25px] leading-[1.35] text-slate-600">
+              {block.codeLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+          ) : null}
+
+          {blockNotes.length ? (
+            <div className="pt-0.5">
+              <AnimatePresence>
+                {blockNotes.map((note, noteIndex) => (
+                  <CommentBubble
+                    key={note.id}
+                    label={note.label}
+                    body={note.body}
+                    tone={note.tone}
+                    active={highlighted}
+                    delay={
+                      shouldReduceMotion
+                        ? 0
+                        : getStaggerDelay(noteIndex, 0.05)
+                    }
+                  />
+                ))}
+              </AnimatePresence>
+            </div>
+          ) : null}
+        </div>
+      </motion.section>
+    )
+  }
 
   return (
-    <div className="flex h-full w-full items-center justify-center">
-      <div className="w-full max-w-[780px] rounded-[34px] border border-slate-200/90 bg-[#fffdfa] shadow-[0_32px_90px_rgba(15,23,42,0.14)]">
-        <div className="space-y-5 p-5 sm:p-6 lg:p-7">
-          <header className="border-b border-slate-200/80 pb-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="font-mono text-[11px] uppercase tracking-[0.32em] text-slate-400">
-                  Research workspace
-                </p>
-                <h2 className="mt-3 font-display text-[1.7rem] font-semibold tracking-[-0.05em] text-slate-900 sm:text-[2rem]">
-                  {documentTitle}
-                </h2>
-                <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                  A static composition of the thesis pipeline, arranged as a
-                  document snapshot with visible retrieval and citation
-                  milestones.
-                </p>
+    <div ref={viewportRef} className="flex h-full w-full items-center justify-center overflow-hidden">
+      <div
+        className="overflow-hidden"
+        style={
+          scaledPaperSize
+            ? {
+                width: `${scaledPaperSize.width}px`,
+                height: `${scaledPaperSize.height}px`,
+              }
+            : undefined
+        }
+      >
+        <article
+          ref={paperRef}
+          data-current-paper
+          className="flex w-[884px] max-w-[884px] flex-col border border-slate-200/90 bg-white shadow-[0_28px_72px_rgba(15,23,42,0.13)]"
+          style={{
+            transform: `scale(${paperScale})`,
+            transformOrigin: 'top center',
+          }}
+        >
+          <div className="flex min-h-0 flex-1 flex-col space-y-3 p-4 sm:p-5 lg:p-5">
+            <header className="border-b border-slate-200/80 pb-2.5">
+              <p className="text-[10px] uppercase tracking-[0.28em] text-slate-400">
+                Extended design outline
+              </p>
+              <h1 className="mt-1.5 font-display text-[1.34rem] font-semibold tracking-[-0.05em] text-slate-900 sm:text-[1.52rem]">
+                {documentTitle}
+              </h1>
+              <p className="mt-1 max-w-[42rem] text-[10px] leading-[1.4] text-slate-500">
+                Trusted-source retrieval assistant for university information:
+                scoped discovery, versioned raw storage, anchored extraction,
+                BM25 retrieval, and cited answers.
+              </p>
+            </header>
+
+            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.92fr)] sm:gap-5">
+              <div className="space-y-2.5">
+                {leftColumnBlocks.map((block, blockIndex) =>
+                  renderBlock(block, blockIndex),
+                )}
               </div>
 
-              <div className="hidden shrink-0 flex-col items-end gap-2 sm:flex">
-                <StatusPill tone="amber">Interlude frame</StatusPill>
-                <p className="text-[10px] uppercase tracking-[0.28em] text-slate-400">
-                  Screenshot ready
-                </p>
+              <div className="space-y-2.5">
+                {rightColumnBlocks.map((block, blockIndex) =>
+                  renderBlock(
+                    block,
+                    leftColumnBlocks.length + blockIndex,
+                  ),
+                )}
               </div>
             </div>
-          </header>
-
-          <div className="space-y-3.5">
-            {sections.map((section) => {
-              const comment = commentsBySection.get(section.id)
-              const highlighted = section.emphasis === 'highlight'
-
-              return (
-                <div
-                  key={section.id}
-                  className="grid grid-cols-[minmax(0,1fr)_8rem] gap-3 sm:grid-cols-[minmax(0,1fr)_9.25rem] sm:gap-4"
-                >
-                  <section
-                    className={[
-                      'rounded-[24px] border p-4 sm:p-4.5',
-                      highlighted
-                        ? 'border-amber-200/90 bg-[linear-gradient(180deg,rgba(255,251,235,0.95),rgba(255,255,255,0.96))] shadow-[0_18px_34px_rgba(245,158,11,0.08)]'
-                        : 'border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))]',
-                    ].join(' ')}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {section.eyebrow}
-                        </p>
-                        <h3 className="mt-2 font-display text-lg font-semibold tracking-[-0.03em] text-slate-900">
-                          {section.title}
-                        </h3>
-                      </div>
-
-                      {highlighted ? (
-                        <StatusPill tone="amber" className="shrink-0">
-                          Focus
-                        </StatusPill>
-                      ) : null}
-                    </div>
-
-                    {section.callout ? (
-                      <div className="my-3 rounded-2xl border border-slate-200/80 bg-white/80 px-3 py-2.5">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                          {section.callout.label}
-                        </p>
-                        <p className="mt-1 text-sm leading-5 text-slate-600">
-                          {section.callout.text}
-                        </p>
-                      </div>
-                    ) : null}
-
-                    <FakeTextBlock lineWidths={section.lineWidths} />
-                  </section>
-
-                  <div className="pt-2">
-                    {comment ? (
-                      <CommentBubble
-                        label={comment.label}
-                        body={comment.body}
-                        tone={comment.tone}
-                      />
-                    ) : null}
-                  </div>
-                </div>
-              )
-            })}
           </div>
-        </div>
+        </article>
       </div>
     </div>
   )
