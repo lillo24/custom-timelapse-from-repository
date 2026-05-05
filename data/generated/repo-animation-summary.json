@@ -1,0 +1,346 @@
+{
+  "generatedAt": "2026-05-05T13:55:06.027Z",
+  "inputDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
+  "totals": {
+    "includedFiles": 434,
+    "excludedFiles": 1,
+    "includedUnits": 14068,
+    "excludedUnits": 616,
+    "totalFinalLines": 94722,
+    "totalMaxLines": 95171
+  },
+  "byCategory": [
+    {
+      "category": "docs",
+      "fileCount": 185,
+      "unitCount": 4736,
+      "finalLines": 33935
+    },
+    {
+      "category": "source",
+      "fileCount": 75,
+      "unitCount": 2992,
+      "finalLines": 16822
+    },
+    {
+      "category": "ui",
+      "fileCount": 73,
+      "unitCount": 2395,
+      "finalLines": 17353
+    },
+    {
+      "category": "test",
+      "fileCount": 46,
+      "unitCount": 2755,
+      "finalLines": 19217
+    },
+    {
+      "category": "unknown",
+      "fileCount": 25,
+      "unitCount": 675,
+      "finalLines": 3792
+    },
+    {
+      "category": "backend",
+      "fileCount": 15,
+      "unitCount": 362,
+      "finalLines": 3193
+    },
+    {
+      "category": "data",
+      "fileCount": 9,
+      "unitCount": 121,
+      "finalLines": 347
+    },
+    {
+      "category": "config",
+      "fileCount": 6,
+      "unitCount": 32,
+      "finalLines": 63
+    }
+  ],
+  "byLanguage": [
+    {
+      "language": "Markdown",
+      "fileCount": 188,
+      "unitCount": 4827,
+      "finalLines": 34014
+    },
+    {
+      "language": "Python",
+      "fileCount": 129,
+      "unitCount": 5694,
+      "finalLines": 36543
+    },
+    {
+      "language": "TypeScript React",
+      "fileCount": 52,
+      "unitCount": 1481,
+      "finalLines": 10278
+    },
+    {
+      "language": "Unknown",
+      "fileCount": 28,
+      "unitCount": 691,
+      "finalLines": 3800
+    },
+    {
+      "language": "TypeScript",
+      "fileCount": 20,
+      "unitCount": 310,
+      "finalLines": 2527
+    },
+    {
+      "language": "TOML",
+      "fileCount": 7,
+      "unitCount": 115,
+      "finalLines": 317
+    },
+    {
+      "language": "JSON",
+      "fileCount": 6,
+      "unitCount": 331,
+      "finalLines": 3220
+    },
+    {
+      "language": "CSS",
+      "fileCount": 1,
+      "unitCount": 604,
+      "finalLines": 3981
+    },
+    {
+      "language": "GitIgnore",
+      "fileCount": 1,
+      "unitCount": 9,
+      "finalLines": 19
+    },
+    {
+      "language": "HTML",
+      "fileCount": 1,
+      "unitCount": 4,
+      "finalLines": 13
+    }
+  ],
+  "topFoldersByLines": [
+    {
+      "folder": "History_Implementation_plans",
+      "fileCount": 97,
+      "finalLines": 27182
+    },
+    {
+      "folder": "ingestion_pipeline/tests",
+      "fileCount": 31,
+      "finalLines": 13203
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices",
+      "fileCount": 4,
+      "finalLines": 4097
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "fileCount": 5,
+      "finalLines": 4026
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/rules",
+      "fileCount": 72,
+      "finalLines": 3999
+    },
+    {
+      "folder": "tools/ingestion_debug_ui/pages",
+      "fileCount": 10,
+      "finalLines": 3480
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/frontend",
+      "fileCount": 11,
+      "finalLines": 3267
+    },
+    {
+      "folder": "tools/ingestion_debug_ui/lib",
+      "fileCount": 8,
+      "finalLines": 2947
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "fileCount": 7,
+      "finalLines": 2741
+    },
+    {
+      "folder": "ingestion_pipeline/retrieval",
+      "fileCount": 12,
+      "finalLines": 2628
+    }
+  ],
+  "largestFiles": [
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "category": "ui",
+      "language": "CSS",
+      "finalLineCount": 3981,
+      "maxLineCount": 3981
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md",
+      "category": "docs",
+      "language": "Markdown",
+      "finalLineCount": 3810,
+      "maxLineCount": 3810
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_discovery_spider.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 3177,
+      "maxLineCount": 3177
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/package-lock.json",
+      "category": "ui",
+      "language": "JSON",
+      "finalLineCount": 3128,
+      "maxLineCount": 3128
+    },
+    {
+      "path": "History_Implementation_plans/react_debug_ui_plan_vercel.md",
+      "category": "docs",
+      "language": "Markdown",
+      "finalLineCount": 1889,
+      "maxLineCount": 1889
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "category": "test",
+      "language": "TypeScript React",
+      "finalLineCount": 1794,
+      "maxLineCount": 1794
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 1771,
+      "maxLineCount": 1771
+    },
+    {
+      "path": "History_Implementation_plans/react_debug_ui_plan_frontend_design.md",
+      "category": "docs",
+      "language": "Markdown",
+      "finalLineCount": 1754,
+      "maxLineCount": 1754
+    },
+    {
+      "path": "tools/ingestion_debug_ui/lib/discovery_reader.py",
+      "category": "source",
+      "language": "Python",
+      "finalLineCount": 1416,
+      "maxLineCount": 1416
+    },
+    {
+      "path": "History_Implementation_plans/react_debug_ui_plan_combined.md",
+      "category": "docs",
+      "language": "Markdown",
+      "finalLineCount": 1366,
+      "maxLineCount": 1366
+    }
+  ],
+  "mostChangedFiles": [
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "unitCount": 604,
+      "category": "ui",
+      "language": "CSS"
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_discovery_spider.py",
+      "unitCount": 448,
+      "category": "test",
+      "language": "Python"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md",
+      "unitCount": 382,
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/package-lock.json",
+      "unitCount": 314,
+      "category": "ui",
+      "language": "JSON"
+    },
+    {
+      "path": "ingestion_pipeline/crawler/spiders/discovery_spider.py",
+      "unitCount": 236,
+      "category": "source",
+      "language": "Python"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "unitCount": 202,
+      "category": "test",
+      "language": "TypeScript React"
+    },
+    {
+      "path": "tools/ingestion_debug_ui/lib/discovery_reader.py",
+      "unitCount": 192,
+      "category": "source",
+      "language": "Python"
+    },
+    {
+      "path": "History_Implementation_plans/react_debug_ui_plan_vercel.md",
+      "unitCount": 190,
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "unitCount": 187,
+      "category": "test",
+      "language": "Python"
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_retrieval_materialize.py",
+      "unitCount": 179,
+      "category": "test",
+      "language": "Python"
+    }
+  ],
+  "warnings": [
+    "change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",
+    "file-states: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Renamed file source tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx was not present in current state.",
+    "History_Implementation_plans/ch1_1_Bootstrap: file remains in the unknown category.",
+    "History_Implementation_plans/ch1_2_foundation.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch1_3_revision_id_collision: file remains in the unknown category.",
+    "History_Implementation_plans/ch2_1_scrapy_seed_skeleton.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch2_2_storage_pipeline: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_1_discovery_policy_config.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_2_discovery_spider_html_gate.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_3_2_html_prefetch_heuristic_fix.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_3_3_discovery_caps_and_log_diagnosis.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_3_4_discovery_unique_link_accounting: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_3_6_trusted_multi_domain_scope.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch3_3_discovery_audit_logs.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ch4_9_debug_priority: file remains in the unknown category.",
+    "History_Implementation_plans/ch4crawl_1_2_UI: file remains in the unknown category.",
+    "History_Implementation_plans/ch4crawl_1_UI_cleanup: file remains in the unknown category.",
+    "History_Implementation_plans/ch4crawl_2_trail-feature: file remains in the unknown category.",
+    "History_Implementation_plans/ch4crawl_3_better-trailing: file remains in the unknown category.",
+    "History_Implementation_plans/ch4crawl_4_better-trailing-2: file remains in the unknown category.",
+    "History_Implementation_plans/ch4logging_1_summary_flags_and_gating: file remains in the unknown category.",
+    "History_Implementation_plans/ch4logging_2_timing_semantics_cleanup: file remains in the unknown category.",
+    "History_Implementation_plans/ch4logging_3_optional_summary_polish: file remains in the unknown category.",
+    "History_Implementation_plans/ingestion_impl_1_Bootstrap: file remains in the unknown category.",
+    "History_Implementation_plans/ingestion_impl_2_foundation.txt: file remains in the unknown category.",
+    "History_Implementation_plans/ingestion_impl_3_revision_id_collision: file remains in the unknown category.",
+    "History_Implementation_plans/v1_3_extraction_alignment_and_contract_checks_prompt.txt: file remains in the unknown category.",
+    "ingestion_pipeline/tests/test_discovery_spider.py: unusually large filtered file (3177 lines).",
+    "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md: unusually large filtered file (3810 lines).",
+    "tools/ingestion_debug_ui_react_3/frontend/package-lock.json: unusually large filtered file (3128 lines).",
+    "tools/ingestion_debug_ui_react_3/frontend/public/analyzation-favicon.svg: missing language for category \"ui\".",
+    "tools/ingestion_debug_ui_react_3/frontend/src/styles.css: unusually large filtered file (3981 lines).",
+    "tools/ingestion_debug_ui_react_3/frontend/tsconfig.node.tsbuildinfo: missing language for category \"config\".",
+    "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo: missing language for category \"config\"."
+  ]
+}

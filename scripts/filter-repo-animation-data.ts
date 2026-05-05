@@ -545,6 +545,14 @@ function classifyFile(filePath: string): ClassifiedFile {
   const lowerName = descriptor.name.toLowerCase();
   const extension = descriptor.extension.toLowerCase();
 
+  if (lowerName === '.gitignore') {
+    return {
+      ...descriptor,
+      category: 'config',
+      language: 'GitIgnore',
+    };
+  }
+
   if (
     lowerPath.startsWith('tests/') ||
     lowerPath.includes('/tests/') ||
@@ -614,6 +622,19 @@ function classifyFile(filePath: string): ClassifiedFile {
     lowerPath.startsWith('src/components/') ||
     lowerPath.startsWith('frontend/') ||
     lowerPath.includes('/frontend/')
+  ) {
+    return {
+      ...descriptor,
+      category: 'ui',
+      language: inferLanguage(extension),
+    };
+  }
+
+  if (
+    extension === 'html' ||
+    extension === 'css' ||
+    lowerPath.startsWith('src/styles/') ||
+    lowerPath.includes('/styles/')
   ) {
     return {
       ...descriptor,
