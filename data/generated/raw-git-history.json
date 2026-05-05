@@ -1,0 +1,484 @@
+{
+  "schemaVersion": 1,
+  "sourceRepo": {
+    "path": "C:/Users/leona/Documents/GitHub/custom-timelapse-from-repository",
+    "currentHead": "50b9fe93bf8d5610e8378c151c1146786e70eb63"
+  },
+  "generatedAt": "2026-05-05T13:05:34.236Z",
+  "commits": [
+    {
+      "order": 0,
+      "hash": "aaffa24332e5c3f3d03ecaefc00d78ad7583fcdc",
+      "shortHash": "aaffa24",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-05T11:34:25+02:00",
+      "message": "Base React App + Doc shell for animation",
+      "parentHashes": [],
+      "changedFiles": [
+        {
+          "path": ".gitignore",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 24,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/01-project-scaffold.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 194,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/02-fake-google-doc-static.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 335,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/03-animation-state-model.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 353,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "eslint.config.js",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 22,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "index.html",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 12,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "package-lock.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 3699,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "package.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 34,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "postcss.config.js",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 6,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/app/App.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 7,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/CommentBubble.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 33,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/DocShell.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 42,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/DocTopBar.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 39,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/DocumentPage.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 114,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/FakeTextBlock.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 15,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/StatusPill.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 37,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/VersionHistorySidebar.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 78,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/presentation/PresentationStage.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/data/staticDocMock.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 144,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/main.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 10,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/scenes/FakeGoogleDocScene.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 23,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/scenes/PlaceholderScene.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 54,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/styles/globals.css",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 46,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tailwind.config.js",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 8,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tsconfig.app.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 25,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tsconfig.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 7,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tsconfig.node.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 24,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "vite.config.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 7,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 1,
+      "hash": "50b9fe93bf8d5610e8378c151c1146786e70eb63",
+      "shortHash": "50b9fe9",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-05T14:59:55+02:00",
+      "message": "Almsot Finished Word Document timelapse UI prototype. Now moving onto Repository UI timelapse",
+      "parentHashes": [
+        "aaffa24332e5c3f3d03ecaefc00d78ad7583fcdc"
+      ],
+      "changedFiles": [
+        {
+          "path": "History-Implementations/04-motion-polish.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 370,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/05-presentation-scene-controls.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 234,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/06-clean-doc-scene-layout.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 317,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/07-word-like-document-chrome.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 154,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History-Implementations/08-document-content-pass.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 353,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "package-lock.json",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "src/app/App.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/document-editor/WordLikeRibbon.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 151,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/CommentBubble.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 36,
+          "deletedLines": 12,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/DocShell.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 69,
+          "deletedLines": 21,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/DocTopBar.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/DocumentPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 248,
+          "deletedLines": 94,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/EditMarker.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 43,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/FakeTextBlock.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 35,
+          "deletedLines": 7,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/LegacyCommentBubble.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 96,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/LegacyDocumentPage.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 220,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/google-doc/VersionHistorySidebar.tsx",
+          "oldPath": null,
+          "status": "deleted",
+          "addedLines": 0,
+          "deletedLines": 78,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/presentation/PresentationStage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "src/components/timeline/TimelineControls.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 147,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/data/docTimeline.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 294,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/data/legacyDocTimeline.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 198,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/data/staticDocMock.ts",
+          "oldPath": null,
+          "status": "deleted",
+          "addedLines": 0,
+          "deletedLines": 144,
+          "isBinary": false
+        },
+        {
+          "path": "src/hooks/useDocTimeline.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 44,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/lib/motionPresets.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 76,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "src/scenes/FakeGoogleDocScene.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 129,
+          "deletedLines": 15,
+          "isBinary": false
+        },
+        {
+          "path": "src/styles/globals.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 2,
+          "isBinary": false
+        }
+      ]
+    }
+  ]
+}
