@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-06T17:47:08.335Z",
+  "generatedAt": "2026-05-06T18:12:17.806Z",
   "sourceDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
   "files": [
     {
@@ -3940,12 +3940,16 @@
       "name": "(root)",
       "depth": 0,
       "parentPath": null,
-      "fileCount": 4,
-      "totalFinalLines": 415,
+      "fileCount": 262,
+      "totalFinalLines": 57572,
       "categories": [
+        "backend",
         "config",
         "data",
-        "docs"
+        "docs",
+        "source",
+        "test",
+        "ui"
       ]
     },
     {
@@ -3954,8 +3958,8 @@
       "name": "assistant_runtime",
       "depth": 1,
       "parentPath": "",
-      "fileCount": 40,
-      "totalFinalLines": 5472,
+      "fileCount": 25,
+      "totalFinalLines": 3176,
       "categories": [
         "docs",
         "source"
@@ -3967,8 +3971,8 @@
       "name": "prompts",
       "depth": 2,
       "parentPath": "assistant_runtime",
-      "fileCount": 6,
-      "totalFinalLines": 106,
+      "fileCount": 3,
+      "totalFinalLines": 53,
       "categories": [
         "docs"
       ]
@@ -3979,8 +3983,8 @@
       "name": "providers",
       "depth": 2,
       "parentPath": "assistant_runtime",
-      "fileCount": 14,
-      "totalFinalLines": 1654,
+      "fileCount": 7,
+      "totalFinalLines": 827,
       "categories": [
         "docs",
         "source"
@@ -3992,8 +3996,8 @@
       "name": "ingestion_pipeline",
       "depth": 1,
       "parentPath": "",
-      "fileCount": 90,
-      "totalFinalLines": 23773,
+      "fileCount": 86,
+      "totalFinalLines": 22481,
       "categories": [
         "data",
         "docs",
@@ -4007,8 +4011,8 @@
       "name": "configs",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 12,
-      "totalFinalLines": 946,
+      "fileCount": 6,
+      "totalFinalLines": 473,
       "categories": [
         "data",
         "docs"
@@ -4020,8 +4024,8 @@
       "name": "crawler",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 23,
-      "totalFinalLines": 4154,
+      "fileCount": 14,
+      "totalFinalLines": 2859,
       "categories": [
         "docs",
         "source"
@@ -4033,8 +4037,8 @@
       "name": "spiders",
       "depth": 3,
       "parentPath": "ingestion_pipeline/crawler",
-      "fileCount": 10,
-      "totalFinalLines": 3128,
+      "fileCount": 5,
+      "totalFinalLines": 1564,
       "categories": [
         "docs",
         "source"
@@ -4046,8 +4050,8 @@
       "name": "docs",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 10,
-      "totalFinalLines": 674,
+      "fileCount": 5,
+      "totalFinalLines": 337,
       "categories": [
         "docs"
       ]
@@ -4058,8 +4062,8 @@
       "name": "extract",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 14,
-      "totalFinalLines": 2208,
+      "fileCount": 7,
+      "totalFinalLines": 1104,
       "categories": [
         "docs",
         "source"
@@ -4071,8 +4075,8 @@
       "name": "retrieval",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 24,
-      "totalFinalLines": 5256,
+      "fileCount": 12,
+      "totalFinalLines": 2628,
       "categories": [
         "data",
         "docs",
@@ -4085,8 +4089,8 @@
       "name": "storage",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 12,
-      "totalFinalLines": 936,
+      "fileCount": 6,
+      "totalFinalLines": 468,
       "categories": [
         "docs",
         "source"
@@ -4098,8 +4102,8 @@
       "name": "tests",
       "depth": 2,
       "parentPath": "ingestion_pipeline",
-      "fileCount": 64,
-      "totalFinalLines": 26640,
+      "fileCount": 32,
+      "totalFinalLines": 13320,
       "categories": [
         "test"
       ]
@@ -4110,8 +4114,8 @@
       "name": "tools",
       "depth": 1,
       "parentPath": "",
-      "fileCount": 149,
-      "totalFinalLines": 31516,
+      "fileCount": 147,
+      "totalFinalLines": 31500,
       "categories": [
         "backend",
         "config",
@@ -4128,8 +4132,8 @@
       "name": "ingestion_debug_ui",
       "depth": 2,
       "parentPath": "tools",
-      "fileCount": 31,
-      "totalFinalLines": 8218,
+      "fileCount": 28,
+      "totalFinalLines": 7967,
       "categories": [
         "docs",
         "source",
@@ -4142,8 +4146,8 @@
       "name": "ingestion_debug_ui_react_3",
       "depth": 2,
       "parentPath": "tools",
-      "fileCount": 121,
-      "totalFinalLines": 23705,
+      "fileCount": 117,
+      "totalFinalLines": 23517,
       "categories": [
         "backend",
         "config",
@@ -4160,8 +4164,8 @@
       "name": "backend",
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui_react_3",
-      "fileCount": 24,
-      "totalFinalLines": 4865,
+      "fileCount": 17,
+      "totalFinalLines": 3416,
       "categories": [
         "backend",
         "docs"
@@ -4173,8 +4177,8 @@
       "name": "routes",
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/backend",
-      "fileCount": 20,
-      "totalFinalLines": 3934,
+      "fileCount": 10,
+      "totalFinalLines": 1967,
       "categories": [
         "backend",
         "docs"
@@ -4186,8 +4190,8 @@
       "name": "frontend",
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui_react_3",
-      "fileCount": 99,
-      "totalFinalLines": 17813,
+      "fileCount": 91,
+      "totalFinalLines": 17676,
       "categories": [
         "config",
         "docs",
@@ -4201,8 +4205,8 @@
       "name": "public",
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend",
-      "fileCount": 2,
-      "totalFinalLines": 12,
+      "fileCount": 1,
+      "totalFinalLines": 6,
       "categories": [
         "ui"
       ]
@@ -4213,8 +4217,8 @@
       "name": "src",
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend",
-      "fileCount": 87,
-      "totalFinalLines": 21638,
+      "fileCount": 82,
+      "totalFinalLines": 17533,
       "categories": [
         "docs",
         "test",
@@ -4227,8 +4231,8 @@
       "name": "app",
       "depth": 5,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src",
-      "fileCount": 12,
-      "totalFinalLines": 4194,
+      "fileCount": 8,
+      "totalFinalLines": 2297,
       "categories": [
         "docs",
         "test",
@@ -4241,8 +4245,8 @@
       "name": "shell",
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
-      "fileCount": 8,
-      "totalFinalLines": 800,
+      "fileCount": 4,
+      "totalFinalLines": 400,
       "categories": [
         "docs",
         "ui"
@@ -4254,8 +4258,8 @@
       "name": "features",
       "depth": 5,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src",
-      "fileCount": 60,
-      "totalFinalLines": 11046,
+      "fileCount": 59,
+      "totalFinalLines": 11021,
       "categories": [
         "docs",
         "test",
@@ -4268,8 +4272,8 @@
       "name": "assistant",
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features",
-      "fileCount": 30,
-      "totalFinalLines": 3300,
+      "fileCount": 22,
+      "totalFinalLines": 2078,
       "categories": [
         "docs",
         "test",
@@ -4282,8 +4286,8 @@
       "name": "components",
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
-      "fileCount": 26,
-      "totalFinalLines": 1398,
+      "fileCount": 13,
+      "totalFinalLines": 699,
       "categories": [
         "ui"
       ]
@@ -4294,8 +4298,8 @@
       "name": "pages",
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
-      "fileCount": 2,
-      "totalFinalLines": 314,
+      "fileCount": 1,
+      "totalFinalLines": 157,
       "categories": [
         "ui"
       ]
@@ -4306,8 +4310,8 @@
       "name": "sources",
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features",
-      "fileCount": 12,
-      "totalFinalLines": 768,
+      "fileCount": 6,
+      "totalFinalLines": 384,
       "categories": [
         "docs",
         "ui"
@@ -4319,8 +4323,8 @@
       "name": "spider-config",
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features",
-      "fileCount": 22,
-      "totalFinalLines": 4455,
+      "fileCount": 16,
+      "totalFinalLines": 3546,
       "categories": [
         "docs",
         "test",
@@ -4333,8 +4337,8 @@
       "name": "components",
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config",
-      "fileCount": 18,
-      "totalFinalLines": 3738,
+      "fileCount": 9,
+      "totalFinalLines": 1869,
       "categories": [
         "ui"
       ]
@@ -4345,8 +4349,8 @@
       "name": "pages",
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config",
-      "fileCount": 2,
-      "totalFinalLines": 1536,
+      "fileCount": 1,
+      "totalFinalLines": 768,
       "categories": [
         "ui"
       ]
@@ -4357,8 +4361,8 @@
       "name": "workbench",
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features",
-      "fileCount": 21,
-      "totalFinalLines": 7235,
+      "fileCount": 14,
+      "totalFinalLines": 4988,
       "categories": [
         "docs",
         "test",
@@ -4371,8 +4375,8 @@
       "name": "pages",
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
-      "fileCount": 14,
-      "totalFinalLines": 5482,
+      "fileCount": 7,
+      "totalFinalLines": 2741,
       "categories": [
         "docs",
         "ui"
@@ -4384,8 +4388,8 @@
       "name": "routes",
       "depth": 5,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src",
-      "fileCount": 20,
-      "totalFinalLines": 220,
+      "fileCount": 10,
+      "totalFinalLines": 110,
       "categories": [
         "docs",
         "ui"
@@ -4397,8 +4401,8 @@
       "name": "tests",
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui_react_3",
-      "fileCount": 7,
-      "totalFinalLines": 2259,
+      "fileCount": 5,
+      "totalFinalLines": 2237,
       "categories": [
         "test"
       ]
@@ -4409,8 +4413,8 @@
       "name": "backend",
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/tests",
-      "fileCount": 6,
-      "totalFinalLines": 4430,
+      "fileCount": 3,
+      "totalFinalLines": 2215,
       "categories": [
         "test"
       ]
@@ -4421,8 +4425,8 @@
       "name": "lib",
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui",
-      "fileCount": 16,
-      "totalFinalLines": 5894,
+      "fileCount": 8,
+      "totalFinalLines": 2947,
       "categories": [
         "docs",
         "source"
@@ -4434,8 +4438,8 @@
       "name": "pages",
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui",
-      "fileCount": 20,
-      "totalFinalLines": 6960,
+      "fileCount": 10,
+      "totalFinalLines": 3480,
       "categories": [
         "docs",
         "source"
@@ -4447,8 +4451,8 @@
       "name": "tests",
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui",
-      "fileCount": 14,
-      "totalFinalLines": 2578,
+      "fileCount": 7,
+      "totalFinalLines": 1289,
       "categories": [
         "test"
       ]

@@ -285,27 +285,11 @@ function buildVisualFolders(files: VisualFile[]): VisualFolder[] {
   ensureFolder(folderMap, '');
 
   for (const file of files) {
-    const folderPath = file.folderPath;
-    ensureFolder(folderMap, folderPath);
-
-    const folder = folderMap.get(folderPath);
-
-    if (!folder) {
-      continue;
-    }
-
-    folder.fileCount += 1;
-    folder.totalFinalLines += file.finalLineCount;
-    folder.categories.add(file.category);
-
-    const segments = folderPath === '' ? [] : folderPath.split('/');
-
-    for (let index = 1; index <= segments.length; index += 1) {
-      const partialPath = segments.slice(0, index).join('/');
-      const partialFolder = ensureFolder(folderMap, partialPath);
-      partialFolder.fileCount += 1;
-      partialFolder.totalFinalLines += file.finalLineCount;
-      partialFolder.categories.add(file.category);
+    for (const folderPath of expandFolderAncestors(file.folderPath)) {
+      const folder = ensureFolder(folderMap, folderPath);
+      folder.fileCount += 1;
+      folder.totalFinalLines += file.finalLineCount;
+      folder.categories.add(file.category);
     }
   }
 
@@ -321,6 +305,23 @@ function buildVisualFolders(files: VisualFile[]): VisualFolder[] {
       totalFinalLines: folder.totalFinalLines,
       categories: [...folder.categories].sort((left, right) => left.localeCompare(right)),
     }));
+}
+
+function expandFolderAncestors(folderPath: string): string[] {
+  const normalizedPath = normalizePath(folderPath);
+
+  if (normalizedPath === '') {
+    return [''];
+  }
+
+  const segments = normalizedPath.split('/');
+  const ancestors = [''];
+
+  for (let index = 1; index <= segments.length; index += 1) {
+    ancestors.push(segments.slice(0, index).join('/'));
+  }
+
+  return ancestors;
 }
 
 function ensureFolder(

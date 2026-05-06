@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "extract:git": "tsx scripts/extract-git-history.ts",
     "filter:animation-data": "tsx scripts/filter-repo-animation-data.ts",
+    "preview:visual-model": "tsx scripts/preview-visual-model.ts",
     "generate:visual-model": "tsx scripts/generate-visual-model.ts",
     "generate:units": "tsx scripts/generate-change-units.ts",
     "reconstruct:states": "tsx scripts/reconstruct-file-states.ts",

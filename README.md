@@ -9,6 +9,7 @@ timelapse scene.
 - `npm run build`
 - `npm run preview`
 - `npm run lint`
+- `npm run preview:visual-model -- --model data/generated/repo-visual-model.json --out data/generated/repo-visual-model-preview.md`
 
 ## Scope
 
@@ -22,3 +23,7 @@ animation behavior are intentionally deferred to later implementation steps.
 `.agents` skill material from the repo timelapse dataset. Those files are kept
 auditable in preprocessing output, but they are not part of the thesis product
 code evolution and would otherwise dominate the future visualization.
+
+`preview:visual-model` adds a non-UI Markdown inspection step so the generated
+visual model can be checked for dominance and timeline-shape issues before the
+React repository view is built.
