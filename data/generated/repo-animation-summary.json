@@ -1,55 +1,55 @@
 {
-  "generatedAt": "2026-05-05T14:04:03.944Z",
+  "generatedAt": "2026-05-06T17:47:07.865Z",
   "inputDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
   "filterConfig": {
     "path": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\repo-animation.config.json",
     "includeCount": 0,
-    "excludeCount": 15
+    "excludeCount": 16
   },
   "totals": {
-    "includedFiles": 334,
-    "excludedFiles": 101,
-    "includedUnits": 10032,
-    "excludedUnits": 4652,
-    "totalFinalLines": 64410,
-    "totalMaxLines": 64859
+    "includedFiles": 262,
+    "excludedFiles": 179,
+    "includedUnits": 9279,
+    "excludedUnits": 5638,
+    "totalFinalLines": 57572,
+    "totalMaxLines": 58021
   },
   "byCategory": [
     {
-      "category": "docs",
-      "fileCount": 113,
-      "unitCount": 1703,
-      "finalLines": 10545
-    },
-    {
       "category": "source",
-      "fileCount": 75,
-      "unitCount": 2992,
-      "finalLines": 16822
+      "fileCount": 76,
+      "unitCount": 3039,
+      "finalLines": 17274
     },
     {
       "category": "ui",
-      "fileCount": 72,
-      "unitCount": 2081,
-      "finalLines": 14225
+      "fileCount": 73,
+      "unitCount": 2132,
+      "finalLines": 14555
     },
     {
       "category": "test",
-      "fileCount": 46,
-      "unitCount": 2755,
-      "finalLines": 19217
+      "fileCount": 48,
+      "unitCount": 2796,
+      "finalLines": 19551
+    },
+    {
+      "category": "docs",
+      "fileCount": 38,
+      "unitCount": 799,
+      "finalLines": 2467
     },
     {
       "category": "backend",
       "fileCount": 15,
-      "unitCount": 362,
-      "finalLines": 3193
+      "unitCount": 377,
+      "finalLines": 3332
     },
     {
       "category": "data",
-      "fileCount": 9,
-      "unitCount": 121,
-      "finalLines": 347
+      "fileCount": 8,
+      "unitCount": 118,
+      "finalLines": 332
     },
     {
       "category": "config",
@@ -61,27 +61,27 @@
   "byLanguage": [
     {
       "language": "Python",
-      "fileCount": 129,
-      "unitCount": 5694,
-      "finalLines": 36543
-    },
-    {
-      "language": "Markdown",
-      "fileCount": 116,
-      "unitCount": 1794,
-      "finalLines": 10624
+      "fileCount": 132,
+      "unitCount": 5783,
+      "finalLines": 37372
     },
     {
       "language": "TypeScript React",
-      "fileCount": 52,
-      "unitCount": 1481,
-      "finalLines": 10278
+      "fileCount": 53,
+      "unitCount": 1529,
+      "finalLines": 10570
+    },
+    {
+      "language": "Markdown",
+      "fileCount": 41,
+      "unitCount": 891,
+      "finalLines": 2547
     },
     {
       "language": "TypeScript",
       "fileCount": 20,
-      "unitCount": 310,
-      "finalLines": 2527
+      "unitCount": 318,
+      "finalLines": 2581
     },
     {
       "language": "TOML",
@@ -91,15 +91,15 @@
     },
     {
       "language": "JSON",
-      "fileCount": 5,
-      "unitCount": 17,
-      "finalLines": 92
+      "fileCount": 4,
+      "unitCount": 14,
+      "finalLines": 77
     },
     {
       "language": "CSS",
       "fileCount": 1,
-      "unitCount": 604,
-      "finalLines": 3981
+      "unitCount": 612,
+      "finalLines": 4060
     },
     {
       "language": "GitIgnore",
@@ -123,23 +123,13 @@
   "topFoldersByLines": [
     {
       "folder": "ingestion_pipeline/tests",
-      "fileCount": 31,
-      "finalLines": 13203
-    },
-    {
-      "folder": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices",
-      "fileCount": 4,
-      "finalLines": 4097
+      "fileCount": 32,
+      "finalLines": 13320
     },
     {
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src",
       "fileCount": 5,
-      "finalLines": 4026
-    },
-    {
-      "folder": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/rules",
-      "fileCount": 72,
-      "finalLines": 3999
+      "finalLines": 4105
     },
     {
       "folder": "tools/ingestion_debug_ui/pages",
@@ -170,6 +160,16 @@
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
       "fileCount": 7,
       "finalLines": 2247
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "fileCount": 3,
+      "finalLines": 2215
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/backend/routes",
+      "fileCount": 10,
+      "finalLines": 1967
     }
   ],
   "largestFiles": [
@@ -177,15 +177,8 @@
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
       "category": "ui",
       "language": "CSS",
-      "finalLineCount": 3981,
-      "maxLineCount": 3981
-    },
-    {
-      "path": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md",
-      "category": "docs",
-      "language": "Markdown",
-      "finalLineCount": 3810,
-      "maxLineCount": 3810
+      "finalLineCount": 4060,
+      "maxLineCount": 4060
     },
     {
       "path": "ingestion_pipeline/tests/test_discovery_spider.py",
@@ -242,12 +235,19 @@
       "language": "Python",
       "finalLineCount": 1058,
       "maxLineCount": 1189
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_crawler_pipeline.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 983,
+      "maxLineCount": 983
     }
   ],
   "mostChangedFiles": [
     {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
-      "unitCount": 604,
+      "unitCount": 612,
       "category": "ui",
       "language": "CSS"
     },
@@ -258,12 +258,6 @@
       "language": "Python"
     },
     {
-      "path": "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md",
-      "unitCount": 382,
-      "category": "docs",
-      "language": "Markdown"
-    },
-    {
       "path": "ingestion_pipeline/crawler/spiders/discovery_spider.py",
       "unitCount": 236,
       "category": "source",
@@ -271,7 +265,7 @@
     },
     {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
-      "unitCount": 202,
+      "unitCount": 204,
       "category": "test",
       "language": "TypeScript React"
     },
@@ -304,12 +298,22 @@
       "unitCount": 148,
       "category": "test",
       "language": "Python"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/EventsPage.tsx",
+      "unitCount": 147,
+      "category": "ui",
+      "language": "TypeScript React"
     }
   ],
   "excludedReasons": [
     {
       "reason": "config-exclude: History_Implementation_plans/**",
-      "fileCount": 97
+      "fileCount": 99
+    },
+    {
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/.agents/**",
+      "fileCount": 76
     },
     {
       "reason": "Excluded by pattern \"*.tsbuildinfo\".",
@@ -324,7 +328,6 @@
     "change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",
     "file-states: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Renamed file source tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx was not present in current state.",
     "ingestion_pipeline/tests/test_discovery_spider.py: unusually large filtered file (3177 lines).",
-    "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md: unusually large filtered file (3810 lines).",
-    "tools/ingestion_debug_ui_react_3/frontend/src/styles.css: unusually large filtered file (3981 lines)."
+    "tools/ingestion_debug_ui_react_3/frontend/src/styles.css: unusually large filtered file (4060 lines)."
   ]
 }

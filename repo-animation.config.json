@@ -4,6 +4,7 @@
     "History-Implementation-plans/**",
     "History-implementations/**",
     "history-implementation-plans/**",
+    "tools/ingestion_debug_ui_react_3/.agents/**",
     "data/raw/**",
     "data/generated/**",
     "node_modules/**",

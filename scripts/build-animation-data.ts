@@ -25,6 +25,7 @@ function main(): void {
     const changeUnitsPath = path.join(outDir, 'repo-change-units.json');
     const animationDatasetPath = path.join(outDir, 'repo-animation-dataset.json');
     const animationSummaryPath = path.join(outDir, 'repo-animation-summary.json');
+    const visualModelPath = path.join(outDir, 'repo-visual-model.json');
     const configPath = resolveEffectiveConfigPath(options.configPath);
 
     runNpmScript('extract:git', [
@@ -80,6 +81,13 @@ function main(): void {
       animationSummaryPath,
     ]);
 
+    runNpmScript('generate:visual-model', [
+      '--dataset',
+      animationDatasetPath,
+      '--out',
+      visualModelPath,
+    ]);
+
     console.log('Animation data pipeline complete.');
     console.log(`Repository: ${options.repoPath}`);
     console.log(`Output directory: ${outDir}`);
@@ -88,6 +96,7 @@ function main(): void {
     }
     console.log(`Dataset: ${animationDatasetPath}`);
     console.log(`Summary: ${animationSummaryPath}`);
+    console.log(`Visual model: ${visualModelPath}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(message);

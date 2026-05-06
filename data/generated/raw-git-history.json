@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "sourceRepo": {
     "path": "C:/Users/leona/Documents/GitHub/thesis-disi-chatbot",
-    "currentHead": "2f302928a4ca07b3e1063ffa459547ac606ee5c9"
+    "currentHead": "da540f0d680758cdb4311f73528fcfec35f6a5a9"
   },
-  "generatedAt": "2026-05-05T14:04:01.247Z",
+  "generatedAt": "2026-05-06T17:47:05.613Z",
   "commits": [
     {
       "order": 0,
@@ -11895,6 +11895,188 @@
           "oldPath": null,
           "status": "modified",
           "addedLines": 107,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 92,
+      "hash": "da540f0d680758cdb4311f73528fcfec35f6a5a9",
+      "shortHash": "da540f0",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-06T19:43:33+02:00",
+      "message": "- The goal is to add a minimal one-shot pipeline command and expose it in the React debug UI Config page.",
+      "parentHashes": [
+        "2f302928a4ca07b3e1063ffa459547ac606ee5c9"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_pipeline_command_config_ui_v8.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 386,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/impl_plan_metadata_01-shared-document-metadata-layer.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 288,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/run_ingestion_pipeline.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 452,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_run_ingestion_pipeline.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 116,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 72,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 67,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/NavRail.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/SpiderConfigRoute.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 97,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 43,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/components/PipelineConfigPanel.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 152,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/pages/SpiderConfigPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 97,
+          "deletedLines": 52,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/queries.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 79,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_config_pipeline_api.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 122,
           "deletedLines": 0,
           "isBinary": false
         }
