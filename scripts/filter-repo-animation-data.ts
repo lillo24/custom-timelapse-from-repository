@@ -9,6 +9,7 @@ import type {
   ExcludedFile,
   RepoAnimationDataset,
 } from '../src/preprocessing/animationDatasetTypes.ts';
+import type { LoadedAnimationFilterConfig } from '../src/preprocessing/animationFilterConfigTypes.ts';
 import type { RepoChangeUnit, RepoChangeUnitsOutput } from '../src/preprocessing/changeUnitTypes.ts';
 import type {
   FileStateStep,
@@ -16,6 +17,10 @@ import type {
   RepoFileState,
 } from '../src/preprocessing/fileStateTypes.ts';
 import type { RawGitHistory } from '../src/preprocessing/gitHistoryTypes.ts';
+import {
+  createEmptyAnimationFilterConfig,
+  parseAnimationFilterConfig,
+} from '../src/preprocessing/loadAnimationFilterConfig.ts';
 
 const DEFAULT_HISTORY_PATH = 'data/generated/raw-git-history.json';
 const DEFAULT_STATES_PATH = 'data/generated/repo-file-states.json';
@@ -36,6 +41,7 @@ const DEFAULT_EXCLUDED_PATTERNS = [
   '*.pyc',
   '*.pyo',
   '*.log',
+  '*.tsbuildinfo',
 ] as const;
 
 const DEFAULT_LOCKFILES = [
@@ -51,6 +57,7 @@ interface CliOptions {
   unitsPath: string;
   outputPath: string;
   includeLockfiles: boolean;
+  configPath?: string;
 }
 
 interface FileDescriptor {
@@ -74,10 +81,16 @@ async function main(): Promise<void> {
     const statesPath = resolveInputFile(options.statesPath, 'State input');
     const unitsPath = resolveInputFile(options.unitsPath, 'Units input');
     const outputPath = path.resolve(process.cwd(), options.outputPath);
+    const configPath = options.configPath
+      ? resolveInputFile(options.configPath, 'Filter config')
+      : undefined;
 
     const history = await loadRawHistory(historyPath);
     const states = await loadReconstructedStates(statesPath);
     const unitsOutput = await loadChangeUnits(unitsPath);
+    const filterConfig = configPath
+      ? parseAnimationFilterConfig(configPath, await readFile(configPath, 'utf8'))
+      : createEmptyAnimationFilterConfig();
     const warnings: string[] = [];
 
     const dataset = buildAnimationDataset(
@@ -88,6 +101,7 @@ async function main(): Promise<void> {
       states,
       unitsOutput,
       options.includeLockfiles,
+      filterConfig,
       warnings,
     );
     const excludedUnitCount = unitsOutput.units.length - dataset.units.length;
@@ -118,6 +132,7 @@ function parseCliArguments(argv: string[]): CliOptions {
   let unitsPath = DEFAULT_UNITS_PATH;
   let outputPath = DEFAULT_OUTPUT_PATH;
   let includeLockfiles = false;
+  let configPath: string | undefined;
 
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -171,6 +186,17 @@ function parseCliArguments(argv: string[]): CliOptions {
       continue;
     }
 
+    if (argument === '--config') {
+      configPath = getFlagValue(argv, index, '--config');
+      index += 1;
+      continue;
+    }
+
+    if (argument.startsWith('--config=')) {
+      configPath = argument.slice('--config='.length);
+      continue;
+    }
+
     if (argument === '--help' || argument === '-h') {
       printUsageAndExit();
     }
@@ -184,6 +210,7 @@ function parseCliArguments(argv: string[]): CliOptions {
     unitsPath,
     outputPath,
     includeLockfiles,
+    configPath,
   };
 }
 
@@ -199,7 +226,7 @@ function getFlagValue(argv: string[], index: number, flagName: string): string {
 
 function printUsageAndExit(): never {
   console.log(
-    'Usage: npm run filter:animation-data -- [--history data/generated/raw-git-history.json] [--states data/generated/repo-file-states.json] [--units data/generated/repo-change-units.json] [--out data/generated/repo-animation-dataset.json] [--include-lockfiles]',
+    'Usage: npm run filter:animation-data -- [--history data/generated/raw-git-history.json] [--states data/generated/repo-file-states.json] [--units data/generated/repo-change-units.json] [--out data/generated/repo-animation-dataset.json] [--include-lockfiles] [--config repo-animation.config.json]',
   );
   process.exit(0);
 }
@@ -298,6 +325,7 @@ function buildAnimationDataset(
   states: ReconstructedRepoFileStates,
   unitsOutput: RepoChangeUnitsOutput,
   includeLockfiles: boolean,
+  filterConfig: LoadedAnimationFilterConfig,
   warnings: string[],
 ): RepoAnimationDataset {
   const excludedPatterns = [...DEFAULT_EXCLUDED_PATTERNS];
@@ -306,16 +334,17 @@ function buildAnimationDataset(
   const includedDescriptors: FileDescriptor[] = [];
 
   for (const descriptor of fileDescriptors) {
-    const exclusionReason = getExclusionReason(
+    const exclusion = getExclusion(
       descriptor.path,
       includeLockfiles,
       excludedPatterns,
+      filterConfig,
     );
 
-    if (exclusionReason) {
+    if (exclusion) {
       exclusionMap.set(descriptor.path, {
         ...descriptor,
-        reason: exclusionReason,
+        reason: exclusion.reason,
       });
       continue;
     }
@@ -334,12 +363,17 @@ function buildAnimationDataset(
 
     if (previousPath && !includedPathSet.has(previousPath) && !exclusionMap.has(previousPath)) {
       const descriptor = createDescriptor(previousPath);
-      const reason = getExclusionReason(previousPath, includeLockfiles, excludedPatterns);
+      const exclusion = getExclusion(
+        previousPath,
+        includeLockfiles,
+        excludedPatterns,
+        filterConfig,
+      );
 
-      if (reason) {
+      if (exclusion) {
         exclusionMap.set(previousPath, {
           ...descriptor,
-          reason,
+          reason: exclusion.reason,
         });
       }
     }
@@ -377,6 +411,14 @@ function buildAnimationDataset(
         ? excludedPatterns
         : [...excludedPatterns, ...DEFAULT_LOCKFILES],
       includeLockfiles,
+      filterConfig:
+        filterConfig.path || filterConfig.include.length > 0 || filterConfig.exclude.length > 0
+          ? {
+              path: filterConfig.path,
+              includePatterns: filterConfig.include,
+              excludePatterns: filterConfig.exclude,
+            }
+          : undefined,
     },
     files,
     units,
@@ -446,20 +488,41 @@ function createDescriptor(filePath: string): FileDescriptor {
   };
 }
 
-function getExclusionReason(
+function getExclusion(
   filePath: string,
   includeLockfiles: boolean,
   excludedPatterns: readonly string[],
-): string | null {
+  filterConfig: LoadedAnimationFilterConfig,
+): { reason: string } | null {
   const normalizedPath = normalizePath(filePath);
+  const basename = path.posix.basename(normalizedPath).toLowerCase();
 
-  if (!includeLockfiles && DEFAULT_LOCKFILES.some((lockfile) => normalizedPath === lockfile)) {
-    return 'Excluded lockfile by default.';
+  if (
+    !includeLockfiles &&
+    DEFAULT_LOCKFILES.some((lockfile) => basename === lockfile.toLowerCase())
+  ) {
+    return { reason: 'Excluded lockfile by default.' };
   }
 
   for (const pattern of excludedPatterns) {
     if (matchesPattern(normalizedPath, pattern)) {
-      return `Excluded by pattern "${pattern}".`;
+      return { reason: `Excluded by pattern "${pattern}".` };
+    }
+  }
+
+  for (const pattern of filterConfig.exclude) {
+    if (matchesPattern(normalizedPath, pattern)) {
+      return { reason: `config-exclude: ${pattern}` };
+    }
+  }
+
+  if (filterConfig.include.length > 0) {
+    const isIncluded = filterConfig.include.some((pattern) =>
+      matchesPattern(normalizedPath, pattern),
+    );
+
+    if (!isIncluded) {
+      return { reason: 'config-include-miss' };
     }
   }
 
@@ -467,17 +530,20 @@ function getExclusionReason(
 }
 
 function matchesPattern(filePath: string, pattern: string): boolean {
-  if (pattern.endsWith('/**')) {
-    const prefix = pattern.slice(0, -3);
-    return filePath === prefix || filePath.startsWith(`${prefix}/`);
+  const normalizedPath = filePath.toLowerCase();
+  const normalizedPattern = pattern.toLowerCase();
+
+  if (normalizedPattern.endsWith('/**')) {
+    const prefix = normalizedPattern.slice(0, -3);
+    return normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`);
   }
 
-  if (pattern.startsWith('*.')) {
-    const suffix = pattern.slice(1);
-    return filePath.endsWith(suffix);
+  if (normalizedPattern.startsWith('*.')) {
+    const suffix = normalizedPattern.slice(1);
+    return normalizedPath.endsWith(suffix);
   }
 
-  return filePath === pattern;
+  return normalizedPath === normalizedPattern;
 }
 
 function enrichUnit(unit: RepoChangeUnit): AnimationUnit {
@@ -550,6 +616,17 @@ function classifyFile(filePath: string): ClassifiedFile {
       ...descriptor,
       category: 'config',
       language: 'GitIgnore',
+    };
+  }
+
+  if (
+    lowerPath.startsWith('history-implementations/') ||
+    lowerPath.startsWith('history_implementation_plans/')
+  ) {
+    return {
+      ...descriptor,
+      category: 'docs',
+      language: inferLanguage(extension) ?? 'Text',
     };
   }
 
@@ -633,8 +710,11 @@ function classifyFile(filePath: string): ClassifiedFile {
   if (
     extension === 'html' ||
     extension === 'css' ||
+    extension === 'svg' ||
     lowerPath.startsWith('src/styles/') ||
-    lowerPath.includes('/styles/')
+    lowerPath.includes('/styles/') ||
+    lowerPath.includes('/public/') ||
+    lowerPath.includes('/assets/')
   ) {
     return {
       ...descriptor,
@@ -644,6 +724,7 @@ function classifyFile(filePath: string): ClassifiedFile {
   }
 
   if (
+    extension === 'txt' ||
     extension === 'json' ||
     extension === 'csv' ||
     extension === 'toml' ||
@@ -652,7 +733,7 @@ function classifyFile(filePath: string): ClassifiedFile {
   ) {
     return {
       ...descriptor,
-      category: 'data',
+      category: extension === 'txt' ? 'docs' : 'data',
       language: inferLanguage(extension),
     };
   }
@@ -708,6 +789,10 @@ function inferLanguage(extension: string): string | undefined {
       return 'TOML';
     case 'csv':
       return 'CSV';
+    case 'txt':
+      return 'Text';
+    case 'svg':
+      return 'SVG';
     default:
       return undefined;
   }

@@ -48,6 +48,11 @@ export interface RepoAnimationDataset {
   filters: {
     excludedPatterns: string[];
     includeLockfiles: boolean;
+    filterConfig?: {
+      path?: string;
+      includePatterns: string[];
+      excludePatterns: string[];
+    };
   };
   files: AnimationFile[];
   units: AnimationUnit[];

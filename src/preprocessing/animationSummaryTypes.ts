@@ -34,6 +34,11 @@ export interface RepoAnimationSummaryMostChangedFile {
 export interface RepoAnimationSummary {
   generatedAt: string;
   inputDatasetPath: string;
+  filterConfig?: {
+    path?: string;
+    includeCount: number;
+    excludeCount: number;
+  };
   totals: RepoAnimationSummaryTotals;
   byCategory: Array<{
     category: string;
@@ -54,5 +59,9 @@ export interface RepoAnimationSummary {
   }>;
   largestFiles: RepoAnimationSummaryLargestFile[];
   mostChangedFiles: RepoAnimationSummaryMostChangedFile[];
+  excludedReasons?: Array<{
+    reason: string;
+    fileCount: number;
+  }>;
   warnings: string[];
 }

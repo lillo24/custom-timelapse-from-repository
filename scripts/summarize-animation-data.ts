@@ -206,6 +206,19 @@ function buildSummary(
   const excludedUnitCount = sourceUnits.units.length - includedUnitCount;
   const totalFinalLines = dataset.files.reduce((sum, file) => sum + file.finalLineCount, 0);
   const totalMaxLines = dataset.files.reduce((sum, file) => sum + file.maxLineCount, 0);
+  const excludedReasons = Array.from(groupExcludedReasons(dataset).entries())
+    .map(([reason, fileCount]) => ({
+      reason,
+      fileCount,
+    }))
+    .sort((left, right) => {
+      if (right.fileCount !== left.fileCount) {
+        return right.fileCount - left.fileCount;
+      }
+
+      return left.reason.localeCompare(right.reason);
+    })
+    .slice(0, SUMMARY_LIMIT);
 
   validateDataset(dataset, sourceUnits.units.length, warnings, includedFilePaths);
 
@@ -285,6 +298,13 @@ function buildSummary(
   return {
     generatedAt: new Date().toISOString(),
     inputDatasetPath: datasetPath,
+    filterConfig: dataset.filters.filterConfig
+      ? {
+          path: dataset.filters.filterConfig.path,
+          includeCount: dataset.filters.filterConfig.includePatterns.length,
+          excludeCount: dataset.filters.filterConfig.excludePatterns.length,
+        }
+      : undefined,
     totals: {
       includedFiles: dataset.files.length,
       excludedFiles: dataset.excludedFiles.length,
@@ -298,6 +318,7 @@ function buildSummary(
     topFoldersByLines,
     largestFiles,
     mostChangedFiles,
+    excludedReasons,
     warnings,
   };
 }
@@ -429,6 +450,16 @@ function groupByFolder(dataset: RepoAnimationDataset): Map<string, SummaryBucket
   }
 
   return buckets;
+}
+
+function groupExcludedReasons(dataset: RepoAnimationDataset): Map<string, number> {
+  const counts = new Map<string, number>();
+
+  for (const excludedFile of dataset.excludedFiles) {
+    counts.set(excludedFile.reason, (counts.get(excludedFile.reason) ?? 0) + 1);
+  }
+
+  return counts;
 }
 
 interface SummaryBucket {

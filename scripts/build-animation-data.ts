@@ -1,14 +1,17 @@
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 const DEFAULT_OUT_DIR = 'data/generated';
 const DEFAULT_LINE_QUANTUM = 10;
+const DEFAULT_CONFIG_PATH = 'repo-animation.config.json';
 
 interface CliOptions {
   repoPath: string;
   outDir: string;
   lineQuantum: number;
   includeLockfiles: boolean;
+  configPath?: string;
 }
 
 void main();
@@ -22,6 +25,7 @@ function main(): void {
     const changeUnitsPath = path.join(outDir, 'repo-change-units.json');
     const animationDatasetPath = path.join(outDir, 'repo-animation-dataset.json');
     const animationSummaryPath = path.join(outDir, 'repo-animation-summary.json');
+    const configPath = resolveEffectiveConfigPath(options.configPath);
 
     runNpmScript('extract:git', [
       '--repo',
@@ -63,6 +67,10 @@ function main(): void {
       filterArgs.push('--include-lockfiles');
     }
 
+    if (configPath) {
+      filterArgs.push('--config', configPath);
+    }
+
     runNpmScript('filter:animation-data', filterArgs);
 
     runNpmScript('summarize:animation-data', [
@@ -75,6 +83,9 @@ function main(): void {
     console.log('Animation data pipeline complete.');
     console.log(`Repository: ${options.repoPath}`);
     console.log(`Output directory: ${outDir}`);
+    if (configPath) {
+      console.log(`Filter config: ${configPath}`);
+    }
     console.log(`Dataset: ${animationDatasetPath}`);
     console.log(`Summary: ${animationSummaryPath}`);
   } catch (error) {
@@ -89,6 +100,7 @@ function parseCliArguments(argv: string[]): CliOptions {
   let outDir = DEFAULT_OUT_DIR;
   let lineQuantum = DEFAULT_LINE_QUANTUM;
   let includeLockfiles = false;
+  let configPath: string | undefined;
 
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -131,6 +143,17 @@ function parseCliArguments(argv: string[]): CliOptions {
       continue;
     }
 
+    if (argument === '--config') {
+      configPath = getFlagValue(argv, index, '--config');
+      index += 1;
+      continue;
+    }
+
+    if (argument.startsWith('--config=')) {
+      configPath = argument.slice('--config='.length);
+      continue;
+    }
+
     if (argument === '--help' || argument === '-h') {
       printUsageAndExit();
     }
@@ -149,6 +172,7 @@ function parseCliArguments(argv: string[]): CliOptions {
     outDir,
     lineQuantum,
     includeLockfiles,
+    configPath,
   };
 }
 
@@ -174,9 +198,18 @@ function parseLineQuantum(value: string): number {
 
 function printUsageAndExit(): never {
   console.log(
-    'Usage: npm run build:animation-data -- --repo <path> [--out-dir data/generated] [--line-quantum 10] [--include-lockfiles]',
+    'Usage: npm run build:animation-data -- --repo <path> [--out-dir data/generated] [--line-quantum 10] [--include-lockfiles] [--config repo-animation.config.json]',
   );
   process.exit(0);
+}
+
+function resolveEffectiveConfigPath(configPath: string | undefined): string | undefined {
+  if (configPath) {
+    return path.resolve(process.cwd(), configPath);
+  }
+
+  const defaultConfigPath = path.resolve(process.cwd(), DEFAULT_CONFIG_PATH);
+  return existsSync(defaultConfigPath) ? defaultConfigPath : undefined;
 }
 
 function runNpmScript(scriptName: string, scriptArgs: string[]): void {

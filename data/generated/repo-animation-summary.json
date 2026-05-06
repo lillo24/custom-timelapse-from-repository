@@ -1,20 +1,25 @@
 {
-  "generatedAt": "2026-05-05T13:55:06.027Z",
+  "generatedAt": "2026-05-05T14:04:03.944Z",
   "inputDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
+  "filterConfig": {
+    "path": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\repo-animation.config.json",
+    "includeCount": 0,
+    "excludeCount": 15
+  },
   "totals": {
-    "includedFiles": 434,
-    "excludedFiles": 1,
-    "includedUnits": 14068,
-    "excludedUnits": 616,
-    "totalFinalLines": 94722,
-    "totalMaxLines": 95171
+    "includedFiles": 334,
+    "excludedFiles": 101,
+    "includedUnits": 10032,
+    "excludedUnits": 4652,
+    "totalFinalLines": 64410,
+    "totalMaxLines": 64859
   },
   "byCategory": [
     {
       "category": "docs",
-      "fileCount": 185,
-      "unitCount": 4736,
-      "finalLines": 33935
+      "fileCount": 113,
+      "unitCount": 1703,
+      "finalLines": 10545
     },
     {
       "category": "source",
@@ -24,21 +29,15 @@
     },
     {
       "category": "ui",
-      "fileCount": 73,
-      "unitCount": 2395,
-      "finalLines": 17353
+      "fileCount": 72,
+      "unitCount": 2081,
+      "finalLines": 14225
     },
     {
       "category": "test",
       "fileCount": 46,
       "unitCount": 2755,
       "finalLines": 19217
-    },
-    {
-      "category": "unknown",
-      "fileCount": 25,
-      "unitCount": 675,
-      "finalLines": 3792
     },
     {
       "category": "backend",
@@ -54,18 +53,12 @@
     },
     {
       "category": "config",
-      "fileCount": 6,
-      "unitCount": 32,
-      "finalLines": 63
+      "fileCount": 4,
+      "unitCount": 18,
+      "finalLines": 61
     }
   ],
   "byLanguage": [
-    {
-      "language": "Markdown",
-      "fileCount": 188,
-      "unitCount": 4827,
-      "finalLines": 34014
-    },
     {
       "language": "Python",
       "fileCount": 129,
@@ -73,16 +66,16 @@
       "finalLines": 36543
     },
     {
+      "language": "Markdown",
+      "fileCount": 116,
+      "unitCount": 1794,
+      "finalLines": 10624
+    },
+    {
       "language": "TypeScript React",
       "fileCount": 52,
       "unitCount": 1481,
       "finalLines": 10278
-    },
-    {
-      "language": "Unknown",
-      "fileCount": 28,
-      "unitCount": 691,
-      "finalLines": 3800
     },
     {
       "language": "TypeScript",
@@ -98,9 +91,9 @@
     },
     {
       "language": "JSON",
-      "fileCount": 6,
-      "unitCount": 331,
-      "finalLines": 3220
+      "fileCount": 5,
+      "unitCount": 17,
+      "finalLines": 92
     },
     {
       "language": "CSS",
@@ -119,14 +112,15 @@
       "fileCount": 1,
       "unitCount": 4,
       "finalLines": 13
+    },
+    {
+      "language": "JavaScript",
+      "fileCount": 1,
+      "unitCount": 2,
+      "finalLines": 10
     }
   ],
   "topFoldersByLines": [
-    {
-      "folder": "History_Implementation_plans",
-      "fileCount": 97,
-      "finalLines": 27182
-    },
     {
       "folder": "ingestion_pipeline/tests",
       "fileCount": 31,
@@ -153,11 +147,6 @@
       "finalLines": 3480
     },
     {
-      "folder": "tools/ingestion_debug_ui_react_3/frontend",
-      "fileCount": 11,
-      "finalLines": 3267
-    },
-    {
       "folder": "tools/ingestion_debug_ui/lib",
       "fileCount": 8,
       "finalLines": 2947
@@ -171,6 +160,16 @@
       "folder": "ingestion_pipeline/retrieval",
       "fileCount": 12,
       "finalLines": 2628
+    },
+    {
+      "folder": "assistant_runtime",
+      "fileCount": 15,
+      "finalLines": 2296
+    },
+    {
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
+      "fileCount": 7,
+      "finalLines": 2247
     }
   ],
   "largestFiles": [
@@ -196,20 +195,6 @@
       "maxLineCount": 3177
     },
     {
-      "path": "tools/ingestion_debug_ui_react_3/frontend/package-lock.json",
-      "category": "ui",
-      "language": "JSON",
-      "finalLineCount": 3128,
-      "maxLineCount": 3128
-    },
-    {
-      "path": "History_Implementation_plans/react_debug_ui_plan_vercel.md",
-      "category": "docs",
-      "language": "Markdown",
-      "finalLineCount": 1889,
-      "maxLineCount": 1889
-    },
-    {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
       "category": "test",
       "language": "TypeScript React",
@@ -224,13 +209,6 @@
       "maxLineCount": 1771
     },
     {
-      "path": "History_Implementation_plans/react_debug_ui_plan_frontend_design.md",
-      "category": "docs",
-      "language": "Markdown",
-      "finalLineCount": 1754,
-      "maxLineCount": 1754
-    },
-    {
       "path": "tools/ingestion_debug_ui/lib/discovery_reader.py",
       "category": "source",
       "language": "Python",
@@ -238,11 +216,32 @@
       "maxLineCount": 1416
     },
     {
-      "path": "History_Implementation_plans/react_debug_ui_plan_combined.md",
-      "category": "docs",
-      "language": "Markdown",
-      "finalLineCount": 1366,
-      "maxLineCount": 1366
+      "path": "ingestion_pipeline/crawler/spiders/discovery_spider.py",
+      "category": "source",
+      "language": "Python",
+      "finalLineCount": 1312,
+      "maxLineCount": 1312
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_retrieval_materialize.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 1260,
+      "maxLineCount": 1260
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_discovery_policy.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 1083,
+      "maxLineCount": 1083
+    },
+    {
+      "path": "tools/ingestion_debug_ui/pages/2_Events_Explorer.py",
+      "category": "source",
+      "language": "Python",
+      "finalLineCount": 1058,
+      "maxLineCount": 1189
     }
   ],
   "mostChangedFiles": [
@@ -265,12 +264,6 @@
       "language": "Markdown"
     },
     {
-      "path": "tools/ingestion_debug_ui_react_3/frontend/package-lock.json",
-      "unitCount": 314,
-      "category": "ui",
-      "language": "JSON"
-    },
-    {
       "path": "ingestion_pipeline/crawler/spiders/discovery_spider.py",
       "unitCount": 236,
       "category": "source",
@@ -289,12 +282,6 @@
       "language": "Python"
     },
     {
-      "path": "History_Implementation_plans/react_debug_ui_plan_vercel.md",
-      "unitCount": 190,
-      "category": "docs",
-      "language": "Markdown"
-    },
-    {
       "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
       "unitCount": 187,
       "category": "test",
@@ -305,42 +292,39 @@
       "unitCount": 179,
       "category": "test",
       "language": "Python"
+    },
+    {
+      "path": "tools/ingestion_debug_ui/pages/2_Events_Explorer.py",
+      "unitCount": 153,
+      "category": "source",
+      "language": "Python"
+    },
+    {
+      "path": "ingestion_pipeline/tests/test_discovery_policy.py",
+      "unitCount": 148,
+      "category": "test",
+      "language": "Python"
+    }
+  ],
+  "excludedReasons": [
+    {
+      "reason": "config-exclude: History_Implementation_plans/**",
+      "fileCount": 97
+    },
+    {
+      "reason": "Excluded by pattern \"*.tsbuildinfo\".",
+      "fileCount": 2
+    },
+    {
+      "reason": "Excluded lockfile by default.",
+      "fileCount": 2
     }
   ],
   "warnings": [
     "change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",
     "file-states: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Renamed file source tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx was not present in current state.",
-    "History_Implementation_plans/ch1_1_Bootstrap: file remains in the unknown category.",
-    "History_Implementation_plans/ch1_2_foundation.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch1_3_revision_id_collision: file remains in the unknown category.",
-    "History_Implementation_plans/ch2_1_scrapy_seed_skeleton.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch2_2_storage_pipeline: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_1_discovery_policy_config.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_2_discovery_spider_html_gate.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_3_2_html_prefetch_heuristic_fix.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_3_3_discovery_caps_and_log_diagnosis.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_3_4_discovery_unique_link_accounting: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_3_6_trusted_multi_domain_scope.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch3_3_discovery_audit_logs.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ch4_9_debug_priority: file remains in the unknown category.",
-    "History_Implementation_plans/ch4crawl_1_2_UI: file remains in the unknown category.",
-    "History_Implementation_plans/ch4crawl_1_UI_cleanup: file remains in the unknown category.",
-    "History_Implementation_plans/ch4crawl_2_trail-feature: file remains in the unknown category.",
-    "History_Implementation_plans/ch4crawl_3_better-trailing: file remains in the unknown category.",
-    "History_Implementation_plans/ch4crawl_4_better-trailing-2: file remains in the unknown category.",
-    "History_Implementation_plans/ch4logging_1_summary_flags_and_gating: file remains in the unknown category.",
-    "History_Implementation_plans/ch4logging_2_timing_semantics_cleanup: file remains in the unknown category.",
-    "History_Implementation_plans/ch4logging_3_optional_summary_polish: file remains in the unknown category.",
-    "History_Implementation_plans/ingestion_impl_1_Bootstrap: file remains in the unknown category.",
-    "History_Implementation_plans/ingestion_impl_2_foundation.txt: file remains in the unknown category.",
-    "History_Implementation_plans/ingestion_impl_3_revision_id_collision: file remains in the unknown category.",
-    "History_Implementation_plans/v1_3_extraction_alignment_and_contract_checks_prompt.txt: file remains in the unknown category.",
     "ingestion_pipeline/tests/test_discovery_spider.py: unusually large filtered file (3177 lines).",
     "tools/ingestion_debug_ui_react_3/.agents/skills/vercel-react-best-practices/AGENTS.md: unusually large filtered file (3810 lines).",
-    "tools/ingestion_debug_ui_react_3/frontend/package-lock.json: unusually large filtered file (3128 lines).",
-    "tools/ingestion_debug_ui_react_3/frontend/public/analyzation-favicon.svg: missing language for category \"ui\".",
-    "tools/ingestion_debug_ui_react_3/frontend/src/styles.css: unusually large filtered file (3981 lines).",
-    "tools/ingestion_debug_ui_react_3/frontend/tsconfig.node.tsbuildinfo: missing language for category \"config\".",
-    "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo: missing language for category \"config\"."
+    "tools/ingestion_debug_ui_react_3/frontend/src/styles.css: unusually large filtered file (3981 lines)."
   ]
 }

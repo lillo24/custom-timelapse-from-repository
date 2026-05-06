@@ -1,0 +1,20 @@
+{
+  "exclude": [
+    "History_Implementation_plans/**",
+    "History-Implementation-plans/**",
+    "History-implementations/**",
+    "history-implementation-plans/**",
+    "data/raw/**",
+    "data/generated/**",
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    ".pytest_cache/**",
+    ".mypy_cache/**",
+    ".ruff_cache/**",
+    "*.lock",
+    "*.tsbuildinfo"
+  ],
+  "include": []
+}
