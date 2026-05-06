@@ -27,3 +27,7 @@ code evolution and would otherwise dominate the future visualization.
 `preview:visual-model` adds a non-UI Markdown inspection step so the generated
 visual model can be checked for dominance and timeline-shape issues before the
 React repository view is built.
+
+`generate:visual-model` also mirrors the latest output into
+`public/data/repo-visual-model.json` so the Vite app can load the repository
+scene from generated data without hardcoding the dataset inside React.

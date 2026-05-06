@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-06T18:12:17.264Z",
+  "generatedAt": "2026-05-06T18:49:21.010Z",
   "inputDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
   "filterConfig": {
     "path": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\repo-animation.config.json",
@@ -7,19 +7,19 @@
     "excludeCount": 16
   },
   "totals": {
-    "includedFiles": 262,
-    "excludedFiles": 179,
-    "includedUnits": 9279,
-    "excludedUnits": 5638,
-    "totalFinalLines": 57572,
-    "totalMaxLines": 58021
+    "includedFiles": 266,
+    "excludedFiles": 180,
+    "includedUnits": 9355,
+    "excludedUnits": 5662,
+    "totalFinalLines": 57849,
+    "totalMaxLines": 58436
   },
   "byCategory": [
     {
       "category": "source",
-      "fileCount": 76,
-      "unitCount": 3039,
-      "finalLines": 17274
+      "fileCount": 78,
+      "unitCount": 3083,
+      "finalLines": 17380
     },
     {
       "category": "ui",
@@ -29,21 +29,21 @@
     },
     {
       "category": "test",
-      "fileCount": 48,
-      "unitCount": 2796,
-      "finalLines": 19551
+      "fileCount": 49,
+      "unitCount": 2813,
+      "finalLines": 19691
     },
     {
       "category": "docs",
-      "fileCount": 38,
-      "unitCount": 799,
-      "finalLines": 2467
+      "fileCount": 39,
+      "unitCount": 808,
+      "finalLines": 2482
     },
     {
       "category": "backend",
       "fileCount": 15,
-      "unitCount": 377,
-      "finalLines": 3332
+      "unitCount": 383,
+      "finalLines": 3348
     },
     {
       "category": "data",
@@ -61,9 +61,9 @@
   "byLanguage": [
     {
       "language": "Python",
-      "fileCount": 132,
-      "unitCount": 5783,
-      "finalLines": 37372
+      "fileCount": 135,
+      "unitCount": 5849,
+      "finalLines": 37633
     },
     {
       "language": "TypeScript React",
@@ -73,9 +73,9 @@
     },
     {
       "language": "Markdown",
-      "fileCount": 41,
-      "unitCount": 891,
-      "finalLines": 2547
+      "fileCount": 42,
+      "unitCount": 901,
+      "finalLines": 2563
     },
     {
       "language": "TypeScript",
@@ -123,8 +123,8 @@
   "topFoldersByLines": [
     {
       "folder": "ingestion_pipeline/tests",
-      "fileCount": 32,
-      "finalLines": 13320
+      "fileCount": 33,
+      "finalLines": 13436
     },
     {
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src",
@@ -149,7 +149,7 @@
     {
       "folder": "ingestion_pipeline/retrieval",
       "fileCount": 12,
-      "finalLines": 2628
+      "finalLines": 2491
     },
     {
       "folder": "assistant_runtime",
@@ -164,12 +164,12 @@
     {
       "folder": "tools/ingestion_debug_ui_react_3/tests/backend",
       "fileCount": 3,
-      "finalLines": 2215
+      "finalLines": 2239
     },
     {
       "folder": "tools/ingestion_debug_ui_react_3/backend/routes",
       "fileCount": 10,
-      "finalLines": 1967
+      "finalLines": 1985
     }
   ],
   "largestFiles": [
@@ -188,18 +188,18 @@
       "maxLineCount": 3177
     },
     {
+      "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 1795,
+      "maxLineCount": 1795
+    },
+    {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
       "category": "test",
       "language": "TypeScript React",
       "finalLineCount": 1794,
       "maxLineCount": 1794
-    },
-    {
-      "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
-      "category": "test",
-      "language": "Python",
-      "finalLineCount": 1771,
-      "maxLineCount": 1771
     },
     {
       "path": "tools/ingestion_debug_ui/lib/discovery_reader.py",
@@ -209,18 +209,18 @@
       "maxLineCount": 1416
     },
     {
+      "path": "ingestion_pipeline/tests/test_retrieval_materialize.py",
+      "category": "test",
+      "language": "Python",
+      "finalLineCount": 1315,
+      "maxLineCount": 1315
+    },
+    {
       "path": "ingestion_pipeline/crawler/spiders/discovery_spider.py",
       "category": "source",
       "language": "Python",
       "finalLineCount": 1312,
       "maxLineCount": 1312
-    },
-    {
-      "path": "ingestion_pipeline/tests/test_retrieval_materialize.py",
-      "category": "test",
-      "language": "Python",
-      "finalLineCount": 1260,
-      "maxLineCount": 1260
     },
     {
       "path": "ingestion_pipeline/tests/test_discovery_policy.py",
@@ -277,13 +277,13 @@
     },
     {
       "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
-      "unitCount": 187,
+      "unitCount": 190,
       "category": "test",
       "language": "Python"
     },
     {
       "path": "ingestion_pipeline/tests/test_retrieval_materialize.py",
-      "unitCount": 179,
+      "unitCount": 185,
       "category": "test",
       "language": "Python"
     },
@@ -309,7 +309,7 @@
   "excludedReasons": [
     {
       "reason": "config-exclude: History_Implementation_plans/**",
-      "fileCount": 99
+      "fileCount": 100
     },
     {
       "reason": "config-exclude: tools/ingestion_debug_ui_react_3/.agents/**",

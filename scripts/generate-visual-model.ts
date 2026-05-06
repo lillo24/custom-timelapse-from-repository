@@ -17,6 +17,7 @@ import type {
 
 const DEFAULT_DATASET_PATH = 'data/generated/repo-animation-dataset.json';
 const DEFAULT_OUTPUT_PATH = 'data/generated/repo-visual-model.json';
+const DEFAULT_PUBLIC_OUTPUT_PATH = 'public/data/repo-visual-model.json';
 const ROOT_FOLDER_LABEL = '(root)';
 
 interface CliOptions {
@@ -31,11 +32,15 @@ async function main(): Promise<void> {
     const options = parseCliArguments(process.argv.slice(2));
     const datasetPath = resolveInputFile(options.datasetPath, 'Dataset input');
     const outputPath = path.resolve(process.cwd(), options.outputPath);
+    const publicOutputPath = path.resolve(process.cwd(), DEFAULT_PUBLIC_OUTPUT_PATH);
     const dataset = await loadDataset(datasetPath);
     const visualModel = buildVisualModel(datasetPath, dataset);
+    const serializedModel = `${JSON.stringify(visualModel, null, 2)}\n`;
 
     await mkdir(path.dirname(outputPath), { recursive: true });
-    await writeFile(outputPath, `${JSON.stringify(visualModel, null, 2)}\n`, 'utf8');
+    await writeFile(outputPath, serializedModel, 'utf8');
+    await mkdir(path.dirname(publicOutputPath), { recursive: true });
+    await writeFile(publicOutputPath, serializedModel, 'utf8');
 
     console.log('Repository visual model');
     console.log(`Files: ${visualModel.summary.fileCount}`);
@@ -43,6 +48,7 @@ async function main(): Promise<void> {
     console.log(`Timeline units: ${visualModel.summary.unitCount}`);
     console.log(`Warnings: ${visualModel.warnings.length}`);
     console.log(`Wrote ${outputPath}`);
+    console.log(`Mirrored ${publicOutputPath}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(message);

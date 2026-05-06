@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "sourceRepo": {
     "path": "C:/Users/leona/Documents/GitHub/thesis-disi-chatbot",
-    "currentHead": "da540f0d680758cdb4311f73528fcfec35f6a5a9"
+    "currentHead": "2c36145d0f24fc9099c87b33c20275e83eab576c"
   },
-  "generatedAt": "2026-05-06T18:12:14.682Z",
+  "generatedAt": "2026-05-06T18:49:18.086Z",
   "commits": [
     {
       "order": 0,
@@ -12077,6 +12077,132 @@
           "oldPath": null,
           "status": "added",
           "addedLines": 122,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 93,
+      "hash": "2c36145d0f24fc9099c87b33c20275e83eab576c",
+      "shortHash": "2c36145",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-06T20:47:47+02:00",
+      "message": "- Create a **shared document-level metadata derivation layer** that sits logically:",
+      "parentHashes": [
+        "da540f0d680758cdb4311f73528fcfec35f6a5a9"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_catalogue_06-expose-shared-metadata.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 225,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/metadata/README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 12,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/metadata/__init__.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 13,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/metadata/document_metadata.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 230,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/retrieval/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/retrieval/materialize.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 148,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_document_metadata.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 60,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_retrieval_materialize.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 55,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 6,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/catalogue.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 19,
+          "deletedLines": 20,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/stored_documents.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 24,
           "deletedLines": 0,
           "isBinary": false
         }
