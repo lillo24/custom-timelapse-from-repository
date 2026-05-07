@@ -3,6 +3,7 @@ import {
   startTransition,
   useEffect,
   useEffectEvent,
+  useMemo,
   useRef,
   useState,
 } from 'react'
@@ -24,6 +25,7 @@ import type {
 } from '../preprocessing/visualModelTypes'
 
 type PlaybackSpeed = (typeof PLAYBACK_SPEED_OPTIONS)[number]
+type PlaybackDurationSeconds = (typeof PLAYBACK_DURATION_OPTIONS)[number]
 
 type CurrentRepoFileState = {
   path: string
@@ -68,8 +70,14 @@ type RepoProgressState = {
   recentTouchedCount: number
 }
 
+type RepoProgressCache = {
+  model: RepoVisualModel
+  activeUnitIndex: number
+  fileStateById: Map<string, CurrentRepoFileState>
+}
+
+const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
 const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
-const BASE_UNITS_PER_SECOND = 36
 const RECENT_UNIT_WINDOW = 20
 
 const CATEGORY_STYLES: Record<
@@ -235,11 +243,27 @@ function RepoExplorerCanvas({
   const maxUnitIndex = Math.max(model.timeline.length - 1, 0)
   const [activeUnitIndex, setActiveUnitIndex] = useState(maxUnitIndex)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [playbackDurationSeconds, setPlaybackDurationSeconds] =
+    useState<PlaybackDurationSeconds>(30)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
   const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, maxUnitIndex)
   const currentUnitIndexRef = useRef(clampedActiveUnitIndex)
   const playbackCarryRef = useRef(0)
   const lastAnimationFrameRef = useRef<number | null>(null)
+  const playbackUnitsPerSecond =
+    model.timeline.length > 0
+      ? (model.timeline.length / playbackDurationSeconds) * playbackSpeed
+      : 0
+  const fullRunDurationSeconds =
+    playbackSpeed > 0 ? playbackDurationSeconds / playbackSpeed : 0
+  const remainingUnitCount = Math.max(
+    0,
+    model.timeline.length - (clampedActiveUnitIndex + 1),
+  )
+  const remainingPlaybackSeconds =
+    playbackUnitsPerSecond > 0
+      ? remainingUnitCount / playbackUnitsPerSecond
+      : 0
 
   useEffect(() => {
     currentUnitIndexRef.current = clampedActiveUnitIndex
@@ -279,8 +303,7 @@ function RepoExplorerCanvas({
     lastAnimationFrameRef.current = timestamp
 
     const pendingUnits =
-      playbackCarryRef.current +
-      (elapsedMs / 1000) * BASE_UNITS_PER_SECOND * playbackSpeed
+      playbackCarryRef.current + (elapsedMs / 1000) * playbackUnitsPerSecond
     const unitsToAdvance = Math.floor(pendingUnits)
     playbackCarryRef.current = pendingUnits - unitsToAdvance
 
@@ -326,7 +349,13 @@ function RepoExplorerCanvas({
       playbackCarryRef.current = 0
       lastAnimationFrameRef.current = null
     }
-  }, [advancePlaybackFrame, isPlaying, model.timeline.length, playbackSpeed])
+  }, [
+    advancePlaybackFrame,
+    isPlaying,
+    model.timeline.length,
+    playbackDurationSeconds,
+    playbackSpeed,
+  ])
 
   function handleTogglePlayback() {
     if (model.timeline.length === 0) {
@@ -345,32 +374,49 @@ function RepoExplorerCanvas({
     setIsPlaying(true)
   }
 
-  const progressState = buildRepoProgressState(model, clampedActiveUnitIndex)
+  const progressState = useRepoProgressState(model, clampedActiveUnitIndex)
   const activeUnit = progressState.activeUnit
   const visibleFiles = progressState.visibleFiles
-  const featuredFolders = selectFeaturedFolders(model.folders, visibleFiles)
-  const sidebarNodes = buildSidebarNodes(model.folders, visibleFiles)
-  const rootFiles = visibleFiles
-    .filter((entry) => entry.file.folderPath === '')
-    .sort(
-      (left, right) =>
-        right.currentVisualWeight - left.currentVisualWeight ||
-        right.state.currentLineCount - left.state.currentLineCount ||
-        left.file.path.localeCompare(right.file.path),
-    )
-    .slice(0, 4)
-  const largestFiles = [...visibleFiles]
-    .sort(
-      (left, right) =>
-        right.state.currentLineCount - left.state.currentLineCount ||
-        right.currentVisualWeight - left.currentVisualWeight ||
-        left.file.path.localeCompare(right.file.path),
-    )
-    .slice(0, 5)
-  const visibleWeightTotal = Math.max(
-    visibleFiles.reduce((sum, entry) => sum + entry.currentVisualWeight, 0),
-    1,
-  )
+  const {
+    featuredFolders,
+    largestFiles,
+    rootFiles,
+    sidebarNodes,
+    visibleFileCount,
+    visibleFolderCount,
+    visibleWeightTotal,
+  } = useMemo(() => {
+    const nextRootFiles = visibleFiles
+      .filter((entry) => entry.file.folderPath === '')
+      .sort(
+        (left, right) =>
+          right.currentVisualWeight - left.currentVisualWeight ||
+          right.state.currentLineCount - left.state.currentLineCount ||
+          left.file.path.localeCompare(right.file.path),
+      )
+      .slice(0, 4)
+    const nextLargestFiles = [...visibleFiles]
+      .sort(
+        (left, right) =>
+          right.state.currentLineCount - left.state.currentLineCount ||
+          right.currentVisualWeight - left.currentVisualWeight ||
+          left.file.path.localeCompare(right.file.path),
+      )
+      .slice(0, 5)
+
+    return {
+      featuredFolders: selectFeaturedFolders(model.folders, visibleFiles),
+      largestFiles: nextLargestFiles,
+      rootFiles: nextRootFiles,
+      sidebarNodes: buildSidebarNodes(model.folders, visibleFiles),
+      visibleFileCount: visibleFiles.length,
+      visibleFolderCount: countVisibleFolders(model.folders, visibleFiles),
+      visibleWeightTotal: Math.max(
+        visibleFiles.reduce((sum, entry) => sum + entry.currentVisualWeight, 0),
+        1,
+      ),
+    }
+  }, [model.folders, visibleFiles])
   const canStepBackward = model.timeline.length > 0 && clampedActiveUnitIndex > 0
   const canStepForward =
     model.timeline.length > 0 && clampedActiveUnitIndex < maxUnitIndex
@@ -411,6 +457,21 @@ function RepoExplorerCanvas({
               <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300">
                 {isPlaying ? 'Playing' : 'Paused'} {formatPlaybackSpeed(playbackSpeed)}
               </span>
+              <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300">
+                Preset {formatDurationPreset(playbackDurationSeconds)} / Full run{' '}
+                {formatDurationSeconds(fullRunDurationSeconds)}
+              </span>
+            </div>
+
+            <div className="mt-2 text-sm text-slate-400">
+              {remainingUnitCount > 0
+                ? `${formatDurationSeconds(remainingPlaybackSeconds)} remaining at the current preset`
+                : 'Timeline complete'}
+            </div>
+            <div className="mt-1 text-sm text-slate-500">
+              {formatNumber(visibleFileCount)} visible files /{' '}
+              {formatNumber(visibleFolderCount)} visible folders /{' '}
+              {formatNumber(progressState.recentTouchedCount)} recently touched
             </div>
           </div>
 
@@ -465,6 +526,19 @@ function RepoExplorerCanvas({
                 }}
                 disabled={!canStepForward}
               />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {PLAYBACK_DURATION_OPTIONS.map((durationSeconds) => (
+                <DurationButton
+                  key={durationSeconds}
+                  durationSeconds={durationSeconds}
+                  isActive={playbackDurationSeconds === durationSeconds}
+                  onClick={() => {
+                    setPlaybackDurationSeconds(durationSeconds)
+                  }}
+                />
+              ))}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
@@ -714,6 +788,30 @@ function SpeedButton({
       }`}
     >
       {formatPlaybackSpeed(speed)}
+    </button>
+  )
+}
+
+function DurationButton({
+  durationSeconds,
+  isActive,
+  onClick,
+}: {
+  durationSeconds: PlaybackDurationSeconds
+  isActive: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1.5 font-mono text-[11px] transition ${
+        isActive
+          ? 'border-violet-300/25 bg-violet-300/14 text-violet-50'
+          : 'border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
+      }`}
+    >
+      {formatDurationPreset(durationSeconds)}
     </button>
   )
 }
@@ -1150,10 +1248,99 @@ function RepoExplorerError({
   )
 }
 
-function buildRepoProgressState(
+function useRepoProgressState(
   model: RepoVisualModel,
   activeUnitIndex: number,
 ): RepoProgressState {
+  const progressCacheRef = useRef<RepoProgressCache | null>(null)
+
+  return useMemo(() => {
+    const progressCache = getRepoProgressCache(
+      model,
+      activeUnitIndex,
+      progressCacheRef.current,
+    )
+
+    progressCacheRef.current = progressCache
+
+    return buildRepoProgressState(model, activeUnitIndex, progressCache.fileStateById)
+  }, [activeUnitIndex, model])
+}
+
+function getRepoProgressCache(
+  model: RepoVisualModel,
+  activeUnitIndex: number,
+  currentCache: RepoProgressCache | null,
+): RepoProgressCache {
+  const targetUnitIndex =
+    model.timeline.length > 0
+      ? clampNumber(activeUnitIndex, 0, model.timeline.length - 1)
+      : -1
+
+  const nextCache =
+    currentCache && currentCache.model === model
+      ? currentCache
+      : {
+          model,
+          activeUnitIndex: model.timeline.length === 0 ? 0 : -1,
+          fileStateById: createInitialFileStateById(model),
+        }
+
+  if (model.timeline.length === 0) {
+    nextCache.activeUnitIndex = 0
+    return nextCache
+  }
+
+  if (targetUnitIndex > nextCache.activeUnitIndex) {
+    for (
+      let index = nextCache.activeUnitIndex + 1;
+      index <= targetUnitIndex;
+      index += 1
+    ) {
+      const unit = model.timeline[index]
+
+      if (!unit) {
+        continue
+      }
+
+      const currentFileState = nextCache.fileStateById.get(unit.fileId)
+
+      if (!currentFileState) {
+        continue
+      }
+
+      nextCache.fileStateById.set(
+        unit.fileId,
+        applyTimelineUnitToFileState(currentFileState, unit),
+      )
+    }
+  } else if (targetUnitIndex < nextCache.activeUnitIndex) {
+    for (let index = nextCache.activeUnitIndex; index > targetUnitIndex; index -= 1) {
+      const unit = model.timeline[index]
+
+      if (!unit) {
+        continue
+      }
+
+      const currentFileState = nextCache.fileStateById.get(unit.fileId)
+
+      if (!currentFileState) {
+        continue
+      }
+
+      nextCache.fileStateById.set(
+        unit.fileId,
+        revertTimelineUnitFromFileState(currentFileState, unit),
+      )
+    }
+  }
+
+  nextCache.activeUnitIndex = targetUnitIndex
+
+  return nextCache
+}
+
+function createInitialFileStateById(model: RepoVisualModel) {
   const fileStateById = new Map<string, CurrentRepoFileState>()
 
   for (const file of model.files) {
@@ -1167,21 +1354,31 @@ function buildRepoProgressState(
     })
   }
 
+  return fileStateById
+}
+
+function buildRepoProgressState(
+  model: RepoVisualModel,
+  activeUnitIndex: number,
+  fileStateById: Map<string, CurrentRepoFileState>,
+): RepoProgressState {
   if (model.timeline.length === 0) {
     return {
       activeUnit: null,
       visibleFiles: model.files
-        .map((file) => createVisibleRepoFile(file, fileStateById.get(file.id), 0))
+        .map((file) =>
+          createVisibleRepoFile(
+            file,
+            withRecentChangeFlag(fileStateById.get(file.id), 0),
+            0,
+          ),
+        )
         .filter((entry): entry is VisibleRepoFile => entry !== null),
       recentTouchedCount: 0,
     }
   }
 
-  const clampedActiveUnitIndex = clampNumber(
-    activeUnitIndex,
-    0,
-    model.timeline.length - 1,
-  )
+  const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, model.timeline.length - 1)
   const activeUnit = model.timeline[clampedActiveUnitIndex] ?? null
 
   if (!activeUnit) {
@@ -1190,22 +1387,6 @@ function buildRepoProgressState(
       visibleFiles: [],
       recentTouchedCount: 0,
     }
-  }
-
-  for (let index = 0; index <= clampedActiveUnitIndex; index += 1) {
-    const unit = model.timeline[index]
-
-    if (!unit) {
-      continue
-    }
-
-    const currentFileState = fileStateById.get(unit.fileId)
-
-    if (!currentFileState) {
-      continue
-    }
-
-    fileStateById.set(unit.fileId, applyTimelineUnitToFileState(currentFileState, unit))
   }
 
   const recentActivityByFileId = new Map<string, number>()
@@ -1231,31 +1412,35 @@ function buildRepoProgressState(
     }
   }
 
-  for (const [fileId, intensity] of recentActivityByFileId.entries()) {
-    const currentFileState = fileStateById.get(fileId)
-
-    if (!currentFileState || !currentFileState.exists || intensity <= 0) {
-      continue
-    }
-
-    fileStateById.set(fileId, {
-      ...currentFileState,
-      recentlyChanged: true,
-    })
-  }
-
   return {
     activeUnit,
     visibleFiles: model.files
       .map((file) =>
         createVisibleRepoFile(
           file,
-          fileStateById.get(file.id),
+          withRecentChangeFlag(
+            fileStateById.get(file.id),
+            recentActivityByFileId.get(file.id) ?? 0,
+          ),
           recentActivityByFileId.get(file.id) ?? 0,
         ),
       )
       .filter((entry): entry is VisibleRepoFile => entry !== null),
     recentTouchedCount: recentActivityByFileId.size,
+  }
+}
+
+function withRecentChangeFlag(
+  fileState: CurrentRepoFileState | undefined,
+  highlightStrength: number,
+) {
+  if (!fileState) {
+    return undefined
+  }
+
+  return {
+    ...fileState,
+    recentlyChanged: fileState.exists && highlightStrength > 0,
   }
 }
 
@@ -1289,6 +1474,43 @@ function applyTimelineUnitToFileState(
     ...fileState,
     exists: true,
     currentLineCount: nextLineCount,
+  }
+}
+
+function revertTimelineUnitFromFileState(
+  fileState: CurrentRepoFileState,
+  unit: VisualTimelineUnit,
+): CurrentRepoFileState {
+  if (unit.type === 'create' || unit.type === 'copy') {
+    return {
+      ...fileState,
+      exists: false,
+      currentLineCount: 0,
+    }
+  }
+
+  if (unit.type === 'delete') {
+    return {
+      ...fileState,
+      exists: true,
+      currentLineCount: Math.max(0, unit.beforeLineCount ?? 0),
+    }
+  }
+
+  let previousLineCount = fileState.currentLineCount
+
+  if (unit.beforeLineCount !== null) {
+    previousLineCount = Math.max(0, unit.beforeLineCount)
+  } else if (unit.afterLineCount !== null) {
+    previousLineCount = Math.max(0, unit.afterLineCount - unit.lineDelta)
+  } else {
+    previousLineCount = Math.max(0, fileState.currentLineCount - unit.lineDelta)
+  }
+
+  return {
+    ...fileState,
+    exists: true,
+    currentLineCount: previousLineCount,
   }
 }
 
@@ -1471,6 +1693,26 @@ function buildSidebarNodes(
     )
 }
 
+function countVisibleFolders(
+  folders: VisualFolder[],
+  visibleFiles: VisibleRepoFile[],
+) {
+  let count = 0
+
+  for (const folder of folders) {
+    if (folder.path === '') {
+      count += 1
+      continue
+    }
+
+    if (getVisibleFilesInSubtree(visibleFiles, folder.path).length > 0) {
+      count += 1
+    }
+  }
+
+  return count
+}
+
 function getVisibleFilesInSubtree(
   visibleFiles: VisibleRepoFile[],
   folderPath: string,
@@ -1484,6 +1726,22 @@ function getVisibleFilesInSubtree(
 
 function formatPlaybackSpeed(speed: PlaybackSpeed) {
   return `${speed}x`
+}
+
+function formatDurationPreset(durationSeconds: PlaybackDurationSeconds) {
+  return `${durationSeconds}s`
+}
+
+function formatDurationSeconds(durationSeconds: number) {
+  if (durationSeconds <= 0) {
+    return '0s'
+  }
+
+  if (durationSeconds < 10) {
+    return `${durationSeconds.toFixed(1)}s`
+  }
+
+  return `${Math.round(durationSeconds)}s`
 }
 
 function isAncestorPath(leftPath: string, rightPath: string) {
