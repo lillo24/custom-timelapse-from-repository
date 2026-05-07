@@ -17,5 +17,19 @@
     "*.lock",
     "*.tsbuildinfo"
   ],
-  "include": []
+  "include": [],
+  "display": {
+    "maxDepth": 4,
+    "hideButCount": [
+      "**/__init__.py"
+    ],
+    "collapseFolders": [
+      "tools/ingestion_debug_ui_react_3/**"
+    ],
+    "maxChildrenByFolder": {
+      "ingestion_pipeline/**": 20,
+      "ingestion_pipeline/tests/**": 12,
+      "tools/**": 15
+    }
+  }
 }

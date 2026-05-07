@@ -21,6 +21,7 @@ import {
   createEmptyAnimationFilterConfig,
   parseAnimationFilterConfig,
 } from '../src/preprocessing/loadAnimationFilterConfig.ts';
+import { matchesPathPattern } from '../src/preprocessing/pathPattern.ts';
 
 const DEFAULT_HISTORY_PATH = 'data/generated/raw-git-history.json';
 const DEFAULT_STATES_PATH = 'data/generated/repo-file-states.json';
@@ -530,20 +531,7 @@ function getExclusion(
 }
 
 function matchesPattern(filePath: string, pattern: string): boolean {
-  const normalizedPath = filePath.toLowerCase();
-  const normalizedPattern = pattern.toLowerCase();
-
-  if (normalizedPattern.endsWith('/**')) {
-    const prefix = normalizedPattern.slice(0, -3);
-    return normalizedPath === prefix || normalizedPath.startsWith(`${prefix}/`);
-  }
-
-  if (normalizedPattern.startsWith('*.')) {
-    const suffix = normalizedPattern.slice(1);
-    return normalizedPath.endsWith(suffix);
-  }
-
-  return normalizedPath === normalizedPattern;
+  return matchesPathPattern(filePath, pattern);
 }
 
 function enrichUnit(unit: RepoChangeUnit): AnimationUnit {

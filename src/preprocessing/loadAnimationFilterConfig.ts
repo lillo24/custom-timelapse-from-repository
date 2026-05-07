@@ -1,7 +1,10 @@
 import type {
+  AnimationDisplayConfigFile,
   AnimationFilterConfigFile,
+  LoadedAnimationDisplayConfig,
   LoadedAnimationFilterConfig,
 } from './animationFilterConfigTypes.ts';
+import { normalizePathPattern } from './pathPattern.ts';
 
 export function parseAnimationFilterConfig(
   configPath: string,
@@ -26,11 +29,13 @@ export function parseAnimationFilterConfig(
   const config = parsed as AnimationFilterConfigFile;
   const include = normalizePatternArray(config.include, 'include', configPath);
   const exclude = normalizePatternArray(config.exclude, 'exclude', configPath);
+  const display = normalizeDisplayConfig(config.display, configPath);
 
   return {
     path: configPath,
     include,
     exclude,
+    display,
   };
 }
 
@@ -38,12 +43,62 @@ export function createEmptyAnimationFilterConfig(): LoadedAnimationFilterConfig 
   return {
     include: [],
     exclude: [],
+    display: createDefaultDisplayConfig(),
+  };
+}
+
+function normalizeDisplayConfig(
+  value: AnimationDisplayConfigFile | undefined,
+  configPath: string,
+): LoadedAnimationDisplayConfig {
+  if (value === undefined) {
+    return createDefaultDisplayConfig();
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`Animation filter config field "display" must be a JSON object: ${configPath}`);
+  }
+
+  const maxDepth = normalizeMaxDepth(value.maxDepth, configPath);
+  const hideButCount = normalizePatternArray(
+    value.hideButCount,
+    'display.hideButCount',
+    configPath,
+  );
+  const collapseFolders = normalizePatternArray(
+    value.collapseFolders,
+    'display.collapseFolders',
+    configPath,
+  );
+  const maxChildrenByFolder = normalizeMaxChildrenByFolder(
+    value.maxChildrenByFolder,
+    configPath,
+  );
+
+  return {
+    maxDepth,
+    hideButCount,
+    collapseFolders,
+    maxChildrenByFolder,
+  };
+}
+
+function createDefaultDisplayConfig(): LoadedAnimationDisplayConfig {
+  return {
+    maxDepth: 4,
+    hideButCount: [],
+    collapseFolders: [],
+    maxChildrenByFolder: {},
   };
 }
 
 function normalizePatternArray(
   value: string[] | undefined,
-  fieldName: 'include' | 'exclude',
+  fieldName:
+    | 'include'
+    | 'exclude'
+    | 'display.hideButCount'
+    | 'display.collapseFolders',
   configPath: string,
 ): string[] {
   if (value === undefined) {
@@ -69,8 +124,61 @@ function normalizePatternArray(
       );
     }
 
-    return trimmed.replace(/\\/g, '/');
+    return normalizePathPattern(trimmed);
   });
 
   return [...normalized].sort((left, right) => left.localeCompare(right));
+}
+
+function normalizeMaxDepth(value: number | undefined, configPath: string): number {
+  if (value === undefined) {
+    return 4;
+  }
+
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(
+      `Animation filter config field "display.maxDepth" must be a non-negative integer: ${configPath}`,
+    );
+  }
+
+  return value;
+}
+
+function normalizeMaxChildrenByFolder(
+  value: Record<string, number> | undefined,
+  configPath: string,
+): Record<string, number> {
+  if (value === undefined) {
+    return {};
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(
+      `Animation filter config field "display.maxChildrenByFolder" must be an object of pattern-to-integer entries: ${configPath}`,
+    );
+  }
+
+  const entries = Object.entries(value).map(([pattern, limit]) => {
+    const normalizedPattern = normalizePathPattern(pattern);
+
+    if (normalizedPattern.length === 0) {
+      throw new Error(
+        `Animation filter config field "display.maxChildrenByFolder" cannot contain empty patterns: ${configPath}`,
+      );
+    }
+
+    if (!Number.isInteger(limit) || limit <= 0) {
+      throw new Error(
+        `Animation filter config field "display.maxChildrenByFolder" must contain only positive integers. Invalid limit for pattern "${pattern}" in ${configPath}.`,
+      );
+    }
+
+    return [normalizedPattern, limit] as const;
+  });
+
+  return Object.fromEntries(
+    entries.sort(([leftPattern], [rightPattern]) =>
+      leftPattern.localeCompare(rightPattern),
+    ),
+  );
 }

@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "sourceRepo": {
     "path": "C:/Users/leona/Documents/GitHub/thesis-disi-chatbot",
-    "currentHead": "2c36145d0f24fc9099c87b33c20275e83eab576c"
+    "currentHead": "d9b9082ff39d2337c427bfb8cbc1fb2981108701"
   },
-  "generatedAt": "2026-05-06T18:49:18.086Z",
+  "generatedAt": "2026-05-07T15:07:00.307Z",
   "commits": [
     {
       "order": 0,
@@ -12203,6 +12203,274 @@
           "oldPath": null,
           "status": "modified",
           "addedLines": 24,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 94,
+      "hash": "bb746269172fa37850461868680dadca56482445",
+      "shortHash": "bb74626",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-06T21:08:14+02:00",
+      "message": "Extend the existing catalogue backend response so it exposes the **shared PDF/document metadata** already derived in the ingestion pipeline.",
+      "parentHashes": [
+        "2c36145d0f24fc9099c87b33c20275e83eab576c"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_catalogue_07-ui-grouped-families.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 295,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api_models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/gemini_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 8,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_answer_bridge.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_answer_service.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 9,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 20,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_prompt_loader.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/catalogue.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 9,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 13,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 21,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantMock.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantAnswer.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 11,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 89,
+          "deletedLines": 4,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 95,
+      "hash": "d9b9082ff39d2337c427bfb8cbc1fb2981108701",
+      "shortHash": "d9b9082",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-06T21:22:22+02:00",
+      "message": "Collapsed pdf in categories in the Catalogue UI",
+      "parentHashes": [
+        "bb746269172fa37850461868680dadca56482445"
+      ],
+      "changedFiles": [
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 65,
+          "deletedLines": 17,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 281,
+          "deletedLines": 70,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 97,
           "deletedLines": 0,
           "isBinary": false
         }

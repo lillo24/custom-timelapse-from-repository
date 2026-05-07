@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-06T18:49:21.603Z",
+  "generatedAt": "2026-05-07T15:07:03.430Z",
   "sourceDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
   "files": [
     {
@@ -85,12 +85,12 @@
       "extension": "py",
       "category": "source",
       "language": "Python",
-      "finalLineCount": 205,
+      "finalLineCount": 203,
       "maxLineCount": 205,
       "visualSize": "lg",
       "visualWeight": 0.6219264046735664,
       "firstUnitOrder": 11397,
-      "lastUnitOrder": 12480
+      "lastUnitOrder": 15050
     },
     {
       "id": "file:assistant_runtime/api.py",
@@ -120,7 +120,7 @@
       "visualSize": "sm",
       "visualWeight": 0.3279438516138407,
       "firstUnitOrder": 6973,
-      "lastUnitOrder": 11001
+      "lastUnitOrder": 15052
     },
     {
       "id": "file:assistant_runtime/models.py",
@@ -130,12 +130,12 @@
       "extension": "py",
       "category": "source",
       "language": "Python",
-      "finalLineCount": 370,
+      "finalLineCount": 364,
       "maxLineCount": 370,
       "visualSize": "xl",
       "visualWeight": 0.835531691527718,
       "firstUnitOrder": 6979,
-      "lastUnitOrder": 12141
+      "lastUnitOrder": 15053
     },
     {
       "id": "file:assistant_runtime/prompt_loader.py",
@@ -160,12 +160,12 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "finalLineCount": 14,
-      "maxLineCount": 14,
+      "finalLineCount": 17,
+      "maxLineCount": 17,
       "visualSize": "xs",
-      "visualWeight": 0.1625272110744002,
+      "visualWeight": 0.17909626377485716,
       "firstUnitOrder": 11031,
-      "lastUnitOrder": 12142
+      "lastUnitOrder": 15055
     },
     {
       "id": "file:assistant_runtime/prompts/README.md",
@@ -235,12 +235,12 @@
       "extension": "py",
       "category": "source",
       "language": "Python",
-      "finalLineCount": 342,
-      "maxLineCount": 342,
+      "finalLineCount": 346,
+      "maxLineCount": 346,
       "visualSize": "xl",
-      "visualWeight": 0.8032951007369113,
+      "visualWeight": 0.8079790768820968,
       "firstUnitOrder": 11038,
-      "lastUnitOrder": 12144
+      "lastUnitOrder": 15060
     },
     {
       "id": "file:assistant_runtime/providers/gemini_rewriter.py",
@@ -295,12 +295,12 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "finalLineCount": 43,
-      "maxLineCount": 43,
+      "finalLineCount": 44,
+      "maxLineCount": 44,
       "visualSize": "sm",
-      "visualWeight": 0.2848369278582012,
+      "visualWeight": 0.28812994971805395,
       "firstUnitOrder": 7259,
-      "lastUnitOrder": 12052
+      "lastUnitOrder": 15057
     },
     {
       "id": "file:assistant_runtime/README.md",
@@ -315,7 +315,7 @@
       "visualSize": "md",
       "visualWeight": 0.5442668601838069,
       "firstUnitOrder": 6964,
-      "lastUnitOrder": 12464
+      "lastUnitOrder": 15049
     },
     {
       "id": "file:assistant_runtime/retrieval_bridge.py",
@@ -385,12 +385,12 @@
       "extension": "py",
       "category": "source",
       "language": "Python",
-      "finalLineCount": 259,
+      "finalLineCount": 253,
       "maxLineCount": 259,
       "visualSize": "lg",
       "visualWeight": 0.6990559672036416,
       "firstUnitOrder": 11074,
-      "lastUnitOrder": 11776
+      "lastUnitOrder": 15061
     },
     {
       "id": "file:assistant_runtime/run_rewrite_retrieve.py",
@@ -1285,12 +1285,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 193,
+      "finalLineCount": 191,
       "maxLineCount": 193,
       "visualSize": "lg",
       "visualWeight": 0.6034492053157634,
       "firstUnitOrder": 11099,
-      "lastUnitOrder": 12154
+      "lastUnitOrder": 15062
     },
     {
       "id": "file:ingestion_pipeline/tests/test_assistant_runtime_answer_service.py",
@@ -1300,12 +1300,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 127,
+      "finalLineCount": 126,
       "maxLineCount": 127,
       "visualSize": "md",
       "visualWeight": 0.48951265714936726,
       "firstUnitOrder": 11116,
-      "lastUnitOrder": 11129
+      "lastUnitOrder": 15063
     },
     {
       "id": "file:ingestion_pipeline/tests/test_assistant_runtime_api.py",
@@ -1315,12 +1315,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 393,
+      "finalLineCount": 392,
       "maxLineCount": 393,
       "visualSize": "xl",
       "visualWeight": 0.8611094204352104,
       "firstUnitOrder": 11421,
-      "lastUnitOrder": 13384
+      "lastUnitOrder": 15065
     },
     {
       "id": "file:ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
@@ -1330,12 +1330,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 490,
+      "finalLineCount": 482,
       "maxLineCount": 490,
       "visualSize": "xl",
       "visualWeight": 0.9615239476408232,
       "firstUnitOrder": 11130,
-      "lastUnitOrder": 12164
+      "lastUnitOrder": 15069
     },
     {
       "id": "file:ingestion_pipeline/tests/test_assistant_runtime_gemini_rewriter.py",
@@ -1390,12 +1390,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 92,
-      "maxLineCount": 92,
+      "finalLineCount": 93,
+      "maxLineCount": 93,
       "visualSize": "md",
-      "visualWeight": 0.41663521893903466,
+      "visualWeight": 0.41889342094762905,
       "firstUnitOrder": 7152,
-      "lastUnitOrder": 11166
+      "lastUnitOrder": 15070
     },
     {
       "id": "file:ingestion_pipeline/tests/test_assistant_runtime_retrieval_bridge.py",
@@ -1465,12 +1465,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 583,
+      "finalLineCount": 582,
       "maxLineCount": 583,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 11169,
-      "lastUnitOrder": 11802
+      "lastUnitOrder": 15072
     },
     {
       "id": "file:ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve.py",
@@ -1885,12 +1885,12 @@
       "extension": "py",
       "category": "backend",
       "language": "Python",
-      "finalLineCount": 544,
-      "maxLineCount": 544,
+      "finalLineCount": 546,
+      "maxLineCount": 546,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 9246,
-      "lastUnitOrder": 14825
+      "lastUnitOrder": 15073
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/backend/README.md",
@@ -1945,12 +1945,12 @@
       "extension": "py",
       "category": "backend",
       "language": "Python",
-      "finalLineCount": 571,
-      "maxLineCount": 572,
+      "finalLineCount": 577,
+      "maxLineCount": 577,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 12211,
-      "lastUnitOrder": 15011
+      "lastUnitOrder": 15077
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/backend/routes/config.py",
@@ -2035,12 +2035,12 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "finalLineCount": 55,
-      "maxLineCount": 55,
+      "finalLineCount": 56,
+      "maxLineCount": 56,
       "visualSize": "sm",
-      "visualWeight": 0.3221390769615825,
+      "visualWeight": 0.3250544221488004,
       "firstUnitOrder": 9268,
-      "lastUnitOrder": 15007
+      "lastUnitOrder": 15075
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/backend/routes/stored_documents.py",
@@ -2185,12 +2185,12 @@
       "extension": "tsx",
       "category": "test",
       "language": "TypeScript React",
-      "finalLineCount": 1794,
-      "maxLineCount": 1794,
+      "finalLineCount": 1842,
+      "maxLineCount": 1842,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 9761,
-      "lastUnitOrder": 14836
+      "lastUnitOrder": 15109
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.tsx",
@@ -2275,12 +2275,12 @@
       "extension": "ts",
       "category": "ui",
       "language": "TypeScript",
-      "finalLineCount": 227,
-      "maxLineCount": 227,
+      "finalLineCount": 246,
+      "maxLineCount": 246,
       "visualSize": "lg",
-      "visualWeight": 0.6544477723947518,
+      "visualWeight": 0.6812862418955974,
       "firstUnitOrder": 11914,
-      "lastUnitOrder": 12526
+      "lastUnitOrder": 15086
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantMock.ts",
@@ -2290,12 +2290,12 @@
       "extension": "ts",
       "category": "ui",
       "language": "TypeScript",
-      "finalLineCount": 98,
+      "finalLineCount": 96,
       "maxLineCount": 98,
       "visualSize": "md",
       "visualWeight": 0.43000658178376583,
       "firstUnitOrder": 12527,
-      "lastUnitOrder": 13128
+      "lastUnitOrder": 15088
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
@@ -2305,12 +2305,12 @@
       "extension": "tsx",
       "category": "test",
       "language": "TypeScript React",
-      "finalLineCount": 517,
-      "maxLineCount": 517,
+      "finalLineCount": 525,
+      "maxLineCount": 525,
       "visualSize": "xl",
-      "visualWeight": 0.9876597076489491,
+      "visualWeight": 0.9952718411247498,
       "firstUnitOrder": 11890,
-      "lastUnitOrder": 13451
+      "lastUnitOrder": 15080
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantSourceMode.ts",
@@ -2350,12 +2350,12 @@
       "extension": "tsx",
       "category": "ui",
       "language": "TypeScript React",
-      "finalLineCount": 53,
+      "finalLineCount": 42,
       "maxLineCount": 61,
       "visualSize": "sm",
       "visualWeight": 0.3392555668263109,
       "firstUnitOrder": 11925,
-      "lastUnitOrder": 13453
+      "lastUnitOrder": 15090
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantChatThread.tsx",
@@ -2560,12 +2560,12 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "finalLineCount": 96,
-      "maxLineCount": 96,
+      "finalLineCount": 97,
+      "maxLineCount": 97,
       "visualSize": "md",
-      "visualWeight": 0.4255961412791452,
+      "visualWeight": 0.42780704520207274,
       "firstUnitOrder": 11910,
-      "lastUnitOrder": 13452
+      "lastUnitOrder": 15082
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
@@ -2950,12 +2950,12 @@
       "extension": "ts",
       "category": "ui",
       "language": "TypeScript",
-      "finalLineCount": 628,
-      "maxLineCount": 628,
+      "finalLineCount": 630,
+      "maxLineCount": 630,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 9908,
-      "lastUnitOrder": 14067
+      "lastUnitOrder": 15112
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/components.tsx",
@@ -3025,12 +3025,12 @@
       "extension": "tsx",
       "category": "ui",
       "language": "TypeScript React",
-      "finalLineCount": 536,
-      "maxLineCount": 562,
+      "finalLineCount": 747,
+      "maxLineCount": 747,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 12247,
-      "lastUnitOrder": 13473
+      "lastUnitOrder": 15148
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/EventsPage.tsx",
@@ -3090,7 +3090,7 @@
       "visualSize": "sm",
       "visualWeight": 0.25697808437502334,
       "firstUnitOrder": 10208,
-      "lastUnitOrder": 13213
+      "lastUnitOrder": 15150
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/StoredDocumentsPage.tsx",
@@ -3150,7 +3150,7 @@
       "visualSize": "sm",
       "visualWeight": 0.2815053871933323,
       "firstUnitOrder": 9903,
-      "lastUnitOrder": 13185
+      "lastUnitOrder": 15111
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/main.tsx",
@@ -3340,12 +3340,12 @@
       "extension": "css",
       "category": "ui",
       "language": "CSS",
-      "finalLineCount": 4060,
-      "maxLineCount": 4060,
+      "finalLineCount": 4157,
+      "maxLineCount": 4157,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 10327,
-      "lastUnitOrder": 14900
+      "lastUnitOrder": 15160
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/frontend/src/vite-env.d.ts",
@@ -3505,12 +3505,12 @@
       "extension": "py",
       "category": "test",
       "language": "Python",
-      "finalLineCount": 1795,
-      "maxLineCount": 1795,
+      "finalLineCount": 1880,
+      "maxLineCount": 1880,
       "visualSize": "xl",
       "visualWeight": 1,
       "firstUnitOrder": 10532,
-      "lastUnitOrder": 15016
+      "lastUnitOrder": 15100
     },
     {
       "id": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_config_pipeline_api.py",
@@ -4001,7 +4001,7 @@
       "depth": 0,
       "parentPath": null,
       "fileCount": 266,
-      "totalFinalLines": 57849,
+      "totalFinalLines": 58298,
       "categories": [
         "backend",
         "config",
@@ -4019,7 +4019,7 @@
       "depth": 1,
       "parentPath": "",
       "fileCount": 25,
-      "totalFinalLines": 3176,
+      "totalFinalLines": 3170,
       "categories": [
         "docs",
         "source"
@@ -4032,7 +4032,7 @@
       "depth": 2,
       "parentPath": "assistant_runtime",
       "fileCount": 3,
-      "totalFinalLines": 53,
+      "totalFinalLines": 56,
       "categories": [
         "docs"
       ]
@@ -4044,7 +4044,7 @@
       "depth": 2,
       "parentPath": "assistant_runtime",
       "fileCount": 7,
-      "totalFinalLines": 827,
+      "totalFinalLines": 832,
       "categories": [
         "docs",
         "source"
@@ -4057,7 +4057,7 @@
       "depth": 1,
       "parentPath": "",
       "fileCount": 90,
-      "totalFinalLines": 22716,
+      "totalFinalLines": 22704,
       "categories": [
         "data",
         "docs",
@@ -4176,7 +4176,7 @@
       "depth": 2,
       "parentPath": "ingestion_pipeline",
       "fileCount": 33,
-      "totalFinalLines": 13436,
+      "totalFinalLines": 13424,
       "categories": [
         "test"
       ]
@@ -4188,7 +4188,7 @@
       "depth": 1,
       "parentPath": "",
       "fileCount": 147,
-      "totalFinalLines": 31542,
+      "totalFinalLines": 32009,
       "categories": [
         "backend",
         "config",
@@ -4220,7 +4220,7 @@
       "depth": 2,
       "parentPath": "tools",
       "fileCount": 117,
-      "totalFinalLines": 23559,
+      "totalFinalLines": 24026,
       "categories": [
         "backend",
         "config",
@@ -4238,7 +4238,7 @@
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui_react_3",
       "fileCount": 17,
-      "totalFinalLines": 3434,
+      "totalFinalLines": 3443,
       "categories": [
         "backend",
         "docs"
@@ -4251,7 +4251,7 @@
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/backend",
       "fileCount": 10,
-      "totalFinalLines": 1985,
+      "totalFinalLines": 1992,
       "categories": [
         "backend",
         "docs"
@@ -4264,7 +4264,7 @@
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui_react_3",
       "fileCount": 91,
-      "totalFinalLines": 17676,
+      "totalFinalLines": 18049,
       "categories": [
         "config",
         "docs",
@@ -4291,7 +4291,7 @@
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend",
       "fileCount": 82,
-      "totalFinalLines": 17533,
+      "totalFinalLines": 17906,
       "categories": [
         "docs",
         "test",
@@ -4305,7 +4305,7 @@
       "depth": 5,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src",
       "fileCount": 8,
-      "totalFinalLines": 2297,
+      "totalFinalLines": 2345,
       "categories": [
         "docs",
         "test",
@@ -4332,7 +4332,7 @@
       "depth": 5,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src",
       "fileCount": 59,
-      "totalFinalLines": 11021,
+      "totalFinalLines": 11249,
       "categories": [
         "docs",
         "test",
@@ -4346,7 +4346,7 @@
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features",
       "fileCount": 22,
-      "totalFinalLines": 2078,
+      "totalFinalLines": 2093,
       "categories": [
         "docs",
         "test",
@@ -4360,7 +4360,7 @@
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
       "fileCount": 13,
-      "totalFinalLines": 699,
+      "totalFinalLines": 688,
       "categories": [
         "ui"
       ]
@@ -4435,7 +4435,7 @@
       "depth": 6,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features",
       "fileCount": 14,
-      "totalFinalLines": 4988,
+      "totalFinalLines": 5201,
       "categories": [
         "docs",
         "test",
@@ -4449,7 +4449,7 @@
       "depth": 7,
       "parentPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
       "fileCount": 7,
-      "totalFinalLines": 2741,
+      "totalFinalLines": 2952,
       "categories": [
         "docs",
         "ui"
@@ -4475,7 +4475,7 @@
       "depth": 3,
       "parentPath": "tools/ingestion_debug_ui_react_3",
       "fileCount": 5,
-      "totalFinalLines": 2261,
+      "totalFinalLines": 2346,
       "categories": [
         "test"
       ]
@@ -4487,7 +4487,7 @@
       "depth": 4,
       "parentPath": "tools/ingestion_debug_ui_react_3/tests",
       "fileCount": 3,
-      "totalFinalLines": 2239,
+      "totalFinalLines": 2324,
       "categories": [
         "test"
       ]
@@ -107436,14 +107436,1257 @@
       "activityWeight": 0.6324555320336759,
       "beforeLineCount": 1771,
       "afterLineCount": 1795
+    },
+    {
+      "unitOrder": 15048,
+      "fileId": "file:assistant_runtime/README.md",
+      "filePath": "assistant_runtime/README.md",
+      "folderPath": "assistant_runtime",
+      "type": "grow",
+      "lineDelta": 0,
+      "activityWeight": 0.6324555320336759,
+      "beforeLineCount": 157,
+      "afterLineCount": 157
+    },
+    {
+      "unitOrder": 15049,
+      "fileId": "file:assistant_runtime/README.md",
+      "filePath": "assistant_runtime/README.md",
+      "folderPath": "assistant_runtime",
+      "type": "shrink",
+      "lineDelta": 0,
+      "activityWeight": 0.6324555320336759,
+      "beforeLineCount": 157,
+      "afterLineCount": 157
+    },
+    {
+      "unitOrder": 15050,
+      "fileId": "file:assistant_runtime/api_models.py",
+      "filePath": "assistant_runtime/api_models.py",
+      "folderPath": "assistant_runtime",
+      "type": "shrink",
+      "lineDelta": -2,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 205,
+      "afterLineCount": 203
+    },
+    {
+      "unitOrder": 15051,
+      "fileId": "file:assistant_runtime/config.py",
+      "filePath": "assistant_runtime/config.py",
+      "folderPath": "assistant_runtime",
+      "type": "grow",
+      "lineDelta": 0,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 57,
+      "afterLineCount": 57
+    },
+    {
+      "unitOrder": 15052,
+      "fileId": "file:assistant_runtime/config.py",
+      "filePath": "assistant_runtime/config.py",
+      "folderPath": "assistant_runtime",
+      "type": "shrink",
+      "lineDelta": 0,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 57,
+      "afterLineCount": 57
+    },
+    {
+      "unitOrder": 15053,
+      "fileId": "file:assistant_runtime/models.py",
+      "filePath": "assistant_runtime/models.py",
+      "folderPath": "assistant_runtime",
+      "type": "shrink",
+      "lineDelta": -6,
+      "activityWeight": 0.7745966692414834,
+      "beforeLineCount": 370,
+      "afterLineCount": 364
+    },
+    {
+      "unitOrder": 15054,
+      "fileId": "file:assistant_runtime/prompts/answer_grounded_default.md",
+      "filePath": "assistant_runtime/prompts/answer_grounded_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "grow",
+      "lineDelta": 3,
+      "activityWeight": 0.7071067811865476,
+      "beforeLineCount": 14,
+      "afterLineCount": 17
+    },
+    {
+      "unitOrder": 15055,
+      "fileId": "file:assistant_runtime/prompts/answer_grounded_default.md",
+      "filePath": "assistant_runtime/prompts/answer_grounded_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "shrink",
+      "lineDelta": 3,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 14,
+      "afterLineCount": 17
+    },
+    {
+      "unitOrder": 15056,
+      "fileId": "file:assistant_runtime/providers/README.md",
+      "filePath": "assistant_runtime/providers/README.md",
+      "folderPath": "assistant_runtime/providers",
+      "type": "grow",
+      "lineDelta": 1,
+      "activityWeight": 0.6324555320336759,
+      "beforeLineCount": 43,
+      "afterLineCount": 44
+    },
+    {
+      "unitOrder": 15057,
+      "fileId": "file:assistant_runtime/providers/README.md",
+      "filePath": "assistant_runtime/providers/README.md",
+      "folderPath": "assistant_runtime/providers",
+      "type": "shrink",
+      "lineDelta": 1,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 43,
+      "afterLineCount": 44
+    },
+    {
+      "unitOrder": 15058,
+      "fileId": "file:assistant_runtime/providers/gemini_grounded_answer.py",
+      "filePath": "assistant_runtime/providers/gemini_grounded_answer.py",
+      "folderPath": "assistant_runtime/providers",
+      "type": "grow",
+      "lineDelta": 4,
+      "activityWeight": 1,
+      "beforeLineCount": 342,
+      "afterLineCount": 346
+    },
+    {
+      "unitOrder": 15059,
+      "fileId": "file:assistant_runtime/providers/gemini_grounded_answer.py",
+      "filePath": "assistant_runtime/providers/gemini_grounded_answer.py",
+      "folderPath": "assistant_runtime/providers",
+      "type": "grow",
+      "lineDelta": 4,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 342,
+      "afterLineCount": 346
+    },
+    {
+      "unitOrder": 15060,
+      "fileId": "file:assistant_runtime/providers/gemini_grounded_answer.py",
+      "filePath": "assistant_runtime/providers/gemini_grounded_answer.py",
+      "folderPath": "assistant_runtime/providers",
+      "type": "shrink",
+      "lineDelta": 4,
+      "activityWeight": 0.8944271909999159,
+      "beforeLineCount": 342,
+      "afterLineCount": 346
+    },
+    {
+      "unitOrder": 15061,
+      "fileId": "file:assistant_runtime/run_rewrite_retrieve_answer.py",
+      "filePath": "assistant_runtime/run_rewrite_retrieve_answer.py",
+      "folderPath": "assistant_runtime",
+      "type": "shrink",
+      "lineDelta": -6,
+      "activityWeight": 0.7745966692414834,
+      "beforeLineCount": 259,
+      "afterLineCount": 253
+    },
+    {
+      "unitOrder": 15062,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_answer_bridge.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_answer_bridge.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "shrink",
+      "lineDelta": -2,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 193,
+      "afterLineCount": 191
+    },
+    {
+      "unitOrder": 15063,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_answer_service.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_answer_service.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "shrink",
+      "lineDelta": -1,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 127,
+      "afterLineCount": 126
+    },
+    {
+      "unitOrder": 15064,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_api.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_api.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "grow",
+      "lineDelta": -1,
+      "activityWeight": 0.9486832980505138,
+      "beforeLineCount": 393,
+      "afterLineCount": 392
+    },
+    {
+      "unitOrder": 15065,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_api.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_api.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "shrink",
+      "lineDelta": -1,
+      "activityWeight": 1,
+      "beforeLineCount": 393,
+      "afterLineCount": 392
+    },
+    {
+      "unitOrder": 15066,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "grow",
+      "lineDelta": -8,
+      "activityWeight": 1,
+      "beforeLineCount": 490,
+      "afterLineCount": 482
+    },
+    {
+      "unitOrder": 15067,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "grow",
+      "lineDelta": -8,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 490,
+      "afterLineCount": 482
+    },
+    {
+      "unitOrder": 15068,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "shrink",
+      "lineDelta": -8,
+      "activityWeight": 1,
+      "beforeLineCount": 490,
+      "afterLineCount": 482
+    },
+    {
+      "unitOrder": 15069,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "shrink",
+      "lineDelta": -8,
+      "activityWeight": 1,
+      "beforeLineCount": 490,
+      "afterLineCount": 482
+    },
+    {
+      "unitOrder": 15070,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_prompt_loader.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_prompt_loader.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "grow",
+      "lineDelta": 1,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 92,
+      "afterLineCount": 93
+    },
+    {
+      "unitOrder": 15071,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "grow",
+      "lineDelta": -1,
+      "activityWeight": 0.7071067811865476,
+      "beforeLineCount": 583,
+      "afterLineCount": 582
+    },
+    {
+      "unitOrder": 15072,
+      "fileId": "file:ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+      "filePath": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+      "folderPath": "ingestion_pipeline/tests",
+      "type": "shrink",
+      "lineDelta": -1,
+      "activityWeight": 0.7745966692414834,
+      "beforeLineCount": 583,
+      "afterLineCount": 582
+    },
+    {
+      "unitOrder": 15073,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/backend/models.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/backend/models.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/backend",
+      "type": "grow",
+      "lineDelta": 2,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 544,
+      "afterLineCount": 546
+    },
+    {
+      "unitOrder": 15074,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/backend/routes",
+      "type": "grow",
+      "lineDelta": 1,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 55,
+      "afterLineCount": 56
+    },
+    {
+      "unitOrder": 15075,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/backend/routes",
+      "type": "shrink",
+      "lineDelta": 1,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 55,
+      "afterLineCount": 56
+    },
+    {
+      "unitOrder": 15076,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/backend/routes/catalogue.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/backend/routes/catalogue.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/backend/routes",
+      "type": "grow",
+      "lineDelta": 6,
+      "activityWeight": 0.9486832980505138,
+      "beforeLineCount": 571,
+      "afterLineCount": 577
+    },
+    {
+      "unitOrder": 15077,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/backend/routes/catalogue.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/backend/routes/catalogue.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/backend/routes",
+      "type": "shrink",
+      "lineDelta": 6,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 571,
+      "afterLineCount": 577
+    },
+    {
+      "unitOrder": 15078,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": 8,
+      "activityWeight": 1,
+      "beforeLineCount": 517,
+      "afterLineCount": 525
+    },
+    {
+      "unitOrder": 15079,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": 8,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 517,
+      "afterLineCount": 525
+    },
+    {
+      "unitOrder": 15080,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "shrink",
+      "lineDelta": 8,
+      "activityWeight": 0.7071067811865476,
+      "beforeLineCount": 517,
+      "afterLineCount": 525
+    },
+    {
+      "unitOrder": 15081,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": 1,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 96,
+      "afterLineCount": 97
+    },
+    {
+      "unitOrder": 15082,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "shrink",
+      "lineDelta": 1,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 96,
+      "afterLineCount": 97
+    },
+    {
+      "unitOrder": 15083,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": 19,
+      "activityWeight": 1,
+      "beforeLineCount": 227,
+      "afterLineCount": 246
+    },
+    {
+      "unitOrder": 15084,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": 19,
+      "activityWeight": 1,
+      "beforeLineCount": 227,
+      "afterLineCount": 246
+    },
+    {
+      "unitOrder": 15085,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": 19,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 227,
+      "afterLineCount": 246
+    },
+    {
+      "unitOrder": 15086,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "shrink",
+      "lineDelta": 19,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 227,
+      "afterLineCount": 246
+    },
+    {
+      "unitOrder": 15087,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantMock.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantMock.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "grow",
+      "lineDelta": -2,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 98,
+      "afterLineCount": 96
+    },
+    {
+      "unitOrder": 15088,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantMock.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantMock.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "type": "shrink",
+      "lineDelta": -2,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 98,
+      "afterLineCount": 96
+    },
+    {
+      "unitOrder": 15089,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantAnswer.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantAnswer.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components",
+      "type": "shrink",
+      "lineDelta": -11,
+      "activityWeight": 1,
+      "beforeLineCount": 53,
+      "afterLineCount": 42
+    },
+    {
+      "unitOrder": 15090,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantAnswer.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantAnswer.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components",
+      "type": "shrink",
+      "lineDelta": -11,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 53,
+      "afterLineCount": 42
+    },
+    {
+      "unitOrder": 15091,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15092,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15093,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15094,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15095,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15096,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15097,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15098,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 1,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15099,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "grow",
+      "lineDelta": 85,
+      "activityWeight": 0.9486832980505138,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15100,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "filePath": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+      "folderPath": "tools/ingestion_debug_ui_react_3/tests/backend",
+      "type": "shrink",
+      "lineDelta": 85,
+      "activityWeight": 0.6324555320336759,
+      "beforeLineCount": 1795,
+      "afterLineCount": 1880
+    },
+    {
+      "unitOrder": 15101,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15102,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15103,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15104,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15105,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15106,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15107,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "grow",
+      "lineDelta": 48,
+      "activityWeight": 0.7071067811865476,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15108,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "shrink",
+      "lineDelta": 48,
+      "activityWeight": 1,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15109,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/app",
+      "type": "shrink",
+      "lineDelta": 48,
+      "activityWeight": 0.8366600265340756,
+      "beforeLineCount": 1794,
+      "afterLineCount": 1842
+    },
+    {
+      "unitOrder": 15110,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
+      "type": "grow",
+      "lineDelta": 0,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 42,
+      "afterLineCount": 42
+    },
+    {
+      "unitOrder": 15111,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
+      "type": "shrink",
+      "lineDelta": 0,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 42,
+      "afterLineCount": 42
+    },
+    {
+      "unitOrder": 15112,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/api.ts",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/api.ts",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
+      "type": "grow",
+      "lineDelta": 2,
+      "activityWeight": 0.4472135954999579,
+      "beforeLineCount": 628,
+      "afterLineCount": 630
+    },
+    {
+      "unitOrder": 15113,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15114,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15115,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15116,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15117,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15118,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15119,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15120,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15121,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15122,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15123,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15124,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15125,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15126,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15127,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15128,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15129,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15130,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15131,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15132,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15133,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15134,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15135,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15136,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15137,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15138,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15139,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15140,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15141,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 211,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15142,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15143,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15144,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15145,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15146,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15147,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15148,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/CataloguePage.tsx",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 211,
+      "activityWeight": 1,
+      "beforeLineCount": 536,
+      "afterLineCount": 747
+    },
+    {
+      "unitOrder": 15149,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "grow",
+      "lineDelta": 0,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 35,
+      "afterLineCount": 35
+    },
+    {
+      "unitOrder": 15150,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/README.md",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages/README.md",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/pages",
+      "type": "shrink",
+      "lineDelta": 0,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 35,
+      "afterLineCount": 35
+    },
+    {
+      "unitOrder": 15151,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15152,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15153,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15154,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15155,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15156,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15157,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15158,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15159,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 1,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
+    },
+    {
+      "unitOrder": 15160,
+      "fileId": "file:tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "filePath": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+      "folderPath": "tools/ingestion_debug_ui_react_3/frontend/src",
+      "type": "grow",
+      "lineDelta": 97,
+      "activityWeight": 0.8366600265340756,
+      "beforeLineCount": 4060,
+      "afterLineCount": 4157
     }
   ],
   "summary": {
     "fileCount": 266,
     "folderCount": 40,
-    "unitCount": 9355,
-    "maxFileLines": 4060,
-    "totalFinalLines": 57849
+    "unitCount": 9468,
+    "maxFileLines": 4157,
+    "totalFinalLines": 58298
   },
   "warnings": [
     "change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",
