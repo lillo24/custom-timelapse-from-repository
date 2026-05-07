@@ -1,11 +1,17 @@
-import { motion, useReducedMotion } from 'motion/react'
-import { startTransition, useState } from 'react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
+import {
+  startTransition,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from 'react'
 import { PresentationStage } from '../components/presentation/PresentationStage'
 import { useRepoVisualModel } from '../hooks/useRepoVisualModel'
 import {
   getFadeSlideSide,
   getFadeSlideUp,
-  getFadeSlideUp as getFadeSlideMotion,
+  getScaleFade,
   getStaggerDelay,
   springSoft,
 } from '../lib/motionPresets'
@@ -16,6 +22,8 @@ import type {
   VisualFolder,
   VisualTimelineUnit,
 } from '../preprocessing/visualModelTypes'
+
+type PlaybackSpeed = (typeof PLAYBACK_SPEED_OPTIONS)[number]
 
 type CurrentRepoFileState = {
   path: string
@@ -59,6 +67,10 @@ type RepoProgressState = {
   visibleFiles: VisibleRepoFile[]
   recentTouchedCount: number
 }
+
+const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
+const BASE_UNITS_PER_SECOND = 36
+const RECENT_UNIT_WINDOW = 20
 
 const CATEGORY_STYLES: Record<
   string,
@@ -171,8 +183,6 @@ const VISUAL_SIZE_RANK: Record<VisualFileSize, number> = {
   xl: 4,
 }
 
-const RECENT_UNIT_WINDOW = 20
-
 export function RepoExplorerScene() {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
@@ -219,16 +229,125 @@ function RepoExplorerCanvas({
   model: RepoVisualModel
   shouldReduceMotion: boolean
 }) {
-  const headerMotion = getFadeSlideMotion(shouldReduceMotion, 12)
+  const headerMotion = getFadeSlideUp(shouldReduceMotion, 12)
   const panelMotion = getFadeSlideSide(shouldReduceMotion, 16)
+  const sectionPresenceMotion = getFadeSlideUp(shouldReduceMotion, 8)
   const maxUnitIndex = Math.max(model.timeline.length - 1, 0)
   const [activeUnitIndex, setActiveUnitIndex] = useState(maxUnitIndex)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
   const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, maxUnitIndex)
+  const currentUnitIndexRef = useRef(clampedActiveUnitIndex)
+  const playbackCarryRef = useRef(0)
+  const lastAnimationFrameRef = useRef<number | null>(null)
+
+  useEffect(() => {
+    currentUnitIndexRef.current = clampedActiveUnitIndex
+  }, [clampedActiveUnitIndex])
+
+  useEffect(() => {
+    if (model.timeline.length === 0 && isPlaying) {
+      setIsPlaying(false)
+    }
+  }, [isPlaying, model.timeline.length])
+
+  useEffect(() => {
+    if (isPlaying && clampedActiveUnitIndex >= maxUnitIndex) {
+      setIsPlaying(false)
+    }
+  }, [clampedActiveUnitIndex, isPlaying, maxUnitIndex])
+
+  function updateActiveUnitIndex(nextIndex: number) {
+    const clampedIndex = clampNumber(nextIndex, 0, maxUnitIndex)
+    currentUnitIndexRef.current = clampedIndex
+    startTransition(() => {
+      setActiveUnitIndex(clampedIndex)
+    })
+  }
+
+  const advancePlaybackFrame = useEffectEvent((timestamp: number) => {
+    if (!isPlaying || model.timeline.length === 0) {
+      return
+    }
+
+    if (lastAnimationFrameRef.current === null) {
+      lastAnimationFrameRef.current = timestamp
+      return
+    }
+
+    const elapsedMs = timestamp - lastAnimationFrameRef.current
+    lastAnimationFrameRef.current = timestamp
+
+    const pendingUnits =
+      playbackCarryRef.current +
+      (elapsedMs / 1000) * BASE_UNITS_PER_SECOND * playbackSpeed
+    const unitsToAdvance = Math.floor(pendingUnits)
+    playbackCarryRef.current = pendingUnits - unitsToAdvance
+
+    if (unitsToAdvance < 1) {
+      return
+    }
+
+    const nextIndex = Math.min(
+      maxUnitIndex,
+      currentUnitIndexRef.current + unitsToAdvance,
+    )
+
+    if (nextIndex !== currentUnitIndexRef.current) {
+      updateActiveUnitIndex(nextIndex)
+    }
+
+    if (nextIndex >= maxUnitIndex) {
+      playbackCarryRef.current = 0
+      lastAnimationFrameRef.current = null
+      setIsPlaying(false)
+    }
+  })
+
+  useEffect(() => {
+    if (!isPlaying || model.timeline.length === 0) {
+      return
+    }
+
+    playbackCarryRef.current = 0
+    lastAnimationFrameRef.current = null
+
+    let frameId = 0
+
+    function playbackLoop(timestamp: number) {
+      advancePlaybackFrame(timestamp)
+      frameId = window.requestAnimationFrame(playbackLoop)
+    }
+
+    frameId = window.requestAnimationFrame(playbackLoop)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      playbackCarryRef.current = 0
+      lastAnimationFrameRef.current = null
+    }
+  }, [advancePlaybackFrame, isPlaying, model.timeline.length, playbackSpeed])
+
+  function handleTogglePlayback() {
+    if (model.timeline.length === 0) {
+      return
+    }
+
+    if (isPlaying) {
+      setIsPlaying(false)
+      return
+    }
+
+    if (clampedActiveUnitIndex >= maxUnitIndex) {
+      updateActiveUnitIndex(0)
+    }
+
+    setIsPlaying(true)
+  }
+
   const progressState = buildRepoProgressState(model, clampedActiveUnitIndex)
   const activeUnit = progressState.activeUnit
   const visibleFiles = progressState.visibleFiles
-  const visibleFileCount = visibleFiles.length
-  const visibleFolderCount = countVisibleFolders(model.folders, visibleFiles)
   const featuredFolders = selectFeaturedFolders(model.folders, visibleFiles)
   const sidebarNodes = buildSidebarNodes(model.folders, visibleFiles)
   const rootFiles = visibleFiles
@@ -263,56 +382,13 @@ function RepoExplorerCanvas({
     ? `Order ${formatNumber(activeUnit.unitOrder)}`
     : 'Static fallback'
 
-  function updateActiveUnitIndex(nextIndex: number) {
-    startTransition(() => {
-      setActiveUnitIndex(clampNumber(nextIndex, 0, maxUnitIndex))
-    })
-  }
-
   return (
     <>
-      <motion.header
-        initial={headerMotion.initial}
-        animate={headerMotion.animate}
-        transition={springSoft}
-        className="flex items-start justify-between gap-6"
-      >
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] uppercase tracking-[0.34em] text-slate-300">
-              <span className="h-2 w-2 rounded-full bg-teal-300 shadow-[0_0_0_4px_rgba(45,212,191,0.12)]" />
-              Repository Progression
-            </div>
-            <div className="rounded-full border border-slate-700/80 bg-slate-950/55 px-3 py-1.5 text-[10px] uppercase tracking-[0.3em] text-slate-400">
-              Size follows current line state
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <h1 className="font-display text-3xl font-semibold tracking-[-0.05em] text-white sm:text-4xl lg:text-[3.15rem]">
-              Repository evolution
-            </h1>
-            <p className="max-w-3xl text-sm leading-6 text-slate-300 sm:text-[15px]">
-              Progress through the generated timeline and reveal the repository
-              as files appear, grow, shrink, and disappear. Recent edit energy
-              adds only temporary emphasis, while card geometry follows current
-              line state.
-            </p>
-          </div>
-        </div>
-
-        <div className="hidden min-w-[248px] rounded-[26px] border border-white/10 bg-slate-950/45 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] lg:block">
-          <div className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
-            Model snapshot
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <StatPill label="Files" value={formatNumber(model.summary.fileCount)} />
-            <StatPill label="Folders" value={formatNumber(model.summary.folderCount)} />
-            <StatPill label="Units" value={formatNumber(model.summary.unitCount)} />
-            <StatPill label="Visible" value={formatNumber(visibleFileCount)} />
-          </div>
-        </div>
-      </motion.header>
+      <FloatingInspectorPanel
+        largestFiles={largestFiles}
+        warnings={model.warnings}
+        shouldReduceMotion={shouldReduceMotion}
+      />
 
       <motion.section
         initial={headerMotion.initial}
@@ -332,11 +408,9 @@ function RepoExplorerCanvas({
               <span className="rounded-full border border-white/10 px-3 py-1 font-mono text-[11px] text-slate-300">
                 {activeOrderLabel}
               </span>
-            </div>
-            <div className="mt-2 text-sm text-slate-400">
-              {formatNumber(visibleFileCount)} visible files /{' '}
-              {formatNumber(visibleFolderCount)} visible folders /{' '}
-              {formatNumber(progressState.recentTouchedCount)} recently touched
+              <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300">
+                {isPlaying ? 'Playing' : 'Paused'} {formatPlaybackSpeed(playbackSpeed)}
+              </span>
             </div>
           </div>
 
@@ -357,39 +431,59 @@ function RepoExplorerCanvas({
 
             <div className="mt-2 flex items-center justify-between gap-4 text-[10px] uppercase tracking-[0.24em] text-slate-500">
               <span>Start</span>
-              <span>Recent glow window: {RECENT_UNIT_WINDOW} units</span>
+              <span>Recent pulse window: {RECENT_UNIT_WINDOW} units</span>
               <span>Current</span>
             </div>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
-            <ControlButton
-              label="Reset"
-              onClick={() => {
-                updateActiveUnitIndex(0)
-              }}
-              disabled={model.timeline.length === 0 || clampedActiveUnitIndex === 0}
-            />
-            <ControlButton
-              label="Previous"
-              onClick={() => {
-                updateActiveUnitIndex(clampedActiveUnitIndex - 1)
-              }}
-              disabled={!canStepBackward}
-            />
-            <ControlButton
-              label="Next"
-              onClick={() => {
-                updateActiveUnitIndex(clampedActiveUnitIndex + 1)
-              }}
-              disabled={!canStepForward}
-              isPrimary
-            />
+          <div className="flex shrink-0 flex-col gap-2 xl:items-end">
+            <div className="flex flex-wrap items-center gap-2">
+              <ControlButton
+                label={isPlaying ? 'Pause' : 'Play'}
+                onClick={handleTogglePlayback}
+                disabled={model.timeline.length === 0}
+                isPrimary
+              />
+              <ControlButton
+                label="Reset"
+                onClick={() => {
+                  updateActiveUnitIndex(0)
+                }}
+                disabled={model.timeline.length === 0 || clampedActiveUnitIndex === 0}
+              />
+              <ControlButton
+                label="Previous"
+                onClick={() => {
+                  updateActiveUnitIndex(clampedActiveUnitIndex - 1)
+                }}
+                disabled={!canStepBackward}
+              />
+              <ControlButton
+                label="Next"
+                onClick={() => {
+                  updateActiveUnitIndex(clampedActiveUnitIndex + 1)
+                }}
+                disabled={!canStepForward}
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {PLAYBACK_SPEED_OPTIONS.map((speed) => (
+                <SpeedButton
+                  key={speed}
+                  speed={speed}
+                  isActive={playbackSpeed === speed}
+                  onClick={() => {
+                    setPlaybackSpeed(speed)
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </motion.section>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[248px_minmax(0,1fr)_272px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[248px_minmax(0,1fr)]">
         <motion.aside
           initial={panelMotion.initial}
           animate={panelMotion.animate}
@@ -450,11 +544,12 @@ function RepoExplorerCanvas({
                     </div>
 
                     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800/90">
-                      <div
+                      <motion.div
                         className="h-full rounded-full bg-[linear-gradient(90deg,rgba(45,212,191,0.9),rgba(56,189,248,0.75))]"
-                        style={{
+                        animate={{
                           width: `${Math.max(16, Math.min(100, (node.totalVisualWeight / visibleWeightTotal) * 100))}%`,
                         }}
+                        transition={{ duration: 0.28, ease: 'easeOut' }}
                       />
                     </div>
 
@@ -495,167 +590,78 @@ function RepoExplorerCanvas({
             />
 
             <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 2xl:grid-cols-2">
-              {featuredFolders.length > 0 ? (
-                featuredFolders.map((section, index) => (
-                  <motion.article
-                    key={section.folder.id}
-                    initial={headerMotion.initial}
-                    animate={headerMotion.animate}
-                    transition={{ ...springSoft, delay: getStaggerDelay(index, 0.04) }}
-                    className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-4"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
-                            Folder
-                          </span>
-                          <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-slate-400">
-                            {formatNumber(section.visibleFileCount)} files
-                          </span>
+              <AnimatePresence initial={false}>
+                {featuredFolders.length > 0 ? (
+                  featuredFolders.map((section, index) => (
+                    <motion.article
+                      key={section.folder.id}
+                      layout
+                      initial={sectionPresenceMotion.initial}
+                      animate={sectionPresenceMotion.animate}
+                      exit={sectionPresenceMotion.exit}
+                      transition={{
+                        layout: springSoft,
+                        opacity: { duration: 0.2 },
+                        y: { duration: 0.22 },
+                        scale: springSoft,
+                        delay: getStaggerDelay(index, 0.02),
+                      }}
+                      className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
+                              Folder
+                            </span>
+                            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+                              {formatNumber(section.visibleFileCount)} files
+                            </span>
+                          </div>
+                          <h2 className="mt-2 truncate font-display text-xl tracking-[-0.04em] text-white">
+                            {section.folder.path}
+                          </h2>
+                          <p className="mt-1 text-[12px] leading-5 text-slate-400">
+                            {formatNumber(section.files.length)} visible cards /{' '}
+                            {section.files[0] ? section.files[0].file.category : 'files'}-heavy
+                            subtree
+                          </p>
                         </div>
-                        <h2 className="mt-2 truncate font-display text-xl tracking-[-0.04em] text-white">
-                          {section.folder.path}
-                        </h2>
-                        <p className="mt-1 text-[12px] leading-5 text-slate-400">
-                          {formatNumber(section.files.length)} visible cards /{' '}
-                          {section.files[0] ? section.files[0].file.category : 'files'}-heavy
-                          subtree
-                        </p>
+
+                        <span className="rounded-full border border-teal-400/20 bg-teal-400/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-teal-100">
+                          {section.totalVisualWeight.toFixed(1)} weight
+                        </span>
                       </div>
 
-                      <span className="rounded-full border border-teal-400/20 bg-teal-400/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-teal-100">
-                        {section.totalVisualWeight.toFixed(1)} weight
-                      </span>
-                    </div>
-
-                    <div className="mt-4 grid grid-cols-4 gap-3 xl:grid-cols-5">
-                      {section.files.map((entry) => (
-                        <RepoFileCard
-                          key={entry.file.id}
-                          entry={entry}
-                          folderPath={section.folder.path}
-                          shouldReduceMotion={shouldReduceMotion}
-                        />
-                      ))}
-                    </div>
-                  </motion.article>
-                ))
-              ) : (
-                <div className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] p-6 text-sm leading-6 text-slate-400">
-                  No repository files are visible at the selected position yet.
-                </div>
-              )}
+                      <div className="mt-4 grid grid-cols-4 gap-3 xl:grid-cols-5">
+                        <AnimatePresence initial={false} mode="popLayout">
+                          {section.files.map((entry) => (
+                            <RepoFileCard
+                              key={entry.file.id}
+                              entry={entry}
+                              folderPath={section.folder.path}
+                              shouldReduceMotion={shouldReduceMotion}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </motion.article>
+                  ))
+                ) : (
+                  <motion.div
+                    key="empty-repo-state"
+                    initial={sectionPresenceMotion.initial}
+                    animate={sectionPresenceMotion.animate}
+                    exit={sectionPresenceMotion.exit}
+                    className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] p-6 text-sm leading-6 text-slate-400"
+                  >
+                    No repository files are visible at the selected position yet.
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </motion.section>
-
-        <motion.aside
-          initial={panelMotion.initial}
-          animate={panelMotion.animate}
-          transition={{ ...springSoft, delay: getStaggerDelay(4, 0.06) }}
-          className="min-h-0 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,28,0.94),rgba(4,8,18,0.94))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-        >
-          <div className="flex h-full flex-col gap-4">
-            <PanelHeader
-              title="Inspector"
-              subtitle="Current file state plus temporary change emphasis"
-            />
-
-            <div className="rounded-[22px] border border-teal-400/15 bg-teal-400/[0.05] p-4">
-              <div className="text-[11px] uppercase tracking-[0.26em] text-teal-100/80">
-                Size basis
-              </div>
-              <p className="mt-2 text-sm leading-6 text-slate-200">
-                Card geometry follows the current line count replayed from the
-                timeline. Recent edits only change glow intensity, never
-                permanent width or height.
-              </p>
-
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                {(Object.keys(SIZE_LABELS) as VisualFileSize[]).map((size) => (
-                  <div
-                    key={size}
-                    className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2"
-                  >
-                    <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-                      {size}
-                    </div>
-                    <div className="mt-1 text-sm text-slate-100">
-                      {SIZE_LABELS[size]}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[22px] border border-white/8 bg-white/[0.02] p-4">
-              <div className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
-                Largest current files
-              </div>
-              <div className="mt-3 space-y-3">
-                {largestFiles.length > 0 ? (
-                  largestFiles.map((entry) => {
-                    const categoryStyle =
-                      CATEGORY_STYLES[entry.file.category] ?? CATEGORY_STYLES.unknown
-
-                    return (
-                      <div
-                        key={entry.file.id}
-                        className="rounded-[18px] border border-white/6 bg-slate-950/50 px-3 py-3"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <span
-                            className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.22em] ${categoryStyle.badge}`}
-                          >
-                            {categoryStyle.label}
-                          </span>
-                          <span className="font-mono text-[11px] text-slate-500">
-                            {formatNumber(entry.state.currentLineCount)} current
-                          </span>
-                        </div>
-                        <div className="mt-2 text-sm font-medium text-slate-100">
-                          {entry.file.name}
-                        </div>
-                        <div className="mt-1 truncate font-mono text-[11px] text-slate-500">
-                          {entry.file.path}
-                        </div>
-                        <div className="mt-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
-                          Peak {formatNumber(entry.file.maxLineCount)} / Final{' '}
-                          {formatNumber(entry.file.finalLineCount)}
-                        </div>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <EmptyPanelState message="Visible file details will appear as the timeline advances." />
-                )}
-              </div>
-            </div>
-
-            <div className="min-h-0 rounded-[22px] border border-white/8 bg-white/[0.02] p-4">
-              <div className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
-                Model warnings
-              </div>
-              <div className="mt-3 space-y-2 overflow-y-auto pr-1 text-[13px] leading-5 text-slate-300">
-                {model.warnings.length > 0 ? (
-                  model.warnings.slice(0, 4).map((warning) => (
-                    <div
-                      key={warning}
-                      className="rounded-[16px] border border-amber-400/15 bg-amber-400/[0.05] px-3 py-2.5 text-amber-50/90"
-                    >
-                      {warning}
-                    </div>
-                  ))
-                ) : (
-                  <div className="rounded-[16px] border border-emerald-400/15 bg-emerald-400/[0.05] px-3 py-2.5 text-emerald-50/90">
-                    No structural model warnings.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.aside>
       </div>
     </>
   )
@@ -688,6 +694,177 @@ function ControlButton({
   )
 }
 
+function SpeedButton({
+  speed,
+  isActive,
+  onClick,
+}: {
+  speed: PlaybackSpeed
+  isActive: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1.5 font-mono text-[11px] transition ${
+        isActive
+          ? 'border-cyan-300/25 bg-cyan-300/14 text-cyan-50'
+          : 'border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]'
+      }`}
+    >
+      {formatPlaybackSpeed(speed)}
+    </button>
+  )
+}
+
+function FloatingInspectorPanel({
+  largestFiles,
+  warnings,
+  shouldReduceMotion,
+}: {
+  largestFiles: VisibleRepoFile[]
+  warnings: string[]
+  shouldReduceMotion: boolean
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const presenceMotion = getScaleFade(shouldReduceMotion)
+
+  return (
+    <div className="pointer-events-none absolute right-5 top-5 z-20 sm:right-6 sm:top-6">
+      <div className="pointer-events-auto flex w-[22rem] max-w-[calc(100vw-2.5rem)] flex-col items-end gap-2">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls="repo-inspector-panel"
+          onClick={() => {
+            setIsOpen((current) => !current)
+          }}
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/80 px-4 py-2 text-sm text-slate-100 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-md transition hover:bg-slate-900/85"
+        >
+          <span>Inspector</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-slate-400">
+            {isOpen ? 'Hide' : 'Show'}
+          </span>
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isOpen ? (
+            <motion.aside
+              id="repo-inspector-panel"
+              initial={presenceMotion.initial}
+              animate={presenceMotion.animate}
+              exit={presenceMotion.exit}
+              transition={springSoft}
+              className="max-h-[70vh] w-full overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,28,0.96),rgba(4,8,18,0.96))] shadow-[0_28px_90px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-md"
+            >
+              <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
+                <PanelHeader
+                  title="Inspector"
+                  subtitle="Current file state plus temporary motion emphasis"
+                />
+
+                <div className="rounded-[22px] border border-teal-400/15 bg-teal-400/[0.05] p-4">
+                  <div className="text-[11px] uppercase tracking-[0.26em] text-teal-100/80">
+                    Size basis
+                  </div>
+                  <p className="mt-2 text-sm leading-6 text-slate-200">
+                    Card geometry follows the current line count replayed from the
+                    timeline. Recent edits only change pulse, glow, and timing
+                    emphasis, never permanent width or height.
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    {(Object.keys(SIZE_LABELS) as VisualFileSize[]).map((size) => (
+                      <div
+                        key={size}
+                        className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2"
+                      >
+                        <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
+                          {size}
+                        </div>
+                        <div className="mt-1 text-sm text-slate-100">
+                          {SIZE_LABELS[size]}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-[22px] border border-white/8 bg-white/[0.02] p-4">
+                  <div className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
+                    Largest current files
+                  </div>
+                  <div className="mt-3 space-y-3">
+                    {largestFiles.length > 0 ? (
+                      largestFiles.map((entry) => {
+                        const categoryStyle =
+                          CATEGORY_STYLES[entry.file.category] ?? CATEGORY_STYLES.unknown
+
+                        return (
+                          <div
+                            key={entry.file.id}
+                            className="rounded-[18px] border border-white/6 bg-slate-950/50 px-3 py-3"
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <span
+                                className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.22em] ${categoryStyle.badge}`}
+                              >
+                                {categoryStyle.label}
+                              </span>
+                              <span className="font-mono text-[11px] text-slate-500">
+                                {formatNumber(entry.state.currentLineCount)} current
+                              </span>
+                            </div>
+                            <div className="mt-2 text-sm font-medium text-slate-100">
+                              {entry.file.name}
+                            </div>
+                            <div className="mt-1 truncate font-mono text-[11px] text-slate-500">
+                              {entry.file.path}
+                            </div>
+                            <div className="mt-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                              Peak {formatNumber(entry.file.maxLineCount)} / Final{' '}
+                              {formatNumber(entry.file.finalLineCount)}
+                            </div>
+                          </div>
+                        )
+                      })
+                    ) : (
+                      <EmptyPanelState message="Visible file details will appear as the timeline advances." />
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-[22px] border border-white/8 bg-white/[0.02] p-4">
+                  <div className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
+                    Model warnings
+                  </div>
+                  <div className="mt-3 space-y-2 text-[13px] leading-5 text-slate-300">
+                    {warnings.length > 0 ? (
+                      warnings.slice(0, 4).map((warning) => (
+                        <div
+                          key={warning}
+                          className="rounded-[16px] border border-amber-400/15 bg-amber-400/[0.05] px-3 py-2.5 text-amber-50/90"
+                        >
+                          {warning}
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-[16px] border border-emerald-400/15 bg-emerald-400/[0.05] px-3 py-2.5 text-emerald-50/90">
+                        No structural model warnings.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.aside>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
 function RepoFileCard({
   entry,
   folderPath,
@@ -706,7 +883,7 @@ function RepoFileCard({
       : file.path.slice(folderPath.length + 1)
   const glowOpacity =
     highlightStrength > 0
-      ? clampNumber(0.16 + highlightStrength * 0.32, 0.16, 0.48)
+      ? clampNumber(0.14 + highlightStrength * 0.34, 0.14, 0.5)
       : 0
   const borderColor =
     highlightStrength > 0 ? 'rgba(45,212,191,0.28)' : 'rgba(255,255,255,0.08)'
@@ -714,14 +891,25 @@ function RepoFileCard({
     layout.baseMinHeight * clampNumber(currentVisualScale, 0.78, 1.16),
   )
   const currentRatio =
-    state.maxLineCount > 0 ? clampNumber(state.currentLineCount / state.maxLineCount, 0, 1) : 0
+    state.maxLineCount > 0
+      ? clampNumber(state.currentLineCount / state.maxLineCount, 0, 1)
+      : 0
+  const presenceMotion = getScaleFade(shouldReduceMotion)
 
   // Keep geometry tied to replayed current line state; recent activity only
-  // affects temporary emphasis such as glow and contrast.
+  // affects temporary emphasis such as pulse, glow, and contrast.
   return (
     <motion.article
       layout
-      transition={springSoft}
+      initial={presenceMotion.initial}
+      animate={presenceMotion.animate}
+      exit={presenceMotion.exit}
+      transition={{
+        layout: springSoft,
+        opacity: { duration: 0.2 },
+        y: { duration: 0.22 },
+        scale: springSoft,
+      }}
       style={{
         minHeight: `${effectiveMinHeight}px`,
         borderColor,
@@ -741,6 +929,7 @@ function RepoFileCard({
               ? { opacity: glowOpacity }
               : {
                   opacity: [glowOpacity * 0.55, glowOpacity, glowOpacity * 0.55],
+                  scale: [0.985, 1.02, 0.985],
                 }
           }
           transition={{
@@ -758,8 +947,29 @@ function RepoFileCard({
       <div className="relative flex h-full flex-col">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="truncate font-display text-[15px] font-medium tracking-[-0.03em] text-white">
-              {file.name}
+            <div className="flex items-center gap-2">
+              <div className="truncate font-display text-[15px] font-medium tracking-[-0.03em] text-white">
+                {file.name}
+              </div>
+              {state.recentlyChanged ? (
+                <motion.span
+                  aria-hidden
+                  className="h-2 w-2 shrink-0 rounded-full bg-teal-300"
+                  animate={
+                    shouldReduceMotion
+                      ? { opacity: 0.9 }
+                      : {
+                          opacity: [0.4, 1, 0.4],
+                          scale: [0.95, 1.22, 0.95],
+                        }
+                  }
+                  transition={{
+                    duration: 1.4,
+                    repeat: shouldReduceMotion ? 0 : Number.POSITIVE_INFINITY,
+                    ease: 'easeInOut',
+                  }}
+                />
+              ) : null}
             </div>
             <div className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
               {relativeFolder}
@@ -776,11 +986,12 @@ function RepoFileCard({
         <div className="mt-4 flex-1">
           <div className="grid gap-1.5">
             <div className="h-1.5 w-full rounded-full bg-white/6">
-              <div
+              <motion.div
                 className="h-full rounded-full bg-[linear-gradient(90deg,rgba(56,189,248,0.75),rgba(45,212,191,0.9))]"
-                style={{
+                animate={{
                   width: `${Math.max(18, Math.min(100, currentRatio * 100))}%`,
                 }}
+                transition={{ duration: 0.28, ease: 'easeOut' }}
               />
             </div>
             <div className="grid grid-cols-3 gap-1.5 opacity-80">
@@ -829,25 +1040,6 @@ function PanelHeader({
       </div>
       <div className="text-sm text-slate-300">
         {subtitle}
-      </div>
-    </div>
-  )
-}
-
-function StatPill({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
-  return (
-    <div className="rounded-[18px] border border-white/8 bg-white/[0.03] px-3 py-2.5">
-      <div className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-500">
-        {label}
-      </div>
-      <div className="mt-1 text-lg font-semibold tracking-[-0.03em] text-white">
-        {value}
       </div>
     </div>
   )
@@ -1017,7 +1209,10 @@ function buildRepoProgressState(
   }
 
   const recentActivityByFileId = new Map<string, number>()
-  const recentUnitStartIndex = Math.max(0, clampedActiveUnitIndex - (RECENT_UNIT_WINDOW - 1))
+  const recentUnitStartIndex = Math.max(
+    0,
+    clampedActiveUnitIndex - (RECENT_UNIT_WINDOW - 1),
+  )
 
   for (let index = recentUnitStartIndex; index <= clampedActiveUnitIndex; index += 1) {
     const unit = model.timeline[index]
@@ -1276,26 +1471,6 @@ function buildSidebarNodes(
     )
 }
 
-function countVisibleFolders(
-  folders: VisualFolder[],
-  visibleFiles: VisibleRepoFile[],
-): number {
-  let count = 0
-
-  for (const folder of folders) {
-    if (folder.path === '') {
-      count += 1
-      continue
-    }
-
-    if (getVisibleFilesInSubtree(visibleFiles, folder.path).length > 0) {
-      count += 1
-    }
-  }
-
-  return count
-}
-
 function getVisibleFilesInSubtree(
   visibleFiles: VisibleRepoFile[],
   folderPath: string,
@@ -1305,6 +1480,10 @@ function getVisibleFilesInSubtree(
       entry.file.folderPath === folderPath ||
       entry.file.folderPath.startsWith(`${folderPath}/`),
   )
+}
+
+function formatPlaybackSpeed(speed: PlaybackSpeed) {
+  return `${speed}x`
 }
 
 function isAncestorPath(leftPath: string, rightPath: string) {
