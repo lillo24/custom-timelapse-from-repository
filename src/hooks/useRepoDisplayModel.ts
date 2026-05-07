@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
-import type { RepoVisualModel } from '../preprocessing/visualModelTypes'
+import type { RepoDisplayModel } from '../preprocessing/displayModelTypes'
 
-const REPO_VISUAL_MODEL_URL = '/data/repo-visual-model.json'
+const REPO_DISPLAY_MODEL_URL = '/data/repo-display-model.json'
 
-type RepoVisualModelState = {
-  model: RepoVisualModel | null
+type RepoDisplayModelState = {
+  model: RepoDisplayModel | null
   error: string | null
   isLoading: boolean
 }
 
-export function useRepoVisualModel() {
-  const [state, setState] = useState<RepoVisualModelState>({
+export function useRepoDisplayModel() {
+  const [state, setState] = useState<RepoDisplayModelState>({
     model: null,
     error: null,
     isLoading: true,
@@ -21,20 +21,20 @@ export function useRepoVisualModel() {
 
     async function loadModel() {
       try {
-        const response = await fetch(REPO_VISUAL_MODEL_URL, {
+        const response = await fetch(REPO_DISPLAY_MODEL_URL, {
           signal: abortController.signal,
         })
 
         if (!response.ok) {
           throw new Error(
-            `Failed to load repository model (${response.status} ${response.statusText}).`,
+            `Failed to load repository display model (${response.status} ${response.statusText}).`,
           )
         }
 
         const parsed: unknown = await response.json()
 
-        if (!isRepoVisualModel(parsed)) {
-          throw new Error('Repository model JSON does not match the expected shape.')
+        if (!isRepoDisplayModel(parsed)) {
+          throw new Error('Repository display model JSON does not match the expected shape.')
         }
 
         setState({
@@ -49,7 +49,10 @@ export function useRepoVisualModel() {
 
         setState({
           model: null,
-          error: error instanceof Error ? error.message : 'Failed to load repository model.',
+          error:
+            error instanceof Error
+              ? error.message
+              : 'Failed to load repository display model.',
           isLoading: false,
         })
       }
@@ -65,20 +68,21 @@ export function useRepoVisualModel() {
   return state
 }
 
-function isRepoVisualModel(value: unknown): value is RepoVisualModel {
+function isRepoDisplayModel(value: unknown): value is RepoDisplayModel {
   if (!value || typeof value !== 'object') {
     return false
   }
 
-  const candidate = value as Partial<RepoVisualModel>
+  const candidate = value as Partial<RepoDisplayModel>
 
   return (
-    Array.isArray(candidate.files) &&
-    Array.isArray(candidate.folders) &&
+    Array.isArray(candidate.nodes) &&
     Array.isArray(candidate.timeline) &&
     Array.isArray(candidate.warnings) &&
     typeof candidate.generatedAt === 'string' &&
-    typeof candidate.sourceDatasetPath === 'string' &&
+    typeof candidate.sourceVisualModelPath === 'string' &&
+    typeof candidate.config === 'object' &&
+    candidate.config !== null &&
     typeof candidate.summary === 'object' &&
     candidate.summary !== null
   )

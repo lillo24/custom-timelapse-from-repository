@@ -11,7 +11,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { PresentationStage } from '../components/presentation/PresentationStage'
-import { useRepoVisualModel } from '../hooks/useRepoVisualModel'
+import { useRepoDisplayModel } from '../hooks/useRepoDisplayModel'
 import {
   getFadeSlideSide,
   getFadeSlideUp,
@@ -20,16 +20,17 @@ import {
   springSoft,
 } from '../lib/motionPresets'
 import type {
-  RepoVisualModel,
-  VisualFile,
-  VisualFileSize,
-  VisualFolder,
-  VisualTimelineUnit,
-} from '../preprocessing/visualModelTypes'
+  RepoDisplayModel,
+  RepoDisplayNode,
+  RepoDisplayNodeType,
+  RepoDisplayTimelineUnit,
+} from '../preprocessing/displayModelTypes'
 
+type RepoVisualSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 type PlaybackSpeed = (typeof PLAYBACK_SPEED_OPTIONS)[number]
 type PlaybackDurationSeconds = (typeof PLAYBACK_DURATION_OPTIONS)[number]
 type FloatingPlaybackLayout = 'vertical' | 'horizontal'
+
 type ViewportBounds = {
   top: number
   right: number
@@ -39,8 +40,12 @@ type ViewportBounds = {
   height: number
 }
 
-type CurrentRepoFileState = {
-  path: string
+type SourceFileReplayState = {
+  exists: boolean
+  currentLineCount: number
+}
+
+type CurrentRepoNodeState = {
   exists: boolean
   currentLineCount: number
   maxLineCount: number
@@ -48,117 +53,94 @@ type CurrentRepoFileState = {
   recentlyChanged: boolean
 }
 
-type VisibleRepoFile = {
-  file: VisualFile
-  state: CurrentRepoFileState
+type VisibleRepoNode = {
+  node: RepoDisplayNode
+  state: CurrentRepoNodeState
   currentVisualScale: number
-  currentVisualSize: VisualFileSize
+  currentVisualSize: RepoVisualSize
   currentVisualWeight: number
+  persistentVisualWeight: number
   highlightStrength: number
 }
 
-type FeaturedFolder = {
-  folder: VisualFolder
-  files: VisibleRepoFile[]
+type FeaturedSection = {
+  id: string
+  title: string
+  path: string
+  kindLabel: string
+  nodes: VisibleRepoNode[]
   totalVisualWeight: number
-  visibleFileCount: number
+  visibleNodeCount: number
 }
 
 type RepoProgressState = {
-  activeUnit: VisualTimelineUnit | null
-  visibleFiles: VisibleRepoFile[]
+  activeUnit: RepoDisplayTimelineUnit | null
+  visibleNodes: VisibleRepoNode[]
   recentTouchedCount: number
 }
 
 type ExplorerRow = {
   id: string
-  name: string
+  label: string
   path: string
   depth: number
-  kind: 'folder' | 'file'
+  type: RepoDisplayNodeType
+  hiddenChildCount: number
   recentlyChanged: boolean
   ancestorHasNextSibling: boolean[]
   hasNextSibling: boolean
 }
 
 type RepoProgressCache = {
-  model: RepoVisualModel
+  model: RepoDisplayModel
   activeUnitIndex: number
-  fileStateById: Map<string, CurrentRepoFileState>
+  sourceFileStateById: Map<string, SourceFileReplayState>
 }
 
 const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
 const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 const RECENT_UNIT_WINDOW = 20
-const SIDEBAR_EXPLORER_MAX_DEPTH = 4
 const SIDEBAR_TREE_INDENT = 14
+const FEATURED_SECTION_LIMIT = 4
+const SECTION_CARD_LIMIT = 8
+const INSPECTOR_NODE_LIMIT = 5
 
-const CATEGORY_STYLES: Record<
-  string,
+const NODE_TYPE_STYLES: Record<
+  RepoDisplayNodeType,
   {
     badge: string
     glow: string
     label: string
   }
 > = {
-  ui: {
+  folder: {
     badge:
       'border-cyan-400/25 bg-cyan-400/12 text-cyan-100 shadow-[0_0_0_1px_rgba(34,211,238,0.04)]',
     glow: 'from-cyan-300/45 via-cyan-400/12 to-transparent',
-    label: 'UI',
+    label: 'Folder',
   },
-  source: {
+  file: {
     badge:
       'border-emerald-400/25 bg-emerald-400/12 text-emerald-100 shadow-[0_0_0_1px_rgba(16,185,129,0.04)]',
     glow: 'from-emerald-300/45 via-emerald-400/12 to-transparent',
-    label: 'Source',
+    label: 'File',
   },
-  backend: {
-    badge:
-      'border-sky-400/25 bg-sky-400/12 text-sky-100 shadow-[0_0_0_1px_rgba(56,189,248,0.04)]',
-    glow: 'from-sky-300/45 via-sky-400/12 to-transparent',
-    label: 'Backend',
-  },
-  test: {
+  collapsedFolder: {
     badge:
       'border-amber-400/25 bg-amber-400/12 text-amber-100 shadow-[0_0_0_1px_rgba(245,158,11,0.04)]',
     glow: 'from-amber-300/45 via-amber-400/12 to-transparent',
-    label: 'Tests',
+    label: 'Collapsed',
   },
-  docs: {
+  moreGroup: {
     badge:
       'border-violet-400/25 bg-violet-400/12 text-violet-100 shadow-[0_0_0_1px_rgba(167,139,250,0.04)]',
     glow: 'from-violet-300/45 via-violet-400/12 to-transparent',
-    label: 'Docs',
-  },
-  config: {
-    badge:
-      'border-rose-400/25 bg-rose-400/12 text-rose-100 shadow-[0_0_0_1px_rgba(251,113,133,0.04)]',
-    glow: 'from-rose-300/45 via-rose-400/12 to-transparent',
-    label: 'Config',
-  },
-  data: {
-    badge:
-      'border-fuchsia-400/25 bg-fuchsia-400/12 text-fuchsia-100 shadow-[0_0_0_1px_rgba(217,70,239,0.04)]',
-    glow: 'from-fuchsia-300/45 via-fuchsia-400/12 to-transparent',
-    label: 'Data',
-  },
-  script: {
-    badge:
-      'border-orange-400/25 bg-orange-400/12 text-orange-100 shadow-[0_0_0_1px_rgba(251,146,60,0.04)]',
-    glow: 'from-orange-300/45 via-orange-400/12 to-transparent',
-    label: 'Scripts',
-  },
-  unknown: {
-    badge:
-      'border-slate-400/25 bg-slate-400/10 text-slate-200 shadow-[0_0_0_1px_rgba(148,163,184,0.04)]',
-    glow: 'from-slate-200/35 via-slate-300/10 to-transparent',
-    label: 'Files',
+    label: 'More',
   },
 }
 
 const FILE_SIZE_LAYOUT: Record<
-  VisualFileSize,
+  RepoVisualSize,
   {
     span: string
     baseMinHeight: number
@@ -186,7 +168,7 @@ const FILE_SIZE_LAYOUT: Record<
   },
 }
 
-const SIZE_LABELS: Record<VisualFileSize, string> = {
+const SIZE_LABELS: Record<RepoVisualSize, string> = {
   xs: 'Pocket',
   sm: 'Small',
   md: 'Medium',
@@ -194,9 +176,9 @@ const SIZE_LABELS: Record<VisualFileSize, string> = {
   xl: 'Anchor',
 }
 
-const VISUAL_SIZE_ORDER: VisualFileSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
+const VISUAL_SIZE_ORDER: RepoVisualSize[] = ['xs', 'sm', 'md', 'lg', 'xl']
 
-const VISUAL_SIZE_RANK: Record<VisualFileSize, number> = {
+const VISUAL_SIZE_RANK: Record<RepoVisualSize, number> = {
   xs: 0,
   sm: 1,
   md: 2,
@@ -207,7 +189,7 @@ const VISUAL_SIZE_RANK: Record<VisualFileSize, number> = {
 export function RepoExplorerScene() {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
-  const { model, error, isLoading } = useRepoVisualModel()
+  const { model, error, isLoading } = useRepoDisplayModel()
   const stageRef = useRef<HTMLElement | null>(null)
   const stageBounds = useElementViewportBounds(stageRef)
 
@@ -236,7 +218,7 @@ export function RepoExplorerScene() {
                   stageBounds={stageBounds}
                 />
               ) : (
-                <RepoExplorerError message="Repository model did not load." />
+                <RepoExplorerError message="Repository display model did not load." />
               )}
             </motion.div>
           </div>
@@ -251,7 +233,7 @@ function RepoExplorerCanvas({
   shouldReduceMotion,
   stageBounds,
 }: {
-  model: RepoVisualModel
+  model: RepoDisplayModel
   shouldReduceMotion: boolean
   stageBounds: ViewportBounds | null
 }) {
@@ -393,31 +375,31 @@ function RepoExplorerCanvas({
 
   const progressState = useRepoProgressState(model, clampedActiveUnitIndex)
   const activeUnit = progressState.activeUnit
-  const visibleFiles = progressState.visibleFiles
+  const visibleNodes = progressState.visibleNodes
   const {
     explorerRows,
-    featuredFolders,
-    largestFiles,
-    visibleFileCount,
+    featuredSections,
+    largestNodes,
+    visibleNodeCount,
     visibleFolderCount,
   } = useMemo(() => {
-    const nextLargestFiles = [...visibleFiles]
+    const nextLargestNodes = [...visibleNodes]
       .sort(
         (left, right) =>
           right.state.currentLineCount - left.state.currentLineCount ||
           right.currentVisualWeight - left.currentVisualWeight ||
-          left.file.path.localeCompare(right.file.path),
+          left.node.path.localeCompare(right.node.path),
       )
-      .slice(0, 5)
+      .slice(0, INSPECTOR_NODE_LIMIT)
 
     return {
-      explorerRows: buildExplorerRows(visibleFiles, SIDEBAR_EXPLORER_MAX_DEPTH),
-      featuredFolders: selectFeaturedFolders(model.folders, visibleFiles),
-      largestFiles: nextLargestFiles,
-      visibleFileCount: visibleFiles.length,
-      visibleFolderCount: countVisibleFolders(model.folders, visibleFiles),
+      explorerRows: buildExplorerRows(visibleNodes),
+      featuredSections: selectFeaturedSections(visibleNodes),
+      largestNodes: nextLargestNodes,
+      visibleNodeCount: visibleNodes.length,
+      visibleFolderCount: countVisibleFolderNodes(visibleNodes),
     }
-  }, [model.folders, visibleFiles])
+  }, [model, visibleNodes])
   const canStepBackward = model.timeline.length > 0 && clampedActiveUnitIndex > 0
   const canStepForward =
     model.timeline.length > 0 && clampedActiveUnitIndex < maxUnitIndex
@@ -449,7 +431,7 @@ function RepoExplorerCanvas({
         fullRunDurationSeconds={fullRunDurationSeconds}
         remainingPlaybackSeconds={remainingPlaybackSeconds}
         remainingUnitCount={remainingUnitCount}
-        visibleFileCount={visibleFileCount}
+        visibleNodeCount={visibleNodeCount}
         visibleFolderCount={visibleFolderCount}
         recentTouchedCount={progressState.recentTouchedCount}
         onTogglePlayback={handleTogglePlayback}
@@ -474,7 +456,7 @@ function RepoExplorerCanvas({
       />
 
       <FloatingInspectorPanel
-        largestFiles={largestFiles}
+        largestNodes={largestNodes}
         warnings={model.warnings}
         shouldReduceMotion={shouldReduceMotion}
       />
@@ -505,7 +487,7 @@ function RepoExplorerCanvas({
                   ))}
                 </div>
               ) : (
-                <EmptyPanelState message="Visible files will appear here as the timeline advances." />
+                <EmptyPanelState message="Visible repository nodes will appear here as the timeline advances." />
               )}
             </div>
           </div>
@@ -520,15 +502,15 @@ function RepoExplorerCanvas({
           <div className="flex h-full flex-col gap-4">
             <PanelHeader
               title="Explorer clusters"
-              subtitle="Folders grouped as repository neighborhoods"
+              subtitle="Display-model sections rendered directly from visible nodes"
             />
 
             <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 2xl:grid-cols-2">
               <AnimatePresence initial={false}>
-                {featuredFolders.length > 0 ? (
-                  featuredFolders.map((section, index) => (
+                {featuredSections.length > 0 ? (
+                  featuredSections.map((section, index) => (
                     <motion.article
-                      key={section.folder.id}
+                      key={section.id}
                       layout
                       initial={sectionPresenceMotion.initial}
                       animate={sectionPresenceMotion.animate}
@@ -546,19 +528,18 @@ function RepoExplorerCanvas({
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
-                              Folder
+                              {section.kindLabel}
                             </span>
                             <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-slate-400">
-                              {formatNumber(section.visibleFileCount)} files
+                              {formatNumber(section.visibleNodeCount)} nodes
                             </span>
                           </div>
                           <h2 className="mt-2 truncate font-display text-xl tracking-[-0.04em] text-white">
-                            {section.folder.path}
+                            {section.title}
                           </h2>
                           <p className="mt-1 text-[12px] leading-5 text-slate-400">
-                            {formatNumber(section.files.length)} visible cards /{' '}
-                            {section.files[0] ? section.files[0].file.category : 'files'}-heavy
-                            subtree
+                            {formatNumber(section.nodes.length)} visible cards from the simplified
+                            display tree
                           </p>
                         </div>
 
@@ -569,11 +550,11 @@ function RepoExplorerCanvas({
 
                       <div className="mt-4 grid grid-cols-4 gap-3 xl:grid-cols-5">
                         <AnimatePresence initial={false} mode="popLayout">
-                          {section.files.map((entry) => (
-                            <RepoFileCard
-                              key={entry.file.id}
+                          {section.nodes.map((entry) => (
+                            <RepoDisplayCard
+                              key={entry.node.id}
                               entry={entry}
-                              folderPath={section.folder.path}
+                              sectionPath={section.path}
                               shouldReduceMotion={shouldReduceMotion}
                             />
                           ))}
@@ -589,7 +570,7 @@ function RepoExplorerCanvas({
                     exit={sectionPresenceMotion.exit}
                     className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] p-6 text-sm leading-6 text-slate-400"
                   >
-                    No repository files are visible at the selected position yet.
+                    No repository nodes are visible at the selected position yet.
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -649,7 +630,7 @@ function FloatingPlaybackControls({
   fullRunDurationSeconds,
   remainingPlaybackSeconds,
   remainingUnitCount,
-  visibleFileCount,
+  visibleNodeCount,
   visibleFolderCount,
   recentTouchedCount,
   onTogglePlayback,
@@ -676,7 +657,7 @@ function FloatingPlaybackControls({
   fullRunDurationSeconds: number
   remainingPlaybackSeconds: number
   remainingUnitCount: number
-  visibleFileCount: number
+  visibleNodeCount: number
   visibleFolderCount: number
   recentTouchedCount: number
   onTogglePlayback: () => void
@@ -909,7 +890,7 @@ function FloatingPlaybackControls({
                 />
                 <PlaybackStatChip
                   label="Visible"
-                  value={`${formatNumber(visibleFileCount)} files`}
+                  value={`${formatNumber(visibleNodeCount)} nodes`}
                 />
                 <PlaybackStatChip
                   label="Folders"
@@ -1021,9 +1002,13 @@ function ExplorerTreeRow({
       className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] leading-5 transition ${
         row.recentlyChanged
           ? 'bg-teal-400/[0.07] text-slate-100'
-          : row.kind === 'folder'
+          : row.type === 'folder'
             ? 'text-slate-200'
-            : 'text-slate-300'
+            : row.type === 'collapsedFolder'
+              ? 'text-amber-100'
+              : row.type === 'moreGroup'
+                ? 'text-violet-200'
+                : 'text-slate-300'
       }`}
     >
       {row.depth > 0 ? (
@@ -1067,19 +1052,27 @@ function ExplorerTreeRow({
           ) : null}
         </div>
       ) : null}
-      <span className="min-w-0 truncate pt-[1px]">
-        {row.name}
-      </span>
+
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+        <span className="min-w-0 truncate pt-[1px]">
+          {row.label}
+        </span>
+        {row.hiddenChildCount > 0 && row.type !== 'file' ? (
+          <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+            {formatNumber(row.hiddenChildCount)} hidden
+          </span>
+        ) : null}
+      </div>
     </div>
   )
 }
 
 function FloatingInspectorPanel({
-  largestFiles,
+  largestNodes,
   warnings,
   shouldReduceMotion,
 }: {
-  largestFiles: VisibleRepoFile[]
+  largestNodes: VisibleRepoNode[]
   warnings: string[]
   shouldReduceMotion: boolean
 }) {
@@ -1117,7 +1110,7 @@ function FloatingInspectorPanel({
               <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
                 <PanelHeader
                   title="Inspector"
-                  subtitle="Current file state plus temporary motion emphasis"
+                  subtitle="Current display-node state plus temporary motion emphasis"
                 />
 
                 <div className="rounded-[22px] border border-teal-400/15 bg-teal-400/[0.05] p-4">
@@ -1125,13 +1118,14 @@ function FloatingInspectorPanel({
                     Size basis
                   </div>
                   <p className="mt-2 text-sm leading-6 text-slate-200">
-                    Card geometry follows the current line count replayed from the
-                    timeline. Recent edits only change pulse, glow, and timing
-                    emphasis, never permanent width or height.
+                    Card geometry follows each visible display node&apos;s current
+                    line count replayed from its source files. Recent edits only
+                    change pulse, glow, and timing emphasis, never permanent width
+                    or height.
                   </p>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
-                    {(Object.keys(SIZE_LABELS) as VisualFileSize[]).map((size) => (
+                    {(Object.keys(SIZE_LABELS) as RepoVisualSize[]).map((size) => (
                       <div
                         key={size}
                         className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2"
@@ -1149,44 +1143,43 @@ function FloatingInspectorPanel({
 
                 <div className="rounded-[22px] border border-white/8 bg-white/[0.02] p-4">
                   <div className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
-                    Largest current files
+                    Largest current nodes
                   </div>
                   <div className="mt-3 space-y-3">
-                    {largestFiles.length > 0 ? (
-                      largestFiles.map((entry) => {
-                        const categoryStyle =
-                          CATEGORY_STYLES[entry.file.category] ?? CATEGORY_STYLES.unknown
+                    {largestNodes.length > 0 ? (
+                      largestNodes.map((entry) => {
+                        const typeStyle = NODE_TYPE_STYLES[entry.node.type]
 
                         return (
                           <div
-                            key={entry.file.id}
+                            key={entry.node.id}
                             className="rounded-[18px] border border-white/6 bg-slate-950/50 px-3 py-3"
                           >
                             <div className="flex items-center justify-between gap-3">
                               <span
-                                className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.22em] ${categoryStyle.badge}`}
+                                className={`rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.22em] ${typeStyle.badge}`}
                               >
-                                {categoryStyle.label}
+                                {typeStyle.label}
                               </span>
                               <span className="font-mono text-[11px] text-slate-500">
                                 {formatNumber(entry.state.currentLineCount)} current
                               </span>
                             </div>
                             <div className="mt-2 text-sm font-medium text-slate-100">
-                              {entry.file.name}
+                              {entry.node.label}
                             </div>
                             <div className="mt-1 truncate font-mono text-[11px] text-slate-500">
-                              {entry.file.path}
+                              {entry.node.path}
                             </div>
                             <div className="mt-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">
-                              Peak {formatNumber(entry.file.maxLineCount)} / Final{' '}
-                              {formatNumber(entry.file.finalLineCount)}
+                              Peak {formatNumber(entry.node.maxLineCount)} / Final{' '}
+                              {formatNumber(entry.node.finalLineCount)}
                             </div>
                           </div>
                         )
                       })
                     ) : (
-                      <EmptyPanelState message="Visible file details will appear as the timeline advances." />
+                      <EmptyPanelState message="Visible node details will appear as the timeline advances." />
                     )}
                   </div>
                 </div>
@@ -1221,22 +1214,18 @@ function FloatingInspectorPanel({
   )
 }
 
-function RepoFileCard({
+function RepoDisplayCard({
   entry,
-  folderPath,
+  sectionPath,
   shouldReduceMotion,
 }: {
-  entry: VisibleRepoFile
-  folderPath: string
+  entry: VisibleRepoNode
+  sectionPath: string
   shouldReduceMotion: boolean
 }) {
-  const { file, state, currentVisualScale, currentVisualSize, highlightStrength } = entry
+  const { node, state, currentVisualScale, currentVisualSize, highlightStrength } = entry
   const layout = FILE_SIZE_LAYOUT[currentVisualSize]
-  const categoryStyle = CATEGORY_STYLES[file.category] ?? CATEGORY_STYLES.unknown
-  const relativeFolder =
-    folderPath === '' || file.folderPath === folderPath
-      ? file.name
-      : file.path.slice(folderPath.length + 1)
+  const typeStyle = NODE_TYPE_STYLES[node.type]
   const glowOpacity =
     highlightStrength > 0
       ? clampNumber(0.14 + highlightStrength * 0.34, 0.14, 0.5)
@@ -1251,9 +1240,9 @@ function RepoFileCard({
       ? clampNumber(state.currentLineCount / state.maxLineCount, 0, 1)
       : 0
   const presenceMotion = getScaleFade(shouldReduceMotion)
+  const secondaryLabel = getCardSecondaryLabel(entry, sectionPath)
+  const tertiaryLabel = getCardTertiaryLabel(entry)
 
-  // Keep geometry tied to replayed current line state; recent activity only
-  // affects temporary emphasis such as pulse, glow, and contrast.
   return (
     <motion.article
       layout
@@ -1297,7 +1286,7 @@ function RepoFileCard({
       ) : null}
 
       <div
-        className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${categoryStyle.glow}`}
+        className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${typeStyle.glow}`}
       />
 
       <div className="relative flex h-full flex-col">
@@ -1305,7 +1294,7 @@ function RepoFileCard({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <div className="truncate font-display text-[15px] font-medium tracking-[-0.03em] text-white">
-                {file.name}
+                {node.label}
               </div>
               {state.recentlyChanged ? (
                 <motion.span
@@ -1328,14 +1317,14 @@ function RepoFileCard({
               ) : null}
             </div>
             <div className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-              {relativeFolder}
+              {secondaryLabel}
             </div>
           </div>
 
           <span
-            className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${categoryStyle.badge}`}
+            className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${typeStyle.badge}`}
           >
-            {file.extension ?? 'file'}
+            {typeStyle.label}
           </span>
         </div>
 
@@ -1370,10 +1359,12 @@ function RepoFileCard({
 
           <div className="text-right">
             <div className="font-mono uppercase tracking-[0.2em] text-slate-500">
-              Peak
+              {tertiaryLabel}
             </div>
             <div className="mt-1 text-slate-200">
-              {formatNumber(file.maxLineCount)}
+              {node.type === 'file'
+                ? formatNumber(node.maxLineCount)
+                : formatNumber(node.hiddenChildCount > 0 ? node.hiddenChildCount : node.childCount)}
             </div>
           </div>
         </div>
@@ -1619,7 +1610,7 @@ function RepoExplorerError({
           Repository scene unavailable
         </div>
         <h1 className="mt-4 font-display text-3xl tracking-[-0.04em] text-white">
-          The visual model could not be loaded.
+          The display model could not be loaded.
         </h1>
         <p className="mt-4 text-sm leading-6 text-rose-50/90">
           {message}
@@ -1627,7 +1618,7 @@ function RepoExplorerError({
         <p className="mt-3 text-sm leading-6 text-rose-50/70">
           Re-run the preprocessing pipeline so{' '}
           <code className="rounded bg-black/20 px-1.5 py-0.5 text-[13px]">
-            public/data/repo-visual-model.json
+            public/data/repo-display-model.json
           </code>{' '}
           is refreshed for the app.
         </p>
@@ -1637,7 +1628,7 @@ function RepoExplorerError({
 }
 
 function useRepoProgressState(
-  model: RepoVisualModel,
+  model: RepoDisplayModel,
   activeUnitIndex: number,
 ): RepoProgressState {
   const progressCacheRef = useRef<RepoProgressCache | null>(null)
@@ -1651,12 +1642,12 @@ function useRepoProgressState(
 
     progressCacheRef.current = progressCache
 
-    return buildRepoProgressState(model, activeUnitIndex, progressCache.fileStateById)
+    return buildRepoProgressState(model, activeUnitIndex, progressCache.sourceFileStateById)
   }, [activeUnitIndex, model])
 }
 
 function getRepoProgressCache(
-  model: RepoVisualModel,
+  model: RepoDisplayModel,
   activeUnitIndex: number,
   currentCache: RepoProgressCache | null,
 ): RepoProgressCache {
@@ -1671,7 +1662,7 @@ function getRepoProgressCache(
       : {
           model,
           activeUnitIndex: model.timeline.length === 0 ? 0 : -1,
-          fileStateById: createInitialFileStateById(model),
+          sourceFileStateById: createInitialSourceFileStateById(model),
         }
 
   if (model.timeline.length === 0) {
@@ -1691,15 +1682,14 @@ function getRepoProgressCache(
         continue
       }
 
-      const currentFileState = nextCache.fileStateById.get(unit.fileId)
-
-      if (!currentFileState) {
-        continue
+      const currentFileState = nextCache.sourceFileStateById.get(unit.sourceFileId) ?? {
+        exists: false,
+        currentLineCount: 0,
       }
 
-      nextCache.fileStateById.set(
-        unit.fileId,
-        applyTimelineUnitToFileState(currentFileState, unit),
+      nextCache.sourceFileStateById.set(
+        unit.sourceFileId,
+        applyTimelineUnitToSourceFileState(currentFileState, unit),
       )
     }
   } else if (targetUnitIndex < nextCache.activeUnitIndex) {
@@ -1710,15 +1700,14 @@ function getRepoProgressCache(
         continue
       }
 
-      const currentFileState = nextCache.fileStateById.get(unit.fileId)
-
-      if (!currentFileState) {
-        continue
+      const currentFileState = nextCache.sourceFileStateById.get(unit.sourceFileId) ?? {
+        exists: false,
+        currentLineCount: 0,
       }
 
-      nextCache.fileStateById.set(
-        unit.fileId,
-        revertTimelineUnitFromFileState(currentFileState, unit),
+      nextCache.sourceFileStateById.set(
+        unit.sourceFileId,
+        revertTimelineUnitFromSourceFileState(currentFileState, unit),
       )
     }
   }
@@ -1728,40 +1717,36 @@ function getRepoProgressCache(
   return nextCache
 }
 
-function createInitialFileStateById(model: RepoVisualModel) {
-  const fileStateById = new Map<string, CurrentRepoFileState>()
+function createInitialSourceFileStateById(model: RepoDisplayModel) {
+  const sourceFileStateById = new Map<string, SourceFileReplayState>()
 
-  for (const file of model.files) {
-    fileStateById.set(file.id, {
-      path: file.path,
-      exists: model.timeline.length === 0,
-      currentLineCount: model.timeline.length === 0 ? file.finalLineCount : 0,
-      maxLineCount: file.maxLineCount,
-      finalLineCount: file.finalLineCount,
-      recentlyChanged: false,
-    })
+  for (const node of model.nodes) {
+    for (const sourceFileId of node.sourceFileIds) {
+      if (!sourceFileStateById.has(sourceFileId)) {
+        sourceFileStateById.set(sourceFileId, {
+          exists: false,
+          currentLineCount: 0,
+        })
+      }
+    }
   }
 
-  return fileStateById
+  return sourceFileStateById
 }
 
 function buildRepoProgressState(
-  model: RepoVisualModel,
+  model: RepoDisplayModel,
   activeUnitIndex: number,
-  fileStateById: Map<string, CurrentRepoFileState>,
+  sourceFileStateById: Map<string, SourceFileReplayState>,
 ): RepoProgressState {
+  const visualWeightReference = calculateDisplayWeightReference(model.nodes)
+
   if (model.timeline.length === 0) {
     return {
       activeUnit: null,
-      visibleFiles: model.files
-        .map((file) =>
-          createVisibleRepoFile(
-            file,
-            withRecentChangeFlag(fileStateById.get(file.id), 0),
-            0,
-          ),
-        )
-        .filter((entry): entry is VisibleRepoFile => entry !== null),
+      visibleNodes: model.nodes
+        .map((node) => createStaticVisibleRepoNode(node, visualWeightReference))
+        .filter((entry): entry is VisibleRepoNode => entry !== null),
       recentTouchedCount: 0,
     }
   }
@@ -1772,12 +1757,12 @@ function buildRepoProgressState(
   if (!activeUnit) {
     return {
       activeUnit: null,
-      visibleFiles: [],
+      visibleNodes: [],
       recentTouchedCount: 0,
     }
   }
 
-  const recentActivityByFileId = new Map<string, number>()
+  const recentActivityByDisplayNodeId = new Map<string, number>()
   const recentUnitStartIndex = Math.max(
     0,
     clampedActiveUnitIndex - (RECENT_UNIT_WINDOW - 1),
@@ -1793,49 +1778,33 @@ function buildRepoProgressState(
     const distance = clampedActiveUnitIndex - index
     const recencyFactor = 1 - (distance / RECENT_UNIT_WINDOW) * 0.55
     const intensity = clampNumber(unit.activityWeight * recencyFactor, 0, 1)
-    const previousIntensity = recentActivityByFileId.get(unit.fileId) ?? 0
+    const previousIntensity = recentActivityByDisplayNodeId.get(unit.displayNodeId) ?? 0
 
     if (intensity > previousIntensity) {
-      recentActivityByFileId.set(unit.fileId, intensity)
+      recentActivityByDisplayNodeId.set(unit.displayNodeId, intensity)
     }
   }
 
   return {
     activeUnit,
-    visibleFiles: model.files
-      .map((file) =>
-        createVisibleRepoFile(
-          file,
-          withRecentChangeFlag(
-            fileStateById.get(file.id),
-            recentActivityByFileId.get(file.id) ?? 0,
-          ),
-          recentActivityByFileId.get(file.id) ?? 0,
+    visibleNodes: model.nodes
+      .map((node) =>
+        createVisibleRepoNode(
+          node,
+          sourceFileStateById,
+          recentActivityByDisplayNodeId.get(node.id) ?? 0,
+          visualWeightReference,
         ),
       )
-      .filter((entry): entry is VisibleRepoFile => entry !== null),
-    recentTouchedCount: recentActivityByFileId.size,
+      .filter((entry): entry is VisibleRepoNode => entry !== null),
+    recentTouchedCount: recentActivityByDisplayNodeId.size,
   }
 }
 
-function withRecentChangeFlag(
-  fileState: CurrentRepoFileState | undefined,
-  highlightStrength: number,
-) {
-  if (!fileState) {
-    return undefined
-  }
-
-  return {
-    ...fileState,
-    recentlyChanged: fileState.exists && highlightStrength > 0,
-  }
-}
-
-function applyTimelineUnitToFileState(
-  fileState: CurrentRepoFileState,
-  unit: VisualTimelineUnit,
-): CurrentRepoFileState {
+function applyTimelineUnitToSourceFileState(
+  fileState: SourceFileReplayState,
+  unit: RepoDisplayTimelineUnit,
+): SourceFileReplayState {
   if (unit.type === 'delete') {
     return {
       ...fileState,
@@ -1856,8 +1825,6 @@ function applyTimelineUnitToFileState(
     nextLineCount = Math.max(0, fileState.currentLineCount + unit.lineDelta)
   }
 
-  // TODO: If the visual model later includes previous file ids for renames,
-  // replay that explicitly instead of relying on target-file continuity alone.
   return {
     ...fileState,
     exists: true,
@@ -1865,10 +1832,10 @@ function applyTimelineUnitToFileState(
   }
 }
 
-function revertTimelineUnitFromFileState(
-  fileState: CurrentRepoFileState,
-  unit: VisualTimelineUnit,
-): CurrentRepoFileState {
+function revertTimelineUnitFromSourceFileState(
+  fileState: SourceFileReplayState,
+  unit: RepoDisplayTimelineUnit,
+): SourceFileReplayState {
   if (unit.type === 'create' || unit.type === 'copy') {
     return {
       ...fileState,
@@ -1902,37 +1869,142 @@ function revertTimelineUnitFromFileState(
   }
 }
 
-function createVisibleRepoFile(
-  file: VisualFile,
-  fileState: CurrentRepoFileState | undefined,
+function createVisibleRepoNode(
+  node: RepoDisplayNode,
+  sourceFileStateById: Map<string, SourceFileReplayState>,
   highlightStrength: number,
-): VisibleRepoFile | null {
-  if (!fileState || !fileState.exists) {
+  visualWeightReference: number,
+): VisibleRepoNode | null {
+  let exists = false
+  let currentLineCount = 0
+
+  for (const sourceFileId of node.sourceFileIds) {
+    const sourceFileState = sourceFileStateById.get(sourceFileId)
+
+    if (!sourceFileState) {
+      continue
+    }
+
+    if (sourceFileState.exists) {
+      exists = true
+    }
+
+    currentLineCount += sourceFileState.currentLineCount
+  }
+
+  if (!exists) {
     return null
   }
 
-  const ratio =
-    fileState.maxLineCount > 0
-      ? clampNumber(fileState.currentLineCount / fileState.maxLineCount, 0, 1)
+  return createVisibleRepoNodeEntry(
+    node,
+    exists,
+    currentLineCount,
+    highlightStrength,
+    visualWeightReference,
+  )
+}
+
+function createStaticVisibleRepoNode(
+  node: RepoDisplayNode,
+  visualWeightReference: number,
+): VisibleRepoNode | null {
+  if (node.sourceFileIds.length === 0) {
+    return null
+  }
+
+  return createVisibleRepoNodeEntry(
+    node,
+    true,
+    node.finalLineCount,
+    0,
+    visualWeightReference,
+  )
+}
+
+function createVisibleRepoNodeEntry(
+  node: RepoDisplayNode,
+  exists: boolean,
+  currentLineCount: number,
+  highlightStrength: number,
+  visualWeightReference: number,
+): VisibleRepoNode {
+  const currentRatio =
+    node.maxLineCount > 0
+      ? clampNumber(currentLineCount / node.maxLineCount, 0, 1)
       : 0
-  const currentVisualScale = clampNumber(0.45 + Math.sqrt(ratio) * 0.75, 0.45, 1.2)
-  const currentVisualSize = deriveCurrentVisualSize(file.visualSize, currentVisualScale)
-  const currentVisualWeight = Math.max(0.06, file.visualWeight * currentVisualScale)
+  const currentVisualScale = clampNumber(0.45 + Math.sqrt(currentRatio) * 0.75, 0.45, 1.2)
+  const persistentVisualWeight = normalizeDisplayVisualWeight(
+    node.visualWeight,
+    visualWeightReference,
+  )
+  const currentVisualWeight = Math.max(0.06, persistentVisualWeight * currentVisualScale)
+  const currentVisualSize = deriveCurrentVisualSize(
+    mapVisualSize(persistentVisualWeight),
+    currentVisualScale,
+  )
 
   return {
-    file,
-    state: fileState,
+    node,
+    state: {
+      exists,
+      currentLineCount,
+      maxLineCount: node.maxLineCount,
+      finalLineCount: node.finalLineCount,
+      recentlyChanged: exists && highlightStrength > 0,
+    },
     currentVisualScale,
     currentVisualSize,
     currentVisualWeight,
+    persistentVisualWeight,
     highlightStrength,
   }
 }
 
+function calculateDisplayWeightReference(nodes: RepoDisplayNode[]): number {
+  const sortedWeights = nodes
+    .map((node) => node.visualWeight)
+    .sort((left, right) => left - right)
+
+  if (sortedWeights.length === 0) {
+    return 1
+  }
+
+  const percentileIndex = Math.max(0, Math.ceil(sortedWeights.length * 0.9) - 1)
+  const percentileValue = sortedWeights[percentileIndex] ?? sortedWeights.at(-1) ?? 1
+  return Math.max(1, percentileValue)
+}
+
+function normalizeDisplayVisualWeight(weight: number, reference: number): number {
+  const cappedWeight = Math.min(Math.max(weight, 0), reference)
+  const rawWeight = Math.sqrt(cappedWeight / reference)
+  return clampNumber(rawWeight, 0, 1)
+}
+
+function mapVisualSize(weight: number): RepoVisualSize {
+  if (weight < 0.2) {
+    return 'xs'
+  }
+
+  if (weight < 0.4) {
+    return 'sm'
+  }
+
+  if (weight < 0.6) {
+    return 'md'
+  }
+
+  if (weight < 0.8) {
+    return 'lg'
+  }
+
+  return 'xl'
+}
+
 function deriveCurrentVisualSize(
-  baseVisualSize: VisualFileSize,
+  baseVisualSize: RepoVisualSize,
   currentVisualScale: number,
-): VisualFileSize {
+): RepoVisualSize {
   const baseRank = VISUAL_SIZE_RANK[baseVisualSize]
   const scaledRank = clampNumber(
     Math.round(baseRank * currentVisualScale),
@@ -1943,191 +2015,196 @@ function deriveCurrentVisualSize(
   return VISUAL_SIZE_ORDER[scaledRank] ?? 'xs'
 }
 
-function selectFeaturedFolders(
-  folders: VisualFolder[],
-  visibleFiles: VisibleRepoFile[],
-): FeaturedFolder[] {
-  const candidates = folders
-    .filter((folder) => folder.path !== '')
-    .map((folder) => {
-      const subtreeFiles = getVisibleFilesInSubtree(visibleFiles, folder.path).sort(
-        (left, right) =>
-          right.currentVisualWeight - left.currentVisualWeight ||
-          right.state.currentLineCount - left.state.currentLineCount ||
-          left.file.path.localeCompare(right.file.path),
-      )
+function selectFeaturedSections(
+  visibleNodes: VisibleRepoNode[],
+): FeaturedSection[] {
+  const visibleChildrenByParent = new Map<string | null, VisibleRepoNode[]>()
 
-      const totalVisualWeight = subtreeFiles.reduce(
-        (sum, entry) => sum + entry.currentVisualWeight,
-        0,
+  for (const entry of visibleNodes) {
+    const parentId = entry.node.parentNodeId
+    const siblings = visibleChildrenByParent.get(parentId) ?? []
+    siblings.push(entry)
+    visibleChildrenByParent.set(parentId, siblings)
+  }
+
+  for (const siblings of visibleChildrenByParent.values()) {
+    siblings.sort(compareVisibleNodesForCards)
+  }
+
+  const sections: FeaturedSection[] = []
+  const rootCards = (visibleChildrenByParent.get(null) ?? []).filter(
+    (entry) => entry.node.type !== 'folder',
+  )
+
+  if (rootCards.length > 0) {
+    sections.push({
+      id: 'section:workspace',
+      title: 'workspace',
+      path: '',
+      kindLabel: 'Root',
+      nodes: rootCards.slice(0, SECTION_CARD_LIMIT),
+      totalVisualWeight: rootCards.reduce((sum, entry) => sum + entry.currentVisualWeight, 0),
+      visibleNodeCount: rootCards.length,
+    })
+  }
+
+  const folderCandidates = visibleNodes
+    .filter((entry) => entry.node.type === 'folder')
+    .map((entry) => {
+      const directChildren = visibleChildrenByParent.get(entry.node.id) ?? []
+
+      if (directChildren.length === 0) {
+        return null
+      }
+
+      const subtreeEntries = collectVisibleSubtreeEntries(
+        entry.node.id,
+        visibleChildrenByParent,
       )
-      const visibleFileCount = subtreeFiles.length
       const score =
-        totalVisualWeight *
-        (folder.depth === 2 ? 1.08 : folder.depth === 1 ? 1 : 0.94)
+        subtreeEntries.reduce((sum, childEntry) => sum + childEntry.currentVisualWeight, 0) *
+        (entry.node.depth === 0 ? 1.08 : entry.node.depth === 1 ? 1 : 0.92)
 
       return {
-        folder,
-        files: subtreeFiles.slice(0, 8),
-        totalVisualWeight,
-        visibleFileCount,
+        entry,
+        directChildren,
+        subtreeEntries,
         score,
       }
     })
-    .filter((candidate) => candidate.visibleFileCount > 0)
+    .filter((candidate): candidate is NonNullable<typeof candidate> => candidate !== null)
     .sort(
       (left, right) =>
         right.score - left.score ||
-        right.visibleFileCount - left.visibleFileCount ||
-        left.folder.path.localeCompare(right.folder.path),
+        right.subtreeEntries.length - left.subtreeEntries.length ||
+        left.entry.node.path.localeCompare(right.entry.node.path),
     )
 
-  const selected: FeaturedFolder[] = []
-
-  for (const candidate of candidates) {
+  for (const candidate of folderCandidates) {
     if (
-      selected.some(
-        (entry) =>
-          isAncestorPath(entry.folder.path, candidate.folder.path) ||
-          isAncestorPath(candidate.folder.path, entry.folder.path),
+      sections.some(
+        (section) =>
+          section.path.length > 0 &&
+          (isAncestorPath(section.path, candidate.entry.node.path) ||
+            isAncestorPath(candidate.entry.node.path, section.path)),
       )
     ) {
       continue
     }
 
-    selected.push({
-      folder: candidate.folder,
-      files: candidate.files,
-      totalVisualWeight: candidate.totalVisualWeight,
-      visibleFileCount: candidate.visibleFileCount,
+    sections.push({
+      id: `section:${candidate.entry.node.id}`,
+      title: candidate.entry.node.path,
+      path: candidate.entry.node.path,
+      kindLabel: 'Folder',
+      nodes: candidate.directChildren.slice(0, SECTION_CARD_LIMIT),
+      totalVisualWeight: candidate.subtreeEntries.reduce(
+        (sum, childEntry) => sum + childEntry.currentVisualWeight,
+        0,
+      ),
+      visibleNodeCount: candidate.subtreeEntries.length,
     })
 
-    if (selected.length === 4) {
+    if (sections.length === FEATURED_SECTION_LIMIT) {
       break
     }
   }
 
-  if (selected.length < 4) {
-    for (const candidate of candidates) {
-      if (selected.some((entry) => entry.folder.path === candidate.folder.path)) {
+  if (sections.length < FEATURED_SECTION_LIMIT) {
+    const collapsedFallbacks = visibleNodes
+      .filter((entry) => entry.node.type === 'collapsedFolder')
+      .sort(compareVisibleNodesForCards)
+
+    for (const entry of collapsedFallbacks) {
+      if (sections.some((section) => section.path === entry.node.path)) {
         continue
       }
 
-      selected.push({
-        folder: candidate.folder,
-        files: candidate.files,
-        totalVisualWeight: candidate.totalVisualWeight,
-        visibleFileCount: candidate.visibleFileCount,
+      sections.push({
+        id: `section:${entry.node.id}`,
+        title: entry.node.path,
+        path: entry.node.path,
+        kindLabel: 'Collapsed',
+        nodes: [entry],
+        totalVisualWeight: entry.currentVisualWeight,
+        visibleNodeCount: 1,
       })
 
-      if (selected.length === 4) {
+      if (sections.length === FEATURED_SECTION_LIMIT) {
         break
       }
     }
   }
 
-  return selected
+  return sections
 }
 
-function buildExplorerRows(
-  visibleFiles: VisibleRepoFile[],
-  maxDepth: number,
-): ExplorerRow[] {
-  const childRowsByParent = new Map<string, ExplorerRow[]>()
-  const folderPaths = new Set<string>()
-  const recentlyChangedFolderPaths = new Set<string>()
+function collectVisibleSubtreeEntries(
+  nodeId: string,
+  visibleChildrenByParent: Map<string | null, VisibleRepoNode[]>,
+): VisibleRepoNode[] {
+  const collected: VisibleRepoNode[] = []
+  const stack = [...(visibleChildrenByParent.get(nodeId) ?? [])]
 
-  const pushRow = (parentPath: string, row: ExplorerRow) => {
-    const rows = childRowsByParent.get(parentPath) ?? []
-    rows.push(row)
-    childRowsByParent.set(parentPath, rows)
-  }
+  while (stack.length > 0) {
+    const entry = stack.shift()
 
-  for (const entry of visibleFiles) {
-    const pathSegments = entry.file.path.split('/')
-    const deepestVisibleFolderIndex = Math.min(pathSegments.length - 2, maxDepth)
-
-    for (let index = 0; index <= deepestVisibleFolderIndex; index += 1) {
-      const folderPath = pathSegments.slice(0, index + 1).join('/')
-
-      if (!folderPath) {
-        continue
-      }
-
-      folderPaths.add(folderPath)
-
-      if (entry.state.recentlyChanged) {
-        recentlyChangedFolderPaths.add(folderPath)
-      }
-    }
-  }
-
-  for (const folderPath of folderPaths) {
-    const pathSegments = folderPath.split('/')
-    const depth = pathSegments.length - 1
-    const name = pathSegments[pathSegments.length - 1] ?? folderPath
-    const parentPath =
-      depth === 0 ? '' : pathSegments.slice(0, -1).join('/')
-
-    pushRow(parentPath, {
-      id: `folder:${folderPath}`,
-      name,
-      path: folderPath,
-      depth,
-      kind: 'folder',
-      recentlyChanged: recentlyChangedFolderPaths.has(folderPath),
-      ancestorHasNextSibling: [],
-      hasNextSibling: false,
-    })
-  }
-
-  for (const entry of visibleFiles) {
-    const depth = entry.file.path.split('/').length - 1
-
-    if (depth > maxDepth) {
+    if (!entry) {
       continue
     }
 
-    pushRow(entry.file.folderPath, {
-      id: `file:${entry.file.path}`,
-      name: entry.file.name,
-      path: entry.file.path,
-      depth,
-      kind: 'file',
-      recentlyChanged: entry.state.recentlyChanged,
-      ancestorHasNextSibling: [],
-      hasNextSibling: false,
-    })
+    collected.push(entry)
+    const children = visibleChildrenByParent.get(entry.node.id)
+
+    if (children && children.length > 0) {
+      stack.unshift(...children)
+    }
+  }
+
+  return collected
+}
+
+function buildExplorerRows(visibleNodes: VisibleRepoNode[]): ExplorerRow[] {
+  const childRowsByParent = new Map<string | null, VisibleRepoNode[]>()
+
+  for (const entry of visibleNodes) {
+    const rows = childRowsByParent.get(entry.node.parentNodeId) ?? []
+    rows.push(entry)
+    childRowsByParent.set(entry.node.parentNodeId, rows)
   }
 
   const flattenedRows: ExplorerRow[] = []
 
   const appendChildren = (
-    parentPath: string,
+    parentNodeId: string | null,
     ancestorHasNextSibling: boolean[],
     parentHasNextSibling: boolean | null,
   ) => {
-    const rows = [...(childRowsByParent.get(parentPath) ?? [])].sort(
-      compareExplorerRows,
-    )
+    const rows = childRowsByParent.get(parentNodeId) ?? []
 
-    for (const [index, row] of rows.entries()) {
+    for (const [index, entry] of rows.entries()) {
       const hasNextSibling = index < rows.length - 1
 
       flattenedRows.push({
-        ...row,
+        id: entry.node.id,
+        label: entry.node.label,
+        path: entry.node.path,
+        depth: entry.node.depth,
+        type: entry.node.type,
+        hiddenChildCount: entry.node.hiddenChildCount,
+        recentlyChanged: entry.state.recentlyChanged,
         ancestorHasNextSibling,
         hasNextSibling,
       })
 
-      if (row.kind === 'folder' && row.depth < maxDepth) {
+      if (entry.node.type === 'folder') {
         const nextAncestorHasNextSibling =
-          row.depth === 0 || parentHasNextSibling === null
+          entry.node.depth === 0 || parentHasNextSibling === null
             ? ancestorHasNextSibling
             : [...ancestorHasNextSibling, parentHasNextSibling]
 
         appendChildren(
-          row.path,
+          entry.node.id,
           nextAncestorHasNextSibling,
           hasNextSibling,
         )
@@ -2135,50 +2212,84 @@ function buildExplorerRows(
     }
   }
 
-  appendChildren('', [], null)
+  appendChildren(null, [], null)
 
   return flattenedRows
 }
 
-function compareExplorerRows(
-  left: ExplorerRow,
-  right: ExplorerRow,
-) {
-  if (left.kind !== right.kind) {
-    return left.kind === 'folder' ? -1 : 1
-  }
-
-  return left.name.localeCompare(right.name) || left.path.localeCompare(right.path)
-}
-
-function countVisibleFolders(
-  folders: VisualFolder[],
-  visibleFiles: VisibleRepoFile[],
-) {
-  let count = 0
-
-  for (const folder of folders) {
-    if (folder.path === '') {
-      count += 1
-      continue
-    }
-
-    if (getVisibleFilesInSubtree(visibleFiles, folder.path).length > 0) {
-      count += 1
-    }
-  }
-
-  return count
-}
-
-function getVisibleFilesInSubtree(
-  visibleFiles: VisibleRepoFile[],
-  folderPath: string,
-) {
-  return visibleFiles.filter(
+function countVisibleFolderNodes(visibleNodes: VisibleRepoNode[]) {
+  return visibleNodes.filter(
     (entry) =>
-      entry.file.folderPath === folderPath ||
-      entry.file.folderPath.startsWith(`${folderPath}/`),
+      entry.node.type === 'folder' || entry.node.type === 'collapsedFolder',
+  ).length
+}
+
+function getCardSecondaryLabel(
+  entry: VisibleRepoNode,
+  sectionPath: string,
+) {
+  if (entry.node.type === 'file') {
+    if (sectionPath === '' || entry.node.path === entry.node.label) {
+      return entry.node.path
+    }
+
+    if (entry.node.path.startsWith(`${sectionPath}/`)) {
+      return entry.node.path.slice(sectionPath.length + 1)
+    }
+
+    return entry.node.path
+  }
+
+  if (entry.node.type === 'moreGroup') {
+    return `${formatNumber(entry.node.hiddenChildCount || entry.node.childCount)} hidden descendants`
+  }
+
+  if (entry.node.type === 'collapsedFolder') {
+    return `${formatNumber(entry.node.childCount)} collapsed children • ${formatNumber(entry.node.sourceFileIds.length)} source files`
+  }
+
+  if (entry.node.path === '') {
+    return 'workspace'
+  }
+
+  return `${formatNumber(entry.node.childCount)} direct children`
+}
+
+function getCardTertiaryLabel(entry: VisibleRepoNode) {
+  if (entry.node.type === 'file') {
+    return 'Peak'
+  }
+
+  if (entry.node.hiddenChildCount > 0) {
+    return 'Hidden'
+  }
+
+  return 'Children'
+}
+
+function compareVisibleNodesForCards(
+  left: VisibleRepoNode,
+  right: VisibleRepoNode,
+) {
+  const leftIsFolderLike =
+    left.node.type === 'folder' || left.node.type === 'collapsedFolder'
+  const rightIsFolderLike =
+    right.node.type === 'folder' || right.node.type === 'collapsedFolder'
+
+  if (leftIsFolderLike !== rightIsFolderLike) {
+    return leftIsFolderLike ? -1 : 1
+  }
+
+  if (left.node.type === 'moreGroup' || right.node.type === 'moreGroup') {
+    if (left.node.type !== right.node.type) {
+      return left.node.type === 'moreGroup' ? 1 : -1
+    }
+  }
+
+  return (
+    right.state.currentLineCount - left.state.currentLineCount ||
+    right.currentVisualWeight - left.currentVisualWeight ||
+    left.node.path.localeCompare(right.node.path)
   )
 }
 

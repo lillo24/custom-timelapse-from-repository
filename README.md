@@ -10,6 +10,7 @@ timelapse scene.
 - `npm run preview`
 - `npm run lint`
 - `npm run preview:visual-model -- --model data/generated/repo-visual-model.json --out data/generated/repo-visual-model-preview.md`
+- `npm run build:animation-data -- --repo ../thesis-disi-chatbot --config repo-animation.config.json`
 
 ## Scope
 
