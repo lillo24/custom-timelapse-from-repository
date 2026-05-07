@@ -31,3 +31,12 @@ React repository view is built.
 `generate:visual-model` also mirrors the latest output into
 `public/data/repo-visual-model.json` so the Vite app can load the repository
 scene from generated data without hardcoding the dataset inside React.
+
+
+# Tools for Fast Changes to Layout
+## Changing gap between right line and text (gap-5)
+className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] leading-5 transition ${
+
+## Changing right line length (12)
+width: `${SIDEBAR_TREE_INDENT / 2 + 12}px`
+

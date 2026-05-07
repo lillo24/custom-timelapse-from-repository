@@ -1,12 +1,15 @@
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import {
   startTransition,
+  type CSSProperties,
   useEffect,
   useEffectEvent,
   useMemo,
+  type RefObject,
   useRef,
   useState,
 } from 'react'
+import { createPortal } from 'react-dom'
 import { PresentationStage } from '../components/presentation/PresentationStage'
 import { useRepoVisualModel } from '../hooks/useRepoVisualModel'
 import {
@@ -26,6 +29,15 @@ import type {
 
 type PlaybackSpeed = (typeof PLAYBACK_SPEED_OPTIONS)[number]
 type PlaybackDurationSeconds = (typeof PLAYBACK_DURATION_OPTIONS)[number]
+type FloatingPlaybackLayout = 'vertical' | 'horizontal'
+type ViewportBounds = {
+  top: number
+  right: number
+  bottom: number
+  left: number
+  width: number
+  height: number
+}
 
 type CurrentRepoFileState = {
   path: string
@@ -52,22 +64,21 @@ type FeaturedFolder = {
   visibleFileCount: number
 }
 
-type SidebarChild = {
-  folder: VisualFolder
-  visibleFileCount: number
-}
-
-type SidebarNode = {
-  folder: VisualFolder
-  children: SidebarChild[]
-  totalVisualWeight: number
-  visibleFileCount: number
-}
-
 type RepoProgressState = {
   activeUnit: VisualTimelineUnit | null
   visibleFiles: VisibleRepoFile[]
   recentTouchedCount: number
+}
+
+type ExplorerRow = {
+  id: string
+  name: string
+  path: string
+  depth: number
+  kind: 'folder' | 'file'
+  recentlyChanged: boolean
+  ancestorHasNextSibling: boolean[]
+  hasNextSibling: boolean
 }
 
 type RepoProgressCache = {
@@ -79,6 +90,8 @@ type RepoProgressCache = {
 const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
 const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 const RECENT_UNIT_WINDOW = 20
+const SIDEBAR_EXPLORER_MAX_DEPTH = 4
+const SIDEBAR_TREE_INDENT = 14
 
 const CATEGORY_STYLES: Record<
   string,
@@ -195,11 +208,13 @@ export function RepoExplorerScene() {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
   const { model, error, isLoading } = useRepoVisualModel()
+  const stageRef = useRef<HTMLElement | null>(null)
+  const stageBounds = useElementViewportBounds(stageRef)
 
   return (
     <main className="flex h-full w-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.14),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.12),transparent_28%),linear-gradient(180deg,#020617_0%,#02030a_100%)] p-4 text-slate-50 sm:p-5 lg:p-6">
       <div className="flex h-full w-full items-center justify-center">
-        <PresentationStage>
+        <PresentationStage ref={stageRef}>
           <div className="relative h-full overflow-hidden bg-[linear-gradient(160deg,rgba(8,15,32,0.98),rgba(3,7,18,0.98))]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.1),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(251,191,36,0.08),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_30%)]" />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
@@ -218,6 +233,7 @@ export function RepoExplorerScene() {
                 <RepoExplorerCanvas
                   model={model}
                   shouldReduceMotion={shouldReduceMotion}
+                  stageBounds={stageBounds}
                 />
               ) : (
                 <RepoExplorerError message="Repository model did not load." />
@@ -233,11 +249,12 @@ export function RepoExplorerScene() {
 function RepoExplorerCanvas({
   model,
   shouldReduceMotion,
+  stageBounds,
 }: {
   model: RepoVisualModel
   shouldReduceMotion: boolean
+  stageBounds: ViewportBounds | null
 }) {
-  const headerMotion = getFadeSlideUp(shouldReduceMotion, 12)
   const panelMotion = getFadeSlideSide(shouldReduceMotion, 16)
   const sectionPresenceMotion = getFadeSlideUp(shouldReduceMotion, 8)
   const maxUnitIndex = Math.max(model.timeline.length - 1, 0)
@@ -378,23 +395,12 @@ function RepoExplorerCanvas({
   const activeUnit = progressState.activeUnit
   const visibleFiles = progressState.visibleFiles
   const {
+    explorerRows,
     featuredFolders,
     largestFiles,
-    rootFiles,
-    sidebarNodes,
     visibleFileCount,
     visibleFolderCount,
-    visibleWeightTotal,
   } = useMemo(() => {
-    const nextRootFiles = visibleFiles
-      .filter((entry) => entry.file.folderPath === '')
-      .sort(
-        (left, right) =>
-          right.currentVisualWeight - left.currentVisualWeight ||
-          right.state.currentLineCount - left.state.currentLineCount ||
-          left.file.path.localeCompare(right.file.path),
-      )
-      .slice(0, 4)
     const nextLargestFiles = [...visibleFiles]
       .sort(
         (left, right) =>
@@ -405,23 +411,19 @@ function RepoExplorerCanvas({
       .slice(0, 5)
 
     return {
+      explorerRows: buildExplorerRows(visibleFiles, SIDEBAR_EXPLORER_MAX_DEPTH),
       featuredFolders: selectFeaturedFolders(model.folders, visibleFiles),
       largestFiles: nextLargestFiles,
-      rootFiles: nextRootFiles,
-      sidebarNodes: buildSidebarNodes(model.folders, visibleFiles),
       visibleFileCount: visibleFiles.length,
       visibleFolderCount: countVisibleFolders(model.folders, visibleFiles),
-      visibleWeightTotal: Math.max(
-        visibleFiles.reduce((sum, entry) => sum + entry.currentVisualWeight, 0),
-        1,
-      ),
     }
   }, [model.folders, visibleFiles])
   const canStepBackward = model.timeline.length > 0 && clampedActiveUnitIndex > 0
   const canStepForward =
     model.timeline.length > 0 && clampedActiveUnitIndex < maxUnitIndex
+  const hasTimeline = model.timeline.length > 0
   const activeUnitLabel =
-    model.timeline.length > 0
+    hasTimeline
       ? `Unit ${formatNumber(clampedActiveUnitIndex + 1)} / ${formatNumber(model.timeline.length)}`
       : 'No timeline units'
   const activeOrderLabel = activeUnit
@@ -430,134 +432,54 @@ function RepoExplorerCanvas({
 
   return (
     <>
+      <FloatingPlaybackControls
+        shouldReduceMotion={shouldReduceMotion}
+        stageBounds={stageBounds}
+        isPlaying={isPlaying}
+        canStepBackward={canStepBackward}
+        canStepForward={canStepForward}
+        hasTimeline={hasTimeline}
+        timelineLength={model.timeline.length}
+        maxUnitIndex={maxUnitIndex}
+        activeUnitIndex={clampedActiveUnitIndex}
+        activeUnitLabel={activeUnitLabel}
+        activeOrderLabel={activeOrderLabel}
+        playbackDurationSeconds={playbackDurationSeconds}
+        playbackSpeed={playbackSpeed}
+        fullRunDurationSeconds={fullRunDurationSeconds}
+        remainingPlaybackSeconds={remainingPlaybackSeconds}
+        remainingUnitCount={remainingUnitCount}
+        visibleFileCount={visibleFileCount}
+        visibleFolderCount={visibleFolderCount}
+        recentTouchedCount={progressState.recentTouchedCount}
+        onTogglePlayback={handleTogglePlayback}
+        onReset={() => {
+          updateActiveUnitIndex(0)
+        }}
+        onStepBackward={() => {
+          updateActiveUnitIndex(clampedActiveUnitIndex - 1)
+        }}
+        onStepForward={() => {
+          updateActiveUnitIndex(clampedActiveUnitIndex + 1)
+        }}
+        onSelectDuration={(durationSeconds) => {
+          setPlaybackDurationSeconds(durationSeconds)
+        }}
+        onSelectSpeed={(speed) => {
+          setPlaybackSpeed(speed)
+        }}
+        onProgressChange={(nextIndex) => {
+          updateActiveUnitIndex(nextIndex)
+        }}
+      />
+
       <FloatingInspectorPanel
         largestFiles={largestFiles}
         warnings={model.warnings}
         shouldReduceMotion={shouldReduceMotion}
       />
 
-      <motion.section
-        initial={headerMotion.initial}
-        animate={headerMotion.animate}
-        transition={{ ...springSoft, delay: getStaggerDelay(1, 0.04) }}
-        className="rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(10,16,30,0.94),rgba(4,8,18,0.96))] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-      >
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
-          <div className="min-w-0 xl:min-w-[272px]">
-            <div className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
-              Timeline position
-            </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-teal-400/20 bg-teal-400/10 px-3 py-1 font-mono text-[11px] text-teal-100">
-                {activeUnitLabel}
-              </span>
-              <span className="rounded-full border border-white/10 px-3 py-1 font-mono text-[11px] text-slate-300">
-                {activeOrderLabel}
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300">
-                {isPlaying ? 'Playing' : 'Paused'} {formatPlaybackSpeed(playbackSpeed)}
-              </span>
-              <span className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 font-mono text-[11px] text-slate-300">
-                Preset {formatDurationPreset(playbackDurationSeconds)} / Full run{' '}
-                {formatDurationSeconds(fullRunDurationSeconds)}
-              </span>
-            </div>
-
-            <div className="mt-2 text-sm text-slate-400">
-              {remainingUnitCount > 0
-                ? `${formatDurationSeconds(remainingPlaybackSeconds)} remaining at the current preset`
-                : 'Timeline complete'}
-            </div>
-            <div className="mt-1 text-sm text-slate-500">
-              {formatNumber(visibleFileCount)} visible files /{' '}
-              {formatNumber(visibleFolderCount)} visible folders /{' '}
-              {formatNumber(progressState.recentTouchedCount)} recently touched
-            </div>
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <input
-              type="range"
-              min={0}
-              max={maxUnitIndex}
-              step={1}
-              value={clampedActiveUnitIndex}
-              onChange={(event) => {
-                updateActiveUnitIndex(Number.parseInt(event.target.value, 10))
-              }}
-              disabled={model.timeline.length === 0}
-              aria-label="Repository timeline position"
-              className="h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-teal-400 disabled:cursor-not-allowed disabled:opacity-40"
-            />
-
-            <div className="mt-2 flex items-center justify-between gap-4 text-[10px] uppercase tracking-[0.24em] text-slate-500">
-              <span>Start</span>
-              <span>Recent pulse window: {RECENT_UNIT_WINDOW} units</span>
-              <span>Current</span>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 flex-col gap-2 xl:items-end">
-            <div className="flex flex-wrap items-center gap-2">
-              <ControlButton
-                label={isPlaying ? 'Pause' : 'Play'}
-                onClick={handleTogglePlayback}
-                disabled={model.timeline.length === 0}
-                isPrimary
-              />
-              <ControlButton
-                label="Reset"
-                onClick={() => {
-                  updateActiveUnitIndex(0)
-                }}
-                disabled={model.timeline.length === 0 || clampedActiveUnitIndex === 0}
-              />
-              <ControlButton
-                label="Previous"
-                onClick={() => {
-                  updateActiveUnitIndex(clampedActiveUnitIndex - 1)
-                }}
-                disabled={!canStepBackward}
-              />
-              <ControlButton
-                label="Next"
-                onClick={() => {
-                  updateActiveUnitIndex(clampedActiveUnitIndex + 1)
-                }}
-                disabled={!canStepForward}
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {PLAYBACK_DURATION_OPTIONS.map((durationSeconds) => (
-                <DurationButton
-                  key={durationSeconds}
-                  durationSeconds={durationSeconds}
-                  isActive={playbackDurationSeconds === durationSeconds}
-                  onClick={() => {
-                    setPlaybackDurationSeconds(durationSeconds)
-                  }}
-                />
-              ))}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {PLAYBACK_SPEED_OPTIONS.map((speed) => (
-                <SpeedButton
-                  key={speed}
-                  speed={speed}
-                  isActive={playbackSpeed === speed}
-                  onClick={() => {
-                    setPlaybackSpeed(speed)
-                  }}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.section>
-
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[248px_minmax(0,1fr)]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[264px_minmax(0,1fr)]">
         <motion.aside
           initial={panelMotion.initial}
           animate={panelMotion.animate}
@@ -565,87 +487,25 @@ function RepoExplorerCanvas({
           className="min-h-0 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,28,0.94),rgba(4,8,18,0.94))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
         >
           <div className="flex h-full flex-col gap-4">
-            <PanelHeader
-              title="Project tree"
-              subtitle="Top-level folders and their strongest branches"
-            />
-
-            <div className="rounded-[20px] border border-white/8 bg-slate-950/55 px-3 py-3">
-              <div className="flex items-center justify-between gap-3 text-sm text-slate-200">
-                <span className="font-medium">workspace</span>
-                <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                  root
-                </span>
+            <div className="space-y-2">
+              <div className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
+                Explorer
               </div>
+              <div className="h-px bg-white/6" />
+            </div>
 
-              {rootFiles.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {rootFiles.map((entry) => (
-                    <span
-                      key={entry.file.id}
-                      className="rounded-full border border-white/8 bg-white/[0.03] px-2.5 py-1 text-[11px] text-slate-300"
-                    >
-                      {entry.file.name}
-                    </span>
+            <div className="min-h-0 overflow-y-auto pr-1">
+              {explorerRows.length > 0 ? (
+                <div>
+                  {explorerRows.map((row) => (
+                    <ExplorerTreeRow
+                      key={row.id}
+                      row={row}
+                    />
                   ))}
                 </div>
               ) : (
-                <p className="mt-3 text-[12px] leading-5 text-slate-500">
-                  Root files will appear as the timeline advances.
-                </p>
-              )}
-            </div>
-
-            <div className="min-h-0 space-y-3 overflow-y-auto pr-1">
-              {sidebarNodes.length > 0 ? (
-                sidebarNodes.map((node) => (
-                  <div
-                    key={node.folder.id}
-                    className="rounded-[22px] border border-white/8 bg-white/[0.02] px-3 py-3"
-                  >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-medium text-slate-100">
-                          {node.folder.name}
-                        </div>
-                        <div className="mt-1 truncate font-mono text-[11px] text-slate-500">
-                          {node.folder.path}
-                        </div>
-                      </div>
-                      <div className="rounded-full border border-white/10 px-2 py-1 font-mono text-[10px] text-slate-400">
-                        {formatNumber(node.visibleFileCount)}
-                      </div>
-                    </div>
-
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800/90">
-                      <motion.div
-                        className="h-full rounded-full bg-[linear-gradient(90deg,rgba(45,212,191,0.9),rgba(56,189,248,0.75))]"
-                        animate={{
-                          width: `${Math.max(16, Math.min(100, (node.totalVisualWeight / visibleWeightTotal) * 100))}%`,
-                        }}
-                        transition={{ duration: 0.28, ease: 'easeOut' }}
-                      />
-                    </div>
-
-                    {node.children.length > 0 ? (
-                      <div className="mt-3 space-y-2 border-l border-white/6 pl-3">
-                        {node.children.map((child) => (
-                          <div
-                            key={child.folder.id}
-                            className="flex items-center justify-between gap-3 text-[12px] text-slate-300"
-                          >
-                            <span className="truncate">{child.folder.name}</span>
-                            <span className="font-mono text-[10px] text-slate-500">
-                              {formatNumber(child.visibleFileCount)}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                ))
-              ) : (
-                <EmptyPanelState message="No folders are visible at the current timeline position." />
+                <EmptyPanelState message="Visible files will appear here as the timeline advances." />
               )}
             </div>
           </div>
@@ -746,18 +606,22 @@ function ControlButton({
   onClick,
   disabled,
   isPrimary = false,
+  isCompact = false,
 }: {
   label: string
   onClick: () => void
   disabled: boolean
   isPrimary?: boolean
+  isCompact?: boolean
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-full border px-4 py-2 text-sm transition disabled:cursor-not-allowed disabled:opacity-40 ${
+      className={`rounded-full border transition disabled:cursor-not-allowed disabled:opacity-40 ${
+        isCompact ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2 text-sm'
+      } ${
         isPrimary
           ? 'border-teal-300/25 bg-teal-300/14 text-teal-50 hover:bg-teal-300/18'
           : 'border-white/10 bg-white/[0.03] text-slate-200 hover:bg-white/[0.06]'
@@ -765,6 +629,327 @@ function ControlButton({
     >
       {label}
     </button>
+  )
+}
+
+function FloatingPlaybackControls({
+  shouldReduceMotion,
+  stageBounds,
+  isPlaying,
+  canStepBackward,
+  canStepForward,
+  hasTimeline,
+  timelineLength,
+  maxUnitIndex,
+  activeUnitIndex,
+  activeUnitLabel,
+  activeOrderLabel,
+  playbackDurationSeconds,
+  playbackSpeed,
+  fullRunDurationSeconds,
+  remainingPlaybackSeconds,
+  remainingUnitCount,
+  visibleFileCount,
+  visibleFolderCount,
+  recentTouchedCount,
+  onTogglePlayback,
+  onReset,
+  onStepBackward,
+  onStepForward,
+  onSelectDuration,
+  onSelectSpeed,
+  onProgressChange,
+}: {
+  shouldReduceMotion: boolean
+  stageBounds: ViewportBounds | null
+  isPlaying: boolean
+  canStepBackward: boolean
+  canStepForward: boolean
+  hasTimeline: boolean
+  timelineLength: number
+  maxUnitIndex: number
+  activeUnitIndex: number
+  activeUnitLabel: string
+  activeOrderLabel: string
+  playbackDurationSeconds: PlaybackDurationSeconds
+  playbackSpeed: PlaybackSpeed
+  fullRunDurationSeconds: number
+  remainingPlaybackSeconds: number
+  remainingUnitCount: number
+  visibleFileCount: number
+  visibleFolderCount: number
+  recentTouchedCount: number
+  onTogglePlayback: () => void
+  onReset: () => void
+  onStepBackward: () => void
+  onStepForward: () => void
+  onSelectDuration: (durationSeconds: PlaybackDurationSeconds) => void
+  onSelectSpeed: (speed: PlaybackSpeed) => void
+  onProgressChange: (nextIndex: number) => void
+}) {
+  const [layout, setLayout] = useState<FloatingPlaybackLayout>('vertical')
+  const [isExpanded, setIsExpanded] = useState(false)
+  const presenceMotion = getScaleFade(shouldReduceMotion)
+  const expandedMotion = getFadeSlideUp(shouldReduceMotion, 6)
+  const isVertical = layout === 'vertical'
+  const floatingStyle = getFloatingPlaybackPosition(layout, stageBounds)
+  const utilityButtonClass =
+    'inline-flex h-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] px-3 text-[11px] text-slate-200 transition hover:bg-white/[0.06] disabled:cursor-not-allowed disabled:opacity-40'
+
+  const content = (
+    <div
+      style={floatingStyle}
+      className="pointer-events-none fixed z-30"
+    >
+      <motion.div
+        initial={presenceMotion.initial}
+        animate={presenceMotion.animate}
+        transition={{ ...springSoft, delay: getStaggerDelay(1, 0.05) }}
+        className={`pointer-events-auto overflow-hidden rounded-[24px] border border-white/10 bg-slate-950/72 p-3 shadow-[0_22px_60px_rgba(2,6,23,0.34)] backdrop-blur-md ${
+          isVertical
+            ? 'w-auto max-w-[calc(100vw-2.5rem)]'
+            : 'max-w-[calc(100vw-2.5rem)]'
+        }`}
+      >
+        <div
+          className={
+            isVertical
+              ? 'flex w-fit flex-col items-center gap-3'
+              : 'flex flex-wrap items-center gap-3'
+          }
+        >
+          <div
+            className={`flex gap-2 ${
+              isVertical ? 'flex-col items-center self-stretch' : 'flex-wrap items-center'
+            }`}
+          >
+            <ControlButton
+              label={isPlaying ? 'Pause' : 'Play'}
+              onClick={onTogglePlayback}
+              disabled={!hasTimeline}
+              isPrimary
+              isCompact
+            />
+            <ControlButton
+              label="Reset"
+              onClick={onReset}
+              disabled={!hasTimeline || activeUnitIndex === 0}
+              isCompact
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setIsExpanded((current) => !current)
+              }}
+              aria-expanded={isExpanded}
+              aria-label={isExpanded ? 'Hide playback details' : 'Show playback details'}
+              className={`${utilityButtonClass} w-8 px-0`}
+            >
+              {isExpanded ? '-' : '+'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setLayout((current) =>
+                  current === 'vertical' ? 'horizontal' : 'vertical',
+                )
+              }}
+              aria-label={`Switch floating controls to ${
+                isVertical ? 'horizontal' : 'vertical'
+              } layout`}
+              className={utilityButtonClass}
+            >
+              {isVertical ? 'Vertical' : 'Horizontal'}
+            </button>
+          </div>
+
+          <div
+            className={
+              isVertical
+                ? 'flex items-center justify-center self-center py-1'
+                : 'min-w-[12rem] flex-1 space-y-1.5'
+            }
+          >
+            <input
+              type="range"
+              min={0}
+              max={maxUnitIndex}
+              step={1}
+              value={activeUnitIndex}
+              onChange={(event) => {
+                onProgressChange(Number.parseInt(event.target.value, 10))
+              }}
+              disabled={!hasTimeline}
+              aria-label="Repository timeline position"
+              className={`cursor-pointer appearance-none rounded-full bg-slate-800 accent-teal-300 disabled:cursor-not-allowed disabled:opacity-40 ${
+                isVertical ? 'h-40 w-1.5' : 'h-1.5 w-full'
+              }`}
+              style={
+                isVertical
+                  ? ({
+                      writingMode: 'vertical-lr',
+                      WebkitAppearance: 'slider-vertical',
+                    } as CSSProperties)
+                  : undefined
+              }
+            />
+          </div>
+
+          <div
+            className={`${
+              isVertical ? 'space-y-2 self-center' : 'flex flex-wrap items-center gap-3'
+            }`}
+          >
+            <div className="space-y-1.5">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                Duration
+              </div>
+              <div
+                className={`flex gap-1.5 ${
+                  isVertical ? 'flex-col items-start' : 'flex-wrap items-center'
+                }`}
+              >
+                {PLAYBACK_DURATION_OPTIONS.map((durationSeconds) => (
+                  <DurationButton
+                    key={durationSeconds}
+                    durationSeconds={durationSeconds}
+                    isActive={playbackDurationSeconds === durationSeconds}
+                    onClick={() => {
+                      onSelectDuration(durationSeconds)
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                Speed
+              </div>
+              <div
+                className={`flex gap-1.5 ${
+                  isVertical ? 'flex-col items-start' : 'flex-wrap items-center'
+                }`}
+              >
+                {PLAYBACK_SPEED_OPTIONS.map((speed) => (
+                  <SpeedButton
+                    key={speed}
+                    speed={speed}
+                    isActive={playbackSpeed === speed}
+                    onClick={() => {
+                      onSelectSpeed(speed)
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <AnimatePresence initial={false}>
+          {isExpanded ? (
+            <motion.div
+              initial={expandedMotion.initial}
+              animate={expandedMotion.animate}
+              exit={expandedMotion.exit}
+              transition={springSoft}
+              className={`mt-3 border-t border-white/8 pt-3 ${
+                isVertical ? 'space-y-3' : 'flex flex-wrap items-start gap-3'
+              }`}
+            >
+              <div
+                className={`flex gap-2 ${
+                  isVertical ? 'justify-center' : 'flex-wrap items-center'
+                }`}
+              >
+                <ControlButton
+                  label="Previous"
+                  onClick={onStepBackward}
+                  disabled={!canStepBackward}
+                  isCompact
+                />
+                <ControlButton
+                  label="Next"
+                  onClick={onStepForward}
+                  disabled={!canStepForward}
+                  isCompact
+                />
+              </div>
+
+              <div
+                className={`grid gap-2 ${
+                  isVertical
+                    ? 'grid-cols-2'
+                    : 'min-w-[18rem] flex-1 grid-cols-2 sm:grid-cols-3 xl:grid-cols-4'
+                }`}
+              >
+                <PlaybackStatChip
+                  label="Unit"
+                  value={activeUnitLabel}
+                />
+                <PlaybackStatChip
+                  label="Total units"
+                  value={formatNumber(timelineLength)}
+                />
+                <PlaybackStatChip
+                  label="Order"
+                  value={activeOrderLabel}
+                />
+                <PlaybackStatChip
+                  label="Full run"
+                  value={formatDurationSeconds(fullRunDurationSeconds)}
+                />
+                <PlaybackStatChip
+                  label="Remaining"
+                  value={
+                    remainingUnitCount > 0
+                      ? formatDurationSeconds(remainingPlaybackSeconds)
+                      : 'Complete'
+                  }
+                />
+                <PlaybackStatChip
+                  label="Visible"
+                  value={`${formatNumber(visibleFileCount)} files`}
+                />
+                <PlaybackStatChip
+                  label="Folders"
+                  value={formatNumber(visibleFolderCount)}
+                />
+                <PlaybackStatChip
+                  label="Pulse"
+                  value={`${formatNumber(recentTouchedCount)} recent`}
+                />
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  )
+
+  if (typeof document === 'undefined') {
+    return content
+  }
+
+  return createPortal(content, document.body)
+}
+
+function PlaybackStatChip({
+  label,
+  value,
+}: {
+  label: string
+  value: string
+}) {
+  return (
+    <div className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-2">
+      <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-slate-500">
+        {label}
+      </div>
+      <div className="mt-1 text-[11px] text-slate-200">
+        {value}
+      </div>
+    </div>
   )
 }
 
@@ -813,6 +998,79 @@ function DurationButton({
     >
       {formatDurationPreset(durationSeconds)}
     </button>
+  )
+}
+
+function ExplorerTreeRow({
+  row,
+}: {
+  row: ExplorerRow
+}) {
+  const gutterWidth = row.depth * SIDEBAR_TREE_INDENT
+  const currentColumnOffset =
+    row.depth > 0
+      ? (row.depth - 1) * SIDEBAR_TREE_INDENT + SIDEBAR_TREE_INDENT / 2
+      : 0
+  const lineColor = 'rgba(148, 163, 184, 0.3)'
+  const highlightLineColor = 'rgba(94, 234, 212, 0.32)'
+  const connectorColor = row.recentlyChanged ? highlightLineColor : lineColor
+
+  return (
+    <div
+      title={row.path}
+      className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] leading-5 transition ${
+        row.recentlyChanged
+          ? 'bg-teal-400/[0.07] text-slate-100'
+          : row.kind === 'folder'
+            ? 'text-slate-200'
+            : 'text-slate-300'
+      }`}
+    >
+      {row.depth > 0 ? (
+        <div
+          aria-hidden
+          className="relative shrink-0 self-stretch"
+          style={{ width: `${gutterWidth}px` }}
+        >
+          {row.ancestorHasNextSibling.map((continues, index) =>
+            continues ? (
+              <span
+                key={`${row.id}:ancestor:${index}`}
+                className="absolute top-[-2px] bottom-[-2px] border-l"
+                style={{
+                  left: `${index * SIDEBAR_TREE_INDENT + SIDEBAR_TREE_INDENT / 2}px`,
+                  borderColor: connectorColor,
+                }}
+              />
+            ) : null,
+          )}
+
+          <span
+            className="absolute border-l border-b"
+            style={{
+              left: `${currentColumnOffset}px`,
+              top: 0,
+              width: `${SIDEBAR_TREE_INDENT / 2 + 13}px`,
+              height: '50%',
+              borderColor: connectorColor,
+              borderBottomLeftRadius: '7px',
+            }}
+          />
+          {row.hasNextSibling ? (
+            <span
+              className="absolute top-[50%] bottom-[-2px] border-l"
+              style={{
+                left: `${currentColumnOffset}px`,
+                borderColor: connectorColor,
+              }}
+            />
+          ) : null}
+        </div>
+      ) : null}
+      <span className="min-w-0 truncate pt-[1px]">
+        {row.name}
+      </span>
+    </div>
   )
 }
 
@@ -1158,26 +1416,51 @@ function EmptyPanelState({
 function RepoExplorerSkeleton() {
   return (
     <>
-      <div className="space-y-4">
-        <div className="h-7 w-56 rounded-full bg-white/8" />
-        <div className="h-14 w-[28rem] max-w-full rounded-[24px] bg-white/6" />
-      </div>
-
-      <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4">
-        <div className="flex flex-col gap-4 xl:flex-row">
-          <div className="h-16 rounded-[18px] bg-white/[0.04] xl:w-72" />
-          <div className="h-16 flex-1 rounded-[18px] bg-white/[0.04]" />
-          <div className="h-16 rounded-[18px] bg-white/[0.04] xl:w-60" />
+      <div className="pointer-events-none fixed right-5 top-1/2 z-30 -translate-y-1/2 sm:right-6">
+        <div className="w-[18rem] max-w-[calc(100vw-2.5rem)] rounded-[24px] border border-white/8 bg-white/[0.05] p-3 shadow-[0_22px_60px_rgba(2,6,23,0.2)] backdrop-blur-md">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="h-8 w-14 rounded-full bg-white/[0.08]" />
+              <div className="h-8 w-14 rounded-full bg-white/[0.07]" />
+              <div className="h-8 w-8 rounded-full bg-white/[0.07]" />
+              <div className="h-8 w-20 rounded-full bg-white/[0.07]" />
+            </div>
+            <div className="h-1.5 rounded-full bg-white/[0.08]" />
+            <div className="space-y-2">
+              <div className="space-y-1.5">
+                <div className="h-3 w-14 rounded-full bg-white/[0.06]" />
+                <div className="flex flex-wrap gap-1.5">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={`duration-${index}`}
+                      className="h-7 w-11 rounded-full bg-white/[0.07]"
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <div className="h-3 w-10 rounded-full bg-white/[0.06]" />
+                <div className="flex flex-wrap gap-1.5">
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <div
+                      key={`speed-${index}`}
+                      className="h-7 w-11 rounded-full bg-white/[0.07]"
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[248px_minmax(0,1fr)_272px]">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[264px_minmax(0,1fr)]">
         <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4">
           <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: 12 }).map((_, index) => (
               <div
                 key={index}
-                className="h-20 rounded-[22px] bg-white/[0.04]"
+                className="h-6 rounded-md bg-white/[0.04]"
               />
             ))}
           </div>
@@ -1203,20 +1486,125 @@ function RepoExplorerSkeleton() {
             ))}
           </div>
         </div>
-
-        <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-4">
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <div
-                key={index}
-                className="h-28 rounded-[22px] bg-white/[0.04]"
-              />
-            ))}
-          </div>
-        </div>
       </div>
     </>
   )
+}
+
+function getFloatingPlaybackPosition(
+  layout: FloatingPlaybackLayout,
+  stageBounds: ViewportBounds | null,
+) {
+  if (typeof window === 'undefined' || !stageBounds) {
+    return layout === 'vertical'
+      ? {
+          right: '0px',
+          top: '50%',
+          transform: 'translateY(-50%)',
+        }
+      : {
+          left: '50%',
+          top: '1.5rem',
+          transform: 'translateX(-50%)',
+        }
+  }
+
+  const viewportPadding = 20
+  const gap = 18
+
+  if (layout === 'vertical') {
+    const panelWidth = 288
+    const availableRight = window.innerWidth - stageBounds.right - viewportPadding
+    const availableLeft = stageBounds.left - viewportPadding
+    const alignRight =
+      availableRight >= panelWidth + gap || availableRight >= availableLeft
+
+    if (alignRight) {
+      return {
+        right: '0px',
+        top: `${stageBounds.top + stageBounds.height / 2}px`,
+        transform: 'translateY(-50%)',
+      }
+    }
+
+    const left = clampNumber(
+      stageBounds.left - panelWidth - gap,
+      viewportPadding,
+      window.innerWidth - panelWidth - viewportPadding,
+    )
+
+    return {
+      left: `${left}px`,
+      top: `${stageBounds.top + stageBounds.height / 2}px`,
+      transform: 'translateY(-50%)',
+    }
+  }
+
+  const panelWidth = 760
+  const panelHeight = 168
+  const left = clampNumber(
+    stageBounds.left + stageBounds.width / 2 - panelWidth / 2,
+    viewportPadding,
+    Math.max(viewportPadding, window.innerWidth - panelWidth - viewportPadding),
+  )
+  const aboveTop = stageBounds.top - panelHeight - gap
+  const top =
+    aboveTop >= viewportPadding
+      ? aboveTop
+      : clampNumber(
+          stageBounds.bottom + gap,
+          viewportPadding,
+          Math.max(viewportPadding, window.innerHeight - panelHeight - viewportPadding),
+        )
+
+  return {
+    left: `${left}px`,
+    top: `${top}px`,
+  }
+}
+
+function useElementViewportBounds(
+  elementRef: RefObject<HTMLElement | null>,
+) {
+  const [bounds, setBounds] = useState<ViewportBounds | null>(null)
+
+  useEffect(() => {
+    const element = elementRef.current
+
+    if (!element) {
+      return
+    }
+
+    const updateBounds = () => {
+      const rect = element.getBoundingClientRect()
+      setBounds({
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      })
+    }
+
+    updateBounds()
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateBounds()
+    })
+
+    resizeObserver.observe(element)
+    window.addEventListener('resize', updateBounds)
+    window.addEventListener('scroll', updateBounds, true)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateBounds)
+      window.removeEventListener('scroll', updateBounds, true)
+    }
+  }, [elementRef])
+
+  return bounds
 }
 
 function RepoExplorerError({
@@ -1641,56 +2029,126 @@ function selectFeaturedFolders(
   return selected
 }
 
-function buildSidebarNodes(
-  folders: VisualFolder[],
+function buildExplorerRows(
   visibleFiles: VisibleRepoFile[],
-): SidebarNode[] {
-  const directChildren = new Map<string, VisualFolder[]>()
+  maxDepth: number,
+): ExplorerRow[] {
+  const childRowsByParent = new Map<string, ExplorerRow[]>()
+  const folderPaths = new Set<string>()
+  const recentlyChangedFolderPaths = new Set<string>()
 
-  for (const folder of folders) {
-    if (!folder.parentPath) {
+  const pushRow = (parentPath: string, row: ExplorerRow) => {
+    const rows = childRowsByParent.get(parentPath) ?? []
+    rows.push(row)
+    childRowsByParent.set(parentPath, rows)
+  }
+
+  for (const entry of visibleFiles) {
+    const pathSegments = entry.file.path.split('/')
+    const deepestVisibleFolderIndex = Math.min(pathSegments.length - 2, maxDepth)
+
+    for (let index = 0; index <= deepestVisibleFolderIndex; index += 1) {
+      const folderPath = pathSegments.slice(0, index + 1).join('/')
+
+      if (!folderPath) {
+        continue
+      }
+
+      folderPaths.add(folderPath)
+
+      if (entry.state.recentlyChanged) {
+        recentlyChangedFolderPaths.add(folderPath)
+      }
+    }
+  }
+
+  for (const folderPath of folderPaths) {
+    const pathSegments = folderPath.split('/')
+    const depth = pathSegments.length - 1
+    const name = pathSegments[pathSegments.length - 1] ?? folderPath
+    const parentPath =
+      depth === 0 ? '' : pathSegments.slice(0, -1).join('/')
+
+    pushRow(parentPath, {
+      id: `folder:${folderPath}`,
+      name,
+      path: folderPath,
+      depth,
+      kind: 'folder',
+      recentlyChanged: recentlyChangedFolderPaths.has(folderPath),
+      ancestorHasNextSibling: [],
+      hasNextSibling: false,
+    })
+  }
+
+  for (const entry of visibleFiles) {
+    const depth = entry.file.path.split('/').length - 1
+
+    if (depth > maxDepth) {
       continue
     }
 
-    const siblings = directChildren.get(folder.parentPath) ?? []
-    siblings.push(folder)
-    directChildren.set(folder.parentPath, siblings)
+    pushRow(entry.file.folderPath, {
+      id: `file:${entry.file.path}`,
+      name: entry.file.name,
+      path: entry.file.path,
+      depth,
+      kind: 'file',
+      recentlyChanged: entry.state.recentlyChanged,
+      ancestorHasNextSibling: [],
+      hasNextSibling: false,
+    })
   }
 
-  return folders
-    .filter((folder) => folder.depth === 1)
-    .map((folder) => {
-      const subtreeFiles = getVisibleFilesInSubtree(visibleFiles, folder.path)
-      const visibleFileCount = subtreeFiles.length
+  const flattenedRows: ExplorerRow[] = []
 
-      return {
-        folder,
-        children: (directChildren.get(folder.path) ?? [])
-          .map((childFolder) => ({
-            folder: childFolder,
-            visibleFileCount: getVisibleFilesInSubtree(visibleFiles, childFolder.path).length,
-          }))
-          .filter((child) => child.visibleFileCount > 0)
-          .sort(
-            (left, right) =>
-              right.visibleFileCount - left.visibleFileCount ||
-              left.folder.path.localeCompare(right.folder.path),
-          )
-          .slice(0, 3),
-        totalVisualWeight: subtreeFiles.reduce(
-          (sum, entry) => sum + entry.currentVisualWeight,
-          0,
-        ),
-        visibleFileCount,
-      }
-    })
-    .filter((node) => node.visibleFileCount > 0)
-    .sort(
-      (left, right) =>
-        right.totalVisualWeight - left.totalVisualWeight ||
-        right.visibleFileCount - left.visibleFileCount ||
-        left.folder.path.localeCompare(right.folder.path),
+  const appendChildren = (
+    parentPath: string,
+    ancestorHasNextSibling: boolean[],
+    parentHasNextSibling: boolean | null,
+  ) => {
+    const rows = [...(childRowsByParent.get(parentPath) ?? [])].sort(
+      compareExplorerRows,
     )
+
+    for (const [index, row] of rows.entries()) {
+      const hasNextSibling = index < rows.length - 1
+
+      flattenedRows.push({
+        ...row,
+        ancestorHasNextSibling,
+        hasNextSibling,
+      })
+
+      if (row.kind === 'folder' && row.depth < maxDepth) {
+        const nextAncestorHasNextSibling =
+          row.depth === 0 || parentHasNextSibling === null
+            ? ancestorHasNextSibling
+            : [...ancestorHasNextSibling, parentHasNextSibling]
+
+        appendChildren(
+          row.path,
+          nextAncestorHasNextSibling,
+          hasNextSibling,
+        )
+      }
+    }
+  }
+
+  appendChildren('', [], null)
+
+  return flattenedRows
+}
+
+function compareExplorerRows(
+  left: ExplorerRow,
+  right: ExplorerRow,
+) {
+  if (left.kind !== right.kind) {
+    return left.kind === 'folder' ? -1 : 1
+  }
+
+  return left.name.localeCompare(right.name) || left.path.localeCompare(right.path)
 }
 
 function countVisibleFolders(
