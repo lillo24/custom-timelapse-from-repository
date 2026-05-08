@@ -33,6 +33,30 @@ React repository view is built.
 `public/data/repo-visual-model.json` so the Vite app can load the repository
 scene from generated data without hardcoding the dataset inside React.
 
+## Repo Explorer V1 snapshot
+
+The frozen V1 repository scene reads
+`public/data/snapshots/repo-display-model-v1.json`.
+
+The live repository scene continues to read
+`public/data/repo-display-model.json`.
+
+This means future preprocessing changes may affect the live repository scene
+without changing Repository V1. The config used for the frozen snapshot is kept
+in `data/snapshots/repo-animation-config-v1.json` for auditability.
+
+To intentionally refresh V1, manually copy the current generated display model
+into `public/data/snapshots/repo-display-model-v1.json` again after reviewing
+the live output.
+
+After reviewing the snapshot, run:
+
+```bash
+git add .
+git commit -m "Snapshot repo explorer v1"
+git tag repo-explorer-v1
+```
+
 
 # Tools for Fast Changes to Layout
 ## `maxVisibleRows` is currently advisory only in preprocessing

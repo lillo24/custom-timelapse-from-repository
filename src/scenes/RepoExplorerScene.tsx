@@ -12,7 +12,10 @@ import {
 import { createPortal } from 'react-dom'
 import { LineCounterOverlay } from '../components/repo/LineCounterOverlay'
 import { PresentationStage } from '../components/presentation/PresentationStage'
-import { useRepoDisplayModel } from '../hooks/useRepoDisplayModel'
+import {
+  LIVE_REPO_DISPLAY_MODEL_URL,
+  useRepoDisplayModel,
+} from '../hooks/useRepoDisplayModel'
 import {
   getFadeSlideSide,
   getFadeSlideUp,
@@ -191,10 +194,18 @@ const VISUAL_SIZE_RANK: Record<RepoVisualSize, number> = {
   xl: 4,
 }
 
-export function RepoExplorerScene() {
+type RepoExplorerSceneProps = {
+  modelUrl?: string
+  snapshotLabel?: string
+}
+
+export function RepoExplorerScene({
+  modelUrl = LIVE_REPO_DISPLAY_MODEL_URL,
+  snapshotLabel,
+}: RepoExplorerSceneProps) {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
-  const { model, error, isLoading } = useRepoDisplayModel()
+  const { model, error, isLoading } = useRepoDisplayModel(modelUrl)
   const stageRef = useRef<HTMLElement | null>(null)
   const stageBounds = useElementViewportBounds(stageRef)
 
@@ -205,6 +216,13 @@ export function RepoExplorerScene() {
           <div className="relative h-full overflow-hidden bg-[linear-gradient(160deg,rgba(8,15,32,0.98),rgba(3,7,18,0.98))]">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(45,212,191,0.1),transparent_28%),radial-gradient(circle_at_82%_16%,rgba(251,191,36,0.08),transparent_18%),linear-gradient(180deg,rgba(255,255,255,0.02),transparent_30%)]" />
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            {snapshotLabel ? (
+              <div className="pointer-events-none absolute left-5 top-5 z-10 sm:left-6 sm:top-6">
+                <div className="rounded-full border border-amber-300/20 bg-slate-950/82 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-amber-100/90 shadow-[0_14px_32px_rgba(0,0,0,0.24)] backdrop-blur-md">
+                  {snapshotLabel}
+                </div>
+              </div>
+            ) : null}
 
             <motion.div
               initial={overlayMotion.initial}
@@ -215,7 +233,10 @@ export function RepoExplorerScene() {
               {isLoading ? (
                 <RepoExplorerSkeleton />
               ) : error ? (
-                <RepoExplorerError message={error} />
+                <RepoExplorerError
+                  message={error}
+                  modelUrl={modelUrl}
+                />
               ) : model ? (
                 <RepoExplorerCanvas
                   model={model}
@@ -223,7 +244,10 @@ export function RepoExplorerScene() {
                   stageBounds={stageBounds}
                 />
               ) : (
-                <RepoExplorerError message="Repository display model did not load." />
+                <RepoExplorerError
+                  message="Repository display model did not load."
+                  modelUrl={modelUrl}
+                />
               )}
             </motion.div>
           </div>
@@ -1486,8 +1510,10 @@ function useElementViewportBounds(
 
 function RepoExplorerError({
   message,
+  modelUrl,
 }: {
   message: string
+  modelUrl: string
 }) {
   return (
     <div className="grid flex-1 place-items-center">
@@ -1502,11 +1528,13 @@ function RepoExplorerError({
           {message}
         </p>
         <p className="mt-3 text-sm leading-6 text-rose-50/70">
-          Re-run the preprocessing pipeline so{' '}
+          {modelUrl === LIVE_REPO_DISPLAY_MODEL_URL
+            ? 'Re-run the preprocessing pipeline so '
+            : 'Refresh or recopy the frozen snapshot so '}
           <code className="rounded bg-black/20 px-1.5 py-0.5 text-[13px]">
-            public/data/repo-display-model.json
+            {modelUrl}
           </code>{' '}
-          is refreshed for the app.
+          is available for the app.
         </p>
       </div>
     </div>

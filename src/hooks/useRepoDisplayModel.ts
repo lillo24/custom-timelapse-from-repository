@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { RepoDisplayModel } from '../preprocessing/displayModelTypes'
 
-const REPO_DISPLAY_MODEL_URL = '/data/repo-display-model.json'
+export const LIVE_REPO_DISPLAY_MODEL_URL = '/data/repo-display-model.json'
 
 type RepoDisplayModelState = {
   model: RepoDisplayModel | null
@@ -9,7 +9,9 @@ type RepoDisplayModelState = {
   isLoading: boolean
 }
 
-export function useRepoDisplayModel() {
+export function useRepoDisplayModel(
+  modelUrl: string = LIVE_REPO_DISPLAY_MODEL_URL,
+) {
   const [state, setState] = useState<RepoDisplayModelState>({
     model: null,
     error: null,
@@ -19,9 +21,15 @@ export function useRepoDisplayModel() {
   useEffect(() => {
     const abortController = new AbortController()
 
+    setState({
+      model: null,
+      error: null,
+      isLoading: true,
+    })
+
     async function loadModel() {
       try {
-        const response = await fetch(REPO_DISPLAY_MODEL_URL, {
+        const response = await fetch(modelUrl, {
           signal: abortController.signal,
         })
 
@@ -63,7 +71,7 @@ export function useRepoDisplayModel() {
     return () => {
       abortController.abort()
     }
-  }, [])
+  }, [modelUrl])
 
   return state
 }
