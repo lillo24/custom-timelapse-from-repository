@@ -9,8 +9,8 @@ function App() {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-50 flex justify-center px-4 pt-4">
-        <div className="pointer-events-auto inline-flex rounded-full border border-white/10 bg-slate-950/75 p-1 shadow-[0_16px_60px_rgba(0,0,0,0.32)] backdrop-blur-md">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-3">
+        <div className="pointer-events-auto inline-flex rounded-full border border-white/10 bg-slate-950/75 px-1 py-0.5 shadow-[0_16px_60px_rgba(0,0,0,0.32)] backdrop-blur-md">
           {(
             [
               { id: 'document', label: 'Document' },
@@ -28,7 +28,7 @@ function App() {
                     setScene(option.id)
                   })
                 }}
-                className={`rounded-full px-4 py-2 text-sm transition ${
+                className={`rounded-full px-4 py-1.5 text-sm transition ${
                   isActive
                     ? 'bg-white text-slate-950 shadow-[0_6px_18px_rgba(255,255,255,0.16)]'
                     : 'text-slate-300 hover:bg-white/8 hover:text-white'

@@ -43,3 +43,11 @@ className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] 
 
 ## Changing right line length (12)
 width: `${SIDEBAR_TREE_INDENT / 2 + 12}px`
+
+
+
+# To improve
+## Maybe some changes in config don't need the whole pipeline to start again (especially the downloading github history)
+
+## Files may reach "maxVisibleRows" before later-root folders are born
+Files may reach "maxVisibleRows" before later-root folders are born, may hide files of the new root folder instead of taking away from other root folders to let space to new one

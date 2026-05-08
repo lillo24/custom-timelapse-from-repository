@@ -279,14 +279,16 @@ function getFloatingCounterPosition(stageBounds: ViewportBounds | null) {
   if (!stageBounds) {
     return {
       top: viewportInset,
-      left: viewportInset,
+      left: '50%',
+      transform: 'translateX(-50%)',
       maxWidth: `calc(100vw - ${viewportInset * 2}px)`,
     }
   }
 
   return {
     top: Math.max(viewportInset, stageBounds.top + 18),
-    left: Math.max(viewportInset, stageBounds.left + 18),
+    left: stageBounds.left + stageBounds.width / 2,
+    transform: 'translateX(-50%)',
     maxWidth: `min(22rem, calc(100vw - ${viewportInset * 2}px))`,
   }
 }

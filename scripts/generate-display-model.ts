@@ -7,6 +7,7 @@ import type {
   RepoDisplayModel,
   RepoDisplayNode,
   RepoDisplayTimelineUnit,
+  RepoDisplayVisibilityFrame,
 } from '../src/preprocessing/displayModelTypes.ts';
 import {
   createEmptyAnimationFilterConfig,
@@ -65,6 +66,40 @@ interface ChildStats {
   hiddenDirectChildCount: number;
 }
 
+interface BuildDisplayModelResult {
+  model: RepoDisplayModel;
+  budgetDebugExamples: string[];
+}
+
+interface SourceFileReplayState {
+  exists: boolean;
+  currentLineCount: number;
+}
+
+interface DisplayNodeRuntimeState {
+  currentLineCount: number;
+  existingFileCount: number;
+  lastTouchedUnitIndex: number;
+  lastTouchedUnitOrder: number;
+}
+
+interface InternalVisibilitySnapshot {
+  unitIndex: number;
+  unitOrder: number;
+  visibleNodeIds: string[];
+  visibleNodeIdSet: Set<string>;
+  budgetHiddenNodeIds: string[];
+  reducedFolderIds: string[];
+  reductionSummaries: string[];
+  effectiveChildCountByFolderId: Record<string, number>;
+  effectiveVisibleChildCountByFolderId: Record<string, number>;
+  effectiveHiddenChildCountByFolderId: Record<string, number>;
+  effectiveHiddenDescendantCountByFolderId: Record<string, number>;
+  rowCountBeforeBudget: number;
+  rowCountAfterBudget: number;
+  budgetApplied: boolean;
+}
+
 void main();
 
 async function main(): Promise<void> {
@@ -78,13 +113,13 @@ async function main(): Promise<void> {
     const displayConfig = configPath
       ? parseAnimationFilterConfig(configPath, await readFile(configPath, 'utf8')).display
       : createEmptyAnimationFilterConfig().display;
-    const displayModel = buildDisplayModel(
+    const displayModelResult = buildDisplayModel(
       modelPath,
       configPath,
       model,
       displayConfig,
     );
-    const serializedModel = `${JSON.stringify(displayModel, null, 2)}\n`;
+    const serializedModel = `${JSON.stringify(displayModelResult.model, null, 2)}\n`;
 
     await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, serializedModel, 'utf8');
@@ -92,17 +127,45 @@ async function main(): Promise<void> {
     await writeFile(publicOutputPath, serializedModel, 'utf8');
 
     console.log('Display model generated');
-    console.log(`Max visible rows: ${displayModel.summary.maxVisibleRows ?? 'none'}`);
-    console.log(`Visible rows before budget: ${displayModel.summary.visibleRowsBeforeBudget}`);
-    console.log(`Visible rows after budget: ${displayModel.summary.visibleRowsAfterBudget}`);
-    console.log(`Visible nodes: ${displayModel.summary.visibleNodeCount}`);
-    console.log(`Hidden-but-counted files: ${displayModel.summary.hiddenButCountedFileCount}`);
-    console.log(`Collapsed folders: ${displayModel.summary.collapsedFolderCount}`);
-    console.log(`Auto-hidden files: ${displayModel.summary.autoHiddenFiles}`);
-    console.log(`Auto-collapsed folders: ${displayModel.summary.autoCollapsedFolders}`);
-    console.log(`Auto more groups: ${displayModel.summary.autoMoreGroups}`);
-    console.log(`Timeline units mapped: ${displayModel.summary.timelineUnitsMapped}`);
-    console.log(`Warnings: ${displayModel.warnings.length}`);
+    console.log(`Max visible rows: ${displayModelResult.model.summary.maxVisibleRows ?? 'none'}`);
+    console.log(
+      `Visible rows before budget: ${displayModelResult.model.summary.visibleRowsBeforeBudget}`,
+    );
+    console.log(
+      `Visible rows after budget: ${displayModelResult.model.summary.visibleRowsAfterBudget}`,
+    );
+    console.log(
+      `Peak rows before budget: ${displayModelResult.model.summary.peakRowsBeforeBudget}`,
+    );
+    console.log(
+      `Peak rows after budget: ${displayModelResult.model.summary.peakRowsAfterBudget}`,
+    );
+    console.log(
+      `Frames with budget applied: ${displayModelResult.model.summary.framesWithBudgetApplied}`,
+    );
+    console.log(
+      `Total dynamic hidden events: ${displayModelResult.model.summary.totalDynamicHiddenEvents}`,
+    );
+    console.log(
+      `Folders reduced by budget: ${displayModelResult.model.summary.foldersReducedByBudget}`,
+    );
+    console.log(
+      `Timeline units remapped because hidden: ${displayModelResult.model.summary.timelineUnitsRemappedBecauseHidden}`,
+    );
+    console.log(`Visible nodes: ${displayModelResult.model.summary.visibleNodeCount}`);
+    console.log(
+      `Hidden-but-counted files: ${displayModelResult.model.summary.hiddenButCountedFileCount}`,
+    );
+    console.log(
+      `Collapsed folders: ${displayModelResult.model.summary.collapsedFolderCount}`,
+    );
+    console.log(`Timeline units mapped: ${displayModelResult.model.summary.timelineUnitsMapped}`);
+
+    for (const example of displayModelResult.budgetDebugExamples) {
+      console.log(example);
+    }
+
+    console.log(`Warnings: ${displayModelResult.model.warnings.length}`);
     console.log(`Wrote ${outputPath}`);
     console.log(`Mirrored ${publicOutputPath}`);
   } catch (error) {
@@ -248,8 +311,22 @@ function buildDisplayModel(
   configPath: string | undefined,
   model: RepoVisualModel,
   displayConfig: LoadedAnimationDisplayConfig,
-): RepoDisplayModel {
-  const warnings = model.warnings.map((warning) => `visual-model: ${warning}`);
+): BuildDisplayModelResult {
+  const warnings: string[] = [];
+  const warningSet = new Set<string>();
+  const pushWarning = (message: string) => {
+    if (warningSet.has(message)) {
+      return;
+    }
+
+    warningSet.add(message);
+    warnings.push(message);
+  };
+
+  for (const warning of model.warnings) {
+    pushWarning(`visual-model: ${warning}`);
+  }
+
   const files = [...model.files].sort((left, right) => left.path.localeCompare(right.path));
   const folders = [...model.folders].sort((left, right) => left.path.localeCompare(right.path));
   const fileById = new Map(files.map((file) => [file.id, file]));
@@ -270,8 +347,7 @@ function buildDisplayModel(
     Object.keys(displayConfig.maxChildrenByFolder).map((pattern) => [pattern, false]),
   );
   const maxChildrenRules = Object.entries(displayConfig.maxChildrenByFolder).sort(
-    ([leftPattern], [rightPattern]) =>
-      comparePatternSpecificity(leftPattern, rightPattern),
+    ([leftPattern], [rightPattern]) => comparePatternSpecificity(leftPattern, rightPattern),
   );
   const revealChildrenMemo = new Map<string, boolean>();
 
@@ -313,73 +389,105 @@ function buildDisplayModel(
 
   for (const [pattern, matched] of hideButCountPatternMatches.entries()) {
     if (!matched) {
-      warnings.push(`hide-but-count rule matches nothing: ${pattern}`);
+      pushWarning(`hide-but-count rule matches nothing: ${pattern}`);
     }
   }
 
   for (const [pattern, matched] of maxChildrenRuleUsages.entries()) {
     if (!matched) {
-      warnings.push(`maxChildren rule matches nothing: ${pattern}`);
+      pushWarning(`maxChildren rule matches nothing: ${pattern}`);
     }
   }
 
   const finalNodes = flattenVisibleNodes();
   finalizeVisibleNodeStats();
-  const timeline = buildDisplayTimeline(model.timeline, displayNodeIdByFileId, nodeById, warnings);
+  const sourceFolderDescendantFileIdsByPath = new Map<string, string[]>();
+
+  for (const folder of folders) {
+    sourceFolderDescendantFileIdsByPath.set(folder.path, getFolderAggregate(folder.path).fileIds);
+  }
+
+  const baseTimeline = buildDisplayTimeline(
+    model.timeline,
+    displayNodeIdByFileId,
+    nodeById,
+    pushWarning,
+  );
+  const dynamicVisibilityResult = applyDynamicVisibilityPlan({
+    nodes: finalNodes,
+    timeline: baseTimeline,
+    displayNodeIdByFileId,
+    allSourceFileIds: files.map((file) => file.id),
+    nodeById,
+    maxVisibleRows: displayConfig.maxVisibleRows,
+    childFoldersByParent,
+    childFilesByFolder,
+    sourceFolderDescendantFileIdsByPath,
+    pushWarning,
+  });
   const collapsedFolderCount = finalNodes.filter((node) => node.type === 'collapsedFolder').length;
   const fileNodeCount = finalNodes.filter((node) => node.type === 'file').length;
   const folderNodeCount = finalNodes.filter(
     (node) => node.type === 'folder' || node.type === 'collapsedFolder',
   ).length;
-  const visibleRowsBeforeBudget = finalNodes.length;
-  const visibleRowsAfterBudget = finalNodes.length;
 
-  if (timeline.length !== model.timeline.length) {
-    warnings.push(
-      `display timeline mapped ${timeline.length} of ${model.timeline.length} source timeline units.`,
+  if (baseTimeline.length !== model.timeline.length) {
+    pushWarning(
+      `display timeline mapped ${baseTimeline.length} of ${model.timeline.length} source timeline units.`,
     );
   }
 
   if (
     displayConfig.maxVisibleRows !== null &&
-    visibleRowsAfterBudget > displayConfig.maxVisibleRows
+    dynamicVisibilityResult.peakRowsAfterBudget > displayConfig.maxVisibleRows
   ) {
-    warnings.push(
-      `maxVisibleRows is currently advisory only: ${visibleRowsAfterBudget} visible rows exceed the configured budget of ${displayConfig.maxVisibleRows}.`,
+    pushWarning(
+      `visibility frame has more rows than maxVisibleRows: peak ${dynamicVisibilityResult.peakRowsAfterBudget} rows exceeds the configured budget of ${displayConfig.maxVisibleRows}.`,
     );
   }
 
   return {
-    generatedAt: new Date().toISOString(),
-    sourceVisualModelPath,
-    config: {
-      path: configPath,
-      maxDepth: displayConfig.maxDepth,
-      maxVisibleRows: displayConfig.maxVisibleRows,
-      hideButCount: [...displayConfig.hideButCount],
-      maxChildrenByFolder: { ...displayConfig.maxChildrenByFolder },
+    budgetDebugExamples: dynamicVisibilityResult.budgetDebugExamples,
+    model: {
+      generatedAt: new Date().toISOString(),
+      sourceVisualModelPath,
+      config: {
+        path: configPath,
+        maxDepth: displayConfig.maxDepth,
+        maxVisibleRows: displayConfig.maxVisibleRows,
+        hideButCount: [...displayConfig.hideButCount],
+        maxChildrenByFolder: { ...displayConfig.maxChildrenByFolder },
+      },
+      nodes: finalNodes,
+      timeline: dynamicVisibilityResult.timeline,
+      visibilityFrames: dynamicVisibilityResult.visibilityFrames,
+      summary: {
+        visibleNodeCount: finalNodes.length,
+        maxVisibleRows: displayConfig.maxVisibleRows,
+        visibleRowsBeforeBudget: dynamicVisibilityResult.visibleRowsBeforeBudget,
+        visibleRowsAfterBudget: dynamicVisibilityResult.visibleRowsAfterBudget,
+        peakRowsBeforeBudget: dynamicVisibilityResult.peakRowsBeforeBudget,
+        peakRowsAfterBudget: dynamicVisibilityResult.peakRowsAfterBudget,
+        framesWithBudgetApplied: dynamicVisibilityResult.framesWithBudgetApplied,
+        totalDynamicHiddenEvents: dynamicVisibilityResult.totalDynamicHiddenEvents,
+        foldersReducedByBudget: dynamicVisibilityResult.foldersReducedByBudget,
+        timelineUnitsRemappedBecauseHidden:
+          dynamicVisibilityResult.timelineUnitsRemappedBecauseHidden,
+        fileNodeCount,
+        folderNodeCount,
+        collapsedFolderCount,
+        hiddenButCountedFileCount: hiddenButCountedFileIds.size,
+        autoHiddenFiles: 0,
+        autoCollapsedFolders: 0,
+        autoMoreGroups: 0,
+        timelineUnitCount: dynamicVisibilityResult.timeline.length,
+        timelineUnitsMapped: dynamicVisibilityResult.timeline.length,
+        sourceFileCount: model.files.length,
+        sourceFolderCount: model.folders.length,
+        sourceTimelineUnitCount: model.timeline.length,
+      },
+      warnings,
     },
-    nodes: finalNodes,
-    timeline,
-    summary: {
-      visibleNodeCount: finalNodes.length,
-      maxVisibleRows: displayConfig.maxVisibleRows,
-      visibleRowsBeforeBudget,
-      visibleRowsAfterBudget,
-      fileNodeCount,
-      folderNodeCount,
-      collapsedFolderCount,
-      hiddenButCountedFileCount: hiddenButCountedFileIds.size,
-      autoHiddenFiles: 0,
-      autoCollapsedFolders: 0,
-      autoMoreGroups: 0,
-      timelineUnitCount: timeline.length,
-      timelineUnitsMapped: timeline.length,
-      sourceFileCount: model.files.length,
-      sourceFolderCount: model.folders.length,
-      sourceTimelineUnitCount: model.timeline.length,
-    },
-    warnings,
   };
 
   function appendFolderContext(
@@ -397,7 +505,7 @@ function buildDisplayModel(
       const childFolder = folderByPath.get(childFolderPath);
 
       if (!childFolder) {
-        warnings.push(`Display model is missing a folder referenced in the tree: ${childFolderPath}`);
+        pushWarning(`Display model is missing a folder referenced in the tree: ${childFolderPath}`);
         continue;
       }
 
@@ -408,7 +516,7 @@ function buildDisplayModel(
           assignFilesToNode(aggregate.fileIds, parentNodeId);
           hiddenDirectChildCount += 1;
         } else {
-          warnings.push(`node deeper than maxDepth has no visible ancestor: ${childFolderPath}`);
+          pushWarning(`node deeper than maxDepth has no visible ancestor: ${childFolderPath}`);
         }
         continue;
       }
@@ -435,20 +543,17 @@ function buildDisplayModel(
       const childFile = fileById.get(childFileId);
 
       if (!childFile) {
-        warnings.push(`Display model is missing a file referenced in the tree: ${childFileId}`);
+        pushWarning(`Display model is missing a file referenced in the tree: ${childFileId}`);
         continue;
       }
 
-      const shouldHideButCount = displayConfig.hideButCount.some((pattern) =>
+      const matchedHideButCountPatterns = displayConfig.hideButCount.filter((pattern) =>
         matchesPathPattern(childFile.path, pattern),
       );
+      const shouldHideButCount = matchedHideButCountPatterns.length > 0;
 
-      if (shouldHideButCount) {
-        for (const pattern of displayConfig.hideButCount) {
-          if (matchesPathPattern(childFile.path, pattern)) {
-            hideButCountPatternMatches.set(pattern, true);
-          }
-        }
+      for (const matchedPattern of matchedHideButCountPatterns) {
+        hideButCountPatternMatches.set(matchedPattern, true);
       }
 
       if (shouldHideButCount && parentNodeId) {
@@ -459,7 +564,7 @@ function buildDisplayModel(
       }
 
       if (shouldHideButCount && !parentNodeId) {
-        warnings.push(
+        pushWarning(
           `hide-but-count pattern matched a root-level file with no visible parent, so it stayed visible: ${childFile.path}`,
         );
       }
@@ -469,7 +574,7 @@ function buildDisplayModel(
           assignFilesToNode([childFile.id], parentNodeId);
           hiddenDirectChildCount += 1;
         } else {
-          warnings.push(`node deeper than maxDepth has no visible ancestor: ${childFile.path}`);
+          pushWarning(`node deeper than maxDepth has no visible ancestor: ${childFile.path}`);
         }
         continue;
       }
@@ -501,7 +606,7 @@ function buildDisplayModel(
       }
     } else if (hiddenCandidates.length > 0) {
       for (const hiddenCandidate of hiddenCandidates) {
-        warnings.push(
+        pushWarning(
           `Hidden root-level display candidate had no visible parent, so its activity could not be remapped: ${hiddenCandidate.path}`,
         );
       }
@@ -537,10 +642,7 @@ function buildDisplayModel(
         continue;
       }
 
-      if (
-        candidate.type === 'collapsedFolder' &&
-        candidate.folder
-      ) {
+      if (candidate.type === 'collapsedFolder' && candidate.folder) {
         const collapsedNode = createNode({
           id: `display:collapsed:${candidate.folder.path}`,
           label: candidate.folder.name,
@@ -582,11 +684,7 @@ function buildDisplayModel(
           hiddenDescendantCount: 0,
         });
 
-        const childStats = appendFolderContext(
-          candidate.folder.path,
-          folderNode.id,
-          nextDepth + 1,
-        );
+        const childStats = appendFolderContext(candidate.folder.path, folderNode.id, nextDepth + 1);
         folderNode.childCount = childStats.directChildCount;
         folderNode.visibleChildCount = folderNode.childNodeIds.length;
         folderNode.hiddenChildCount = childStats.hiddenDirectChildCount;
@@ -641,17 +739,14 @@ function buildDisplayModel(
       }
 
       const rankedCandidates = [...candidates].sort(compareCandidatePriority);
-      const selectedKeys = new Set(
-        rankedCandidates.slice(0, limit).map((candidate) => candidate.key),
-      );
+      const selectedKeys = new Set(rankedCandidates.slice(0, limit).map((candidate) => candidate.key));
 
       return candidates.filter((candidate) => selectedKeys.has(candidate.key));
     }
 
     return candidates.filter(
       (candidate) =>
-        candidate.folder !== undefined &&
-        shouldRevealFolderChildren(candidate.folder.path),
+        candidate.folder !== undefined && shouldRevealFolderChildren(candidate.folder.path),
     );
   }
 
@@ -684,7 +779,7 @@ function buildDisplayModel(
       const existingNodeId = displayNodeIdByFileId.get(fileId);
 
       if (existingNodeId && existingNodeId !== nodeId) {
-        warnings.push(
+        pushWarning(
           `Source file ${fileId} was mapped to multiple display nodes (${existingNodeId}, ${nodeId}); keeping the first mapping.`,
         );
         continue;
@@ -829,9 +924,7 @@ function buildDisplayModel(
   }
 }
 
-function buildFileActivityMap(
-  timeline: VisualTimelineUnit[],
-): Map<string, number> {
+function buildFileActivityMap(timeline: VisualTimelineUnit[]): Map<string, number> {
   const activityWeightByFileId = new Map<string, number>();
 
   for (const unit of timeline) {
@@ -848,7 +941,7 @@ function buildDisplayTimeline(
   timeline: VisualTimelineUnit[],
   displayNodeIdByFileId: Map<string, string>,
   nodeById: Map<string, RepoDisplayNode>,
-  warnings: string[],
+  pushWarning: (message: string) => void,
 ): RepoDisplayTimelineUnit[] {
   return [...timeline]
     .sort((left, right) => left.unitOrder - right.unitOrder)
@@ -856,7 +949,7 @@ function buildDisplayTimeline(
       const displayNodeId = displayNodeIdByFileId.get(unit.fileId);
 
       if (!displayNodeId) {
-        warnings.push(
+        pushWarning(
           `timeline unit could not be mapped to a display node: unit ${unit.unitOrder} file ${unit.filePath}`,
         );
         return [];
@@ -865,7 +958,7 @@ function buildDisplayTimeline(
       const displayNode = nodeById.get(displayNodeId);
 
       if (!displayNode) {
-        warnings.push(
+        pushWarning(
           `timeline unit ${unit.unitOrder} resolved to a missing display node: ${displayNodeId}`,
         );
         return [];
@@ -878,6 +971,9 @@ function buildDisplayTimeline(
           sourceFilePath: unit.filePath,
           displayNodeId,
           displayNodePath: displayNode.path,
+          effectiveDisplayNodeId: displayNodeId,
+          effectiveDisplayNodePath: displayNode.path,
+          remappedBecauseHidden: false,
           type: unit.type,
           lineDelta: unit.lineDelta,
           activityWeight: unit.activityWeight,
@@ -886,6 +982,775 @@ function buildDisplayTimeline(
         },
       ];
     });
+}
+
+function applyDynamicVisibilityPlan({
+  nodes,
+  timeline,
+  displayNodeIdByFileId,
+  allSourceFileIds,
+  nodeById,
+  maxVisibleRows,
+  childFoldersByParent,
+  childFilesByFolder,
+  sourceFolderDescendantFileIdsByPath,
+  pushWarning,
+}: {
+  nodes: RepoDisplayNode[];
+  timeline: RepoDisplayTimelineUnit[];
+  displayNodeIdByFileId: Map<string, string>;
+  allSourceFileIds: string[];
+  nodeById: Map<string, RepoDisplayNode>;
+  maxVisibleRows: number | null;
+  childFoldersByParent: Map<string, string[]>;
+  childFilesByFolder: Map<string, string[]>;
+  sourceFolderDescendantFileIdsByPath: Map<string, string[]>;
+  pushWarning: (message: string) => void;
+}): {
+  timeline: RepoDisplayTimelineUnit[];
+  visibilityFrames: RepoDisplayVisibilityFrame[];
+  visibleRowsBeforeBudget: number;
+  visibleRowsAfterBudget: number;
+  peakRowsBeforeBudget: number;
+  peakRowsAfterBudget: number;
+  framesWithBudgetApplied: number;
+  totalDynamicHiddenEvents: number;
+  foldersReducedByBudget: number;
+  timelineUnitsRemappedBecauseHidden: number;
+  budgetDebugExamples: string[];
+} {
+  if (timeline.length === 0) {
+    const staticRowCount = nodes.length;
+
+    return {
+      timeline,
+      visibilityFrames: [],
+      visibleRowsBeforeBudget: staticRowCount,
+      visibleRowsAfterBudget: staticRowCount,
+      peakRowsBeforeBudget: staticRowCount,
+      peakRowsAfterBudget: staticRowCount,
+      framesWithBudgetApplied: 0,
+      totalDynamicHiddenEvents: 0,
+      foldersReducedByBudget: 0,
+      timelineUnitsRemappedBecauseHidden: 0,
+      budgetDebugExamples: [],
+    };
+  }
+
+  const sourceFileStateById = new Map<string, SourceFileReplayState>(
+    allSourceFileIds.map((fileId) => [fileId, { exists: false, currentLineCount: 0 }]),
+  );
+  const nodeRuntimeById = new Map<string, DisplayNodeRuntimeState>(
+    nodes.map((node) => [
+      node.id,
+      {
+        currentLineCount: 0,
+        existingFileCount: 0,
+        lastTouchedUnitIndex: -1,
+        lastTouchedUnitOrder: -1,
+      },
+    ]),
+  );
+  const ancestorNodeIdsByFileId = buildAncestorNodeIdsByFileId(displayNodeIdByFileId, nodeById);
+  const budgetDebugExamples: string[] = [];
+  const frameSnapshots: InternalVisibilitySnapshot[] = [];
+  const reducedFolderIds = new Set<string>();
+  let peakRowsBeforeBudget = 0;
+  let peakRowsAfterBudget = 0;
+  let totalDynamicHiddenEvents = 0;
+  let timelineUnitsRemappedBecauseHidden = 0;
+
+  for (const [unitIndex, unit] of timeline.entries()) {
+    applyTimelineUnitToReplayState(
+      unit,
+      unitIndex,
+      sourceFileStateById,
+      nodeRuntimeById,
+      ancestorNodeIdsByFileId,
+    );
+
+    const snapshot = createVisibilitySnapshot({
+      unitIndex,
+      unitOrder: unit.unitOrder,
+      nodes,
+      nodeById,
+      nodeRuntimeById,
+      maxVisibleRows,
+      childFoldersByParent,
+      childFilesByFolder,
+      sourceFolderDescendantFileIdsByPath,
+      sourceFileStateById,
+      pushWarning,
+    });
+
+    frameSnapshots.push(snapshot);
+    peakRowsBeforeBudget = Math.max(peakRowsBeforeBudget, snapshot.rowCountBeforeBudget);
+    peakRowsAfterBudget = Math.max(peakRowsAfterBudget, snapshot.rowCountAfterBudget);
+    totalDynamicHiddenEvents += snapshot.budgetHiddenNodeIds.length;
+
+    for (const folderId of snapshot.reducedFolderIds) {
+      reducedFolderIds.add(folderId);
+    }
+
+    if (snapshot.budgetApplied && budgetDebugExamples.length < 6) {
+      budgetDebugExamples.push(
+        `Budget applied at unit ${unit.unitOrder}: ${snapshot.rowCountBeforeBudget} -> ${snapshot.rowCountAfterBudget} rows`,
+      );
+
+      for (const reductionSummary of snapshot.reductionSummaries) {
+        if (budgetDebugExamples.length >= 10) {
+          break;
+        }
+
+        budgetDebugExamples.push(reductionSummary);
+      }
+    }
+
+    const effectiveNode = resolveEffectiveVisibleNode(
+      unit.displayNodeId,
+      snapshot.visibleNodeIdSet,
+      nodeById,
+    );
+
+    if (!effectiveNode) {
+      pushWarning(
+        `timeline unit could not be mapped to visible parent: unit ${unit.unitOrder} node ${unit.displayNodeId}`,
+      );
+      continue;
+    }
+
+    const remappedBecauseHidden = effectiveNode.id !== unit.displayNodeId;
+
+    if (remappedBecauseHidden) {
+      timelineUnitsRemappedBecauseHidden += 1;
+    }
+
+    timeline[unitIndex] = {
+      ...unit,
+      effectiveDisplayNodeId: effectiveNode.id,
+      effectiveDisplayNodePath: effectiveNode.path,
+      remappedBecauseHidden,
+    };
+  }
+
+  const visibilityFrames = compactVisibilitySnapshots(frameSnapshots);
+
+  for (const frame of visibilityFrames) {
+    if (maxVisibleRows !== null && frame.rowCountAfterBudget > maxVisibleRows) {
+      pushWarning(
+        `visibility frame has more rows than maxVisibleRows: units ${frame.startUnitOrder}-${frame.endUnitOrder} contain ${frame.rowCountAfterBudget} rows against budget ${maxVisibleRows}.`,
+      );
+    }
+
+    for (const nodeId of frame.visibleNodeIds) {
+      if (!nodeById.has(nodeId)) {
+        pushWarning(`visibility frame references unknown node id: ${nodeId}`);
+      }
+    }
+  }
+
+  return {
+    timeline,
+    visibilityFrames,
+    visibleRowsBeforeBudget: frameSnapshots.at(-1)?.rowCountBeforeBudget ?? 0,
+    visibleRowsAfterBudget: frameSnapshots.at(-1)?.rowCountAfterBudget ?? 0,
+    peakRowsBeforeBudget,
+    peakRowsAfterBudget,
+    framesWithBudgetApplied: visibilityFrames.filter((frame) => frame.budgetApplied).length,
+    totalDynamicHiddenEvents,
+    foldersReducedByBudget: reducedFolderIds.size,
+    timelineUnitsRemappedBecauseHidden,
+    budgetDebugExamples,
+  };
+}
+
+function buildAncestorNodeIdsByFileId(
+  displayNodeIdByFileId: Map<string, string>,
+  nodeById: Map<string, RepoDisplayNode>,
+): Map<string, string[]> {
+  const ancestorNodeIdsByFileId = new Map<string, string[]>();
+
+  for (const [fileId, nodeId] of displayNodeIdByFileId.entries()) {
+    const ancestorNodeIds: string[] = [];
+    let currentNodeId: string | null = nodeId;
+
+    while (currentNodeId) {
+      ancestorNodeIds.push(currentNodeId);
+      const currentNode = nodeById.get(currentNodeId);
+      currentNodeId = currentNode?.parentNodeId ?? null;
+    }
+
+    ancestorNodeIdsByFileId.set(fileId, ancestorNodeIds);
+  }
+
+  return ancestorNodeIdsByFileId;
+}
+
+function applyTimelineUnitToReplayState(
+  unit: RepoDisplayTimelineUnit,
+  unitIndex: number,
+  sourceFileStateById: Map<string, SourceFileReplayState>,
+  nodeRuntimeById: Map<string, DisplayNodeRuntimeState>,
+  ancestorNodeIdsByFileId: Map<string, string[]>,
+): void {
+  const currentFileState = sourceFileStateById.get(unit.sourceFileId) ?? {
+    exists: false,
+    currentLineCount: 0,
+  };
+  const nextFileState = applyTimelineUnitToSourceFileState(currentFileState, unit);
+  const lineDelta = nextFileState.currentLineCount - currentFileState.currentLineCount;
+  const existingFileDelta =
+    (nextFileState.exists ? 1 : 0) - (currentFileState.exists ? 1 : 0);
+
+  sourceFileStateById.set(unit.sourceFileId, nextFileState);
+
+  for (const nodeId of ancestorNodeIdsByFileId.get(unit.sourceFileId) ?? []) {
+    const currentNodeState = nodeRuntimeById.get(nodeId);
+
+    if (!currentNodeState) {
+      continue;
+    }
+
+    currentNodeState.currentLineCount = Math.max(
+      0,
+      currentNodeState.currentLineCount + lineDelta,
+    );
+    currentNodeState.existingFileCount = Math.max(
+      0,
+      currentNodeState.existingFileCount + existingFileDelta,
+    );
+    currentNodeState.lastTouchedUnitIndex = unitIndex;
+    currentNodeState.lastTouchedUnitOrder = unit.unitOrder;
+  }
+}
+
+function applyTimelineUnitToSourceFileState(
+  fileState: SourceFileReplayState,
+  unit: RepoDisplayTimelineUnit,
+): SourceFileReplayState {
+  if (unit.type === 'delete') {
+    return {
+      ...fileState,
+      exists: false,
+      currentLineCount: 0,
+    };
+  }
+
+  let nextLineCount = fileState.currentLineCount;
+
+  if (unit.afterLineCount !== null) {
+    nextLineCount = Math.max(0, unit.afterLineCount);
+  } else if (unit.beforeLineCount !== null) {
+    nextLineCount = Math.max(0, unit.beforeLineCount + unit.lineDelta);
+  } else if (unit.type === 'create' || unit.type === 'copy') {
+    nextLineCount = Math.max(0, unit.lineDelta);
+  } else {
+    nextLineCount = Math.max(0, fileState.currentLineCount + unit.lineDelta);
+  }
+
+  return {
+    ...fileState,
+    exists: true,
+    currentLineCount: nextLineCount,
+  };
+}
+
+function createVisibilitySnapshot({
+  unitIndex,
+  unitOrder,
+  nodes,
+  nodeById,
+  nodeRuntimeById,
+  maxVisibleRows,
+  childFoldersByParent,
+  childFilesByFolder,
+  sourceFolderDescendantFileIdsByPath,
+  sourceFileStateById,
+  pushWarning,
+}: {
+  unitIndex: number;
+  unitOrder: number;
+  nodes: RepoDisplayNode[];
+  nodeById: Map<string, RepoDisplayNode>;
+  nodeRuntimeById: Map<string, DisplayNodeRuntimeState>;
+  maxVisibleRows: number | null;
+  childFoldersByParent: Map<string, string[]>;
+  childFilesByFolder: Map<string, string[]>;
+  sourceFolderDescendantFileIdsByPath: Map<string, string[]>;
+  sourceFileStateById: Map<string, SourceFileReplayState>;
+  pushWarning: (message: string) => void;
+}): InternalVisibilitySnapshot {
+  const baseVisibleNodeIds = nodes
+    .filter((node) => (nodeRuntimeById.get(node.id)?.existingFileCount ?? 0) > 0)
+    .map((node) => node.id);
+  const rowCountBeforeBudget = baseVisibleNodeIds.length;
+  const effectiveVisibleNodeIdSet = new Set(baseVisibleNodeIds);
+  const budgetHiddenNodeIds: string[] = [];
+  const reducedFolderIds = new Set<string>();
+  const reductionSummaries: string[] = [];
+
+  if (maxVisibleRows !== null && rowCountBeforeBudget > maxVisibleRows) {
+    while (effectiveVisibleNodeIdSet.size > maxVisibleRows) {
+      const visibleImmediateChildrenByFolderId = buildVisibleImmediateChildrenByFolderId(
+        nodes,
+        nodeById,
+        effectiveVisibleNodeIdSet,
+      );
+      const folderIdToReduce = selectFolderIdToReduce(
+        visibleImmediateChildrenByFolderId,
+        nodeById,
+      );
+
+      if (!folderIdToReduce) {
+        pushWarning(
+          `budget could not be reached at unit ${unitOrder}: ${effectiveVisibleNodeIdSet.size} rows remain visible against budget ${maxVisibleRows}.`,
+        );
+        break;
+      }
+
+      const folderNode = nodeById.get(folderIdToReduce);
+      const visibleChildNodeIds = visibleImmediateChildrenByFolderId.get(folderIdToReduce) ?? [];
+      const childNodeIdToHide = selectChildNodeIdToHide(
+        visibleChildNodeIds,
+        nodeById,
+        nodeRuntimeById,
+      );
+
+      if (!folderNode || !childNodeIdToHide) {
+        pushWarning(
+          `budget could not be reached at unit ${unitOrder}: folder ${folderIdToReduce} had no hideable child rows.`,
+        );
+        break;
+      }
+
+      const beforeVisibleChildCount = visibleChildNodeIds.length;
+      const subtreeNodeIdsToHide = collectVisibleSubtreeNodeIds(
+        childNodeIdToHide,
+        nodeById,
+        effectiveVisibleNodeIdSet,
+      );
+
+      if (subtreeNodeIdsToHide.length === 0) {
+        pushWarning(
+          `budget could not be reached at unit ${unitOrder}: child ${childNodeIdToHide} produced no visible subtree to hide.`,
+        );
+        break;
+      }
+
+      for (const subtreeNodeId of subtreeNodeIdsToHide) {
+        effectiveVisibleNodeIdSet.delete(subtreeNodeId);
+        budgetHiddenNodeIds.push(subtreeNodeId);
+      }
+
+      const afterVisibleChildCount =
+        buildVisibleImmediateChildrenByFolderId(nodes, nodeById, effectiveVisibleNodeIdSet).get(
+          folderIdToReduce,
+        )?.length ?? 0;
+      reducedFolderIds.add(folderIdToReduce);
+
+      if (reductionSummaries.length < 4) {
+        reductionSummaries.push(
+          `Reduced ${folderNode.path} from ${beforeVisibleChildCount} to ${afterVisibleChildCount} visible children`,
+        );
+      }
+    }
+  }
+
+  const visibleNodeIds = baseVisibleNodeIds.filter((nodeId) => effectiveVisibleNodeIdSet.has(nodeId));
+  const {
+    effectiveChildCountByFolderId,
+    effectiveVisibleChildCountByFolderId,
+    effectiveHiddenChildCountByFolderId,
+    effectiveHiddenDescendantCountByFolderId,
+  } = buildEffectiveFolderCountMaps({
+    visibleNodeIds,
+    visibleNodeIdSet: effectiveVisibleNodeIdSet,
+    nodeById,
+    nodeRuntimeById,
+    childFoldersByParent,
+    childFilesByFolder,
+    sourceFolderDescendantFileIdsByPath,
+    sourceFileStateById,
+  });
+
+  return {
+    unitIndex,
+    unitOrder,
+    visibleNodeIds,
+    visibleNodeIdSet: effectiveVisibleNodeIdSet,
+    budgetHiddenNodeIds,
+    reducedFolderIds: [...reducedFolderIds].sort((left, right) => left.localeCompare(right)),
+    reductionSummaries,
+    effectiveChildCountByFolderId,
+    effectiveVisibleChildCountByFolderId,
+    effectiveHiddenChildCountByFolderId,
+    effectiveHiddenDescendantCountByFolderId,
+    rowCountBeforeBudget,
+    rowCountAfterBudget: visibleNodeIds.length,
+    budgetApplied: visibleNodeIds.length < rowCountBeforeBudget,
+  };
+}
+
+function buildVisibleImmediateChildrenByFolderId(
+  nodes: RepoDisplayNode[],
+  nodeById: Map<string, RepoDisplayNode>,
+  visibleNodeIdSet: Set<string>,
+): Map<string, string[]> {
+  const visibleImmediateChildrenByFolderId = new Map<string, string[]>();
+
+  for (const node of nodes) {
+    if (!visibleNodeIdSet.has(node.id)) {
+      continue;
+    }
+
+    if (!node.parentNodeId || !visibleNodeIdSet.has(node.parentNodeId)) {
+      continue;
+    }
+
+    const parentNode = nodeById.get(node.parentNodeId);
+
+    if (!parentNode || parentNode.type !== 'folder') {
+      continue;
+    }
+
+    const existingChildren = visibleImmediateChildrenByFolderId.get(parentNode.id) ?? [];
+    existingChildren.push(node.id);
+    visibleImmediateChildrenByFolderId.set(parentNode.id, existingChildren);
+  }
+
+  return visibleImmediateChildrenByFolderId;
+}
+
+function selectFolderIdToReduce(
+  visibleImmediateChildrenByFolderId: Map<string, string[]>,
+  nodeById: Map<string, RepoDisplayNode>,
+): string | null {
+  const candidates = [...visibleImmediateChildrenByFolderId.entries()]
+    .filter(([, childNodeIds]) => childNodeIds.length > 0)
+    .map(([folderId, childNodeIds]) => ({
+      folderId,
+      childCount: childNodeIds.length,
+      folderNode: nodeById.get(folderId),
+    }))
+    .filter(
+      (candidate): candidate is { folderId: string; childCount: number; folderNode: RepoDisplayNode } =>
+        candidate.folderNode !== undefined,
+    )
+    .sort((left, right) => {
+      return (
+        compareNumbersDescending(left.childCount, right.childCount) ||
+        stableStringHash(left.folderNode.path) - stableStringHash(right.folderNode.path) ||
+        left.folderNode.path.localeCompare(right.folderNode.path)
+      );
+    });
+
+  return candidates[0]?.folderId ?? null;
+}
+
+function selectChildNodeIdToHide(
+  visibleChildNodeIds: string[],
+  nodeById: Map<string, RepoDisplayNode>,
+  nodeRuntimeById: Map<string, DisplayNodeRuntimeState>,
+): string | null {
+  const candidates = [...visibleChildNodeIds]
+    .map((nodeId) => nodeById.get(nodeId))
+    .filter((node): node is RepoDisplayNode => node !== undefined)
+    .sort((left, right) => compareChildHidePriority(left, right, nodeRuntimeById));
+
+  return candidates[0]?.id ?? null;
+}
+
+function compareChildHidePriority(
+  left: RepoDisplayNode,
+  right: RepoDisplayNode,
+  nodeRuntimeById: Map<string, DisplayNodeRuntimeState>,
+): number {
+  const leftIsFile = left.type === 'file';
+  const rightIsFile = right.type === 'file';
+
+  if (leftIsFile !== rightIsFile) {
+    return leftIsFile ? -1 : 1;
+  }
+
+  const leftRuntime = nodeRuntimeById.get(left.id);
+  const rightRuntime = nodeRuntimeById.get(right.id);
+  const leftCurrentLineCount = leftRuntime?.currentLineCount ?? 0;
+  const rightCurrentLineCount = rightRuntime?.currentLineCount ?? 0;
+  const leftLineScale = Math.max(leftCurrentLineCount, left.finalLineCount, left.maxLineCount);
+  const rightLineScale = Math.max(rightCurrentLineCount, right.finalLineCount, right.maxLineCount);
+  const leftLastTouched = leftRuntime?.lastTouchedUnitIndex ?? -1;
+  const rightLastTouched = rightRuntime?.lastTouchedUnitIndex ?? -1;
+
+  return (
+    left.visualWeight - right.visualWeight ||
+    leftCurrentLineCount - rightCurrentLineCount ||
+    leftLineScale - rightLineScale ||
+    leftLastTouched - rightLastTouched ||
+    stableStringHash(left.path) - stableStringHash(right.path) ||
+    left.path.localeCompare(right.path)
+  );
+}
+
+function collectVisibleSubtreeNodeIds(
+  rootNodeId: string,
+  nodeById: Map<string, RepoDisplayNode>,
+  visibleNodeIdSet: Set<string>,
+): string[] {
+  const collected: string[] = [];
+  const stack = [rootNodeId];
+
+  while (stack.length > 0) {
+    const currentNodeId = stack.shift();
+
+    if (!currentNodeId || !visibleNodeIdSet.has(currentNodeId)) {
+      continue;
+    }
+
+    collected.push(currentNodeId);
+    const currentNode = nodeById.get(currentNodeId);
+
+    if (!currentNode) {
+      continue;
+    }
+
+    stack.unshift(...currentNode.childNodeIds);
+  }
+
+  return collected;
+}
+
+function buildEffectiveFolderCountMaps({
+  visibleNodeIds,
+  visibleNodeIdSet,
+  nodeById,
+  nodeRuntimeById,
+  childFoldersByParent,
+  childFilesByFolder,
+  sourceFolderDescendantFileIdsByPath,
+  sourceFileStateById,
+}: {
+  visibleNodeIds: string[];
+  visibleNodeIdSet: Set<string>;
+  nodeById: Map<string, RepoDisplayNode>;
+  nodeRuntimeById: Map<string, DisplayNodeRuntimeState>;
+  childFoldersByParent: Map<string, string[]>;
+  childFilesByFolder: Map<string, string[]>;
+  sourceFolderDescendantFileIdsByPath: Map<string, string[]>;
+  sourceFileStateById: Map<string, SourceFileReplayState>;
+}): {
+  effectiveChildCountByFolderId: Record<string, number>;
+  effectiveVisibleChildCountByFolderId: Record<string, number>;
+  effectiveHiddenChildCountByFolderId: Record<string, number>;
+  effectiveHiddenDescendantCountByFolderId: Record<string, number>;
+} {
+  const visibleImmediateChildrenByFolderId = buildVisibleImmediateChildrenByFolderId(
+    visibleNodeIds.map((nodeId) => nodeById.get(nodeId)).filter((node): node is RepoDisplayNode => node !== undefined),
+    nodeById,
+    visibleNodeIdSet,
+  );
+  const visibleLeafFileCountByNodeId = buildVisibleLeafFileCountByNodeId(
+    visibleNodeIds,
+    nodeById,
+    visibleImmediateChildrenByFolderId,
+  );
+  const sourceFolderExistsMemo = new Map<string, boolean>();
+  const effectiveChildCountByFolderId: Record<string, number> = {};
+  const effectiveVisibleChildCountByFolderId: Record<string, number> = {};
+  const effectiveHiddenChildCountByFolderId: Record<string, number> = {};
+  const effectiveHiddenDescendantCountByFolderId: Record<string, number> = {};
+
+  for (const nodeId of visibleNodeIds) {
+    const node = nodeById.get(nodeId);
+
+    if (!node || node.type === 'file') {
+      continue;
+    }
+
+    const effectiveVisibleChildCount =
+      visibleImmediateChildrenByFolderId.get(node.id)?.length ?? 0;
+    const effectiveChildCount = Math.max(
+      effectiveVisibleChildCount,
+      countCurrentDirectChildren(node.path),
+    );
+    const visibleLeafFileCount = visibleLeafFileCountByNodeId.get(node.id) ?? 0;
+    const existingFileCount = nodeRuntimeById.get(node.id)?.existingFileCount ?? 0;
+    const effectiveHiddenDescendantCount = Math.max(0, existingFileCount - visibleLeafFileCount);
+
+    effectiveChildCountByFolderId[node.id] = effectiveChildCount;
+    effectiveVisibleChildCountByFolderId[node.id] = effectiveVisibleChildCount;
+    effectiveHiddenChildCountByFolderId[node.id] = Math.max(
+      0,
+      effectiveChildCount - effectiveVisibleChildCount,
+    );
+    effectiveHiddenDescendantCountByFolderId[node.id] = effectiveHiddenDescendantCount;
+  }
+
+  return {
+    effectiveChildCountByFolderId,
+    effectiveVisibleChildCountByFolderId,
+    effectiveHiddenChildCountByFolderId,
+    effectiveHiddenDescendantCountByFolderId,
+  };
+
+  function countCurrentDirectChildren(folderPath: string): number {
+    let directChildCount = 0;
+
+    for (const fileId of childFilesByFolder.get(folderPath) ?? []) {
+      if (sourceFileStateById.get(fileId)?.exists) {
+        directChildCount += 1;
+      }
+    }
+
+    for (const childFolderPath of childFoldersByParent.get(folderPath) ?? []) {
+      if (sourceFolderExistsMemo.has(childFolderPath)) {
+        if (sourceFolderExistsMemo.get(childFolderPath)) {
+          directChildCount += 1;
+        }
+
+        continue;
+      }
+
+      const exists = (sourceFolderDescendantFileIdsByPath.get(childFolderPath) ?? []).some(
+        (fileId) => sourceFileStateById.get(fileId)?.exists,
+      );
+      sourceFolderExistsMemo.set(childFolderPath, exists);
+
+      if (exists) {
+        directChildCount += 1;
+      }
+    }
+
+    return directChildCount;
+  }
+}
+
+function buildVisibleLeafFileCountByNodeId(
+  visibleNodeIds: string[],
+  nodeById: Map<string, RepoDisplayNode>,
+  visibleImmediateChildrenByFolderId: Map<string, string[]>,
+): Map<string, number> {
+  const visibleLeafFileCountByNodeId = new Map<string, number>();
+
+  for (const nodeId of [...visibleNodeIds].reverse()) {
+    const node = nodeById.get(nodeId);
+
+    if (!node) {
+      continue;
+    }
+
+    if (node.type === 'file') {
+      visibleLeafFileCountByNodeId.set(node.id, 1);
+      continue;
+    }
+
+    const visibleLeafFileCount = (visibleImmediateChildrenByFolderId.get(node.id) ?? []).reduce(
+      (sum, childNodeId) => sum + (visibleLeafFileCountByNodeId.get(childNodeId) ?? 0),
+      0,
+    );
+
+    visibleLeafFileCountByNodeId.set(node.id, visibleLeafFileCount);
+  }
+
+  return visibleLeafFileCountByNodeId;
+}
+
+function resolveEffectiveVisibleNode(
+  displayNodeId: string,
+  visibleNodeIdSet: Set<string>,
+  nodeById: Map<string, RepoDisplayNode>,
+): RepoDisplayNode | null {
+  let currentNodeId: string | null = displayNodeId;
+
+  while (currentNodeId) {
+    if (visibleNodeIdSet.has(currentNodeId)) {
+      return nodeById.get(currentNodeId) ?? null;
+    }
+
+    const currentNode = nodeById.get(currentNodeId);
+    currentNodeId = currentNode?.parentNodeId ?? null;
+  }
+
+  return null;
+}
+
+function compactVisibilitySnapshots(
+  snapshots: InternalVisibilitySnapshot[],
+): RepoDisplayVisibilityFrame[] {
+  if (snapshots.length === 0) {
+    return [];
+  }
+
+  const frames: RepoDisplayVisibilityFrame[] = [];
+  let currentStartSnapshot = snapshots[0];
+  let currentEndSnapshot = snapshots[0];
+  let currentKey = buildVisibilitySnapshotKey(snapshots[0]);
+
+  for (let index = 1; index < snapshots.length; index += 1) {
+    const snapshot = snapshots[index];
+    const snapshotKey = buildVisibilitySnapshotKey(snapshot);
+
+    if (snapshotKey === currentKey) {
+      currentEndSnapshot = snapshot;
+      continue;
+    }
+
+    frames.push(createVisibilityFrame(currentStartSnapshot, currentEndSnapshot));
+    currentStartSnapshot = snapshot;
+    currentEndSnapshot = snapshot;
+    currentKey = snapshotKey;
+  }
+
+  frames.push(createVisibilityFrame(currentStartSnapshot, currentEndSnapshot));
+
+  return frames;
+}
+
+function createVisibilityFrame(
+  startSnapshot: InternalVisibilitySnapshot,
+  endSnapshot: InternalVisibilitySnapshot,
+): RepoDisplayVisibilityFrame {
+  return {
+    startUnitIndex: startSnapshot.unitIndex,
+    endUnitIndex: endSnapshot.unitIndex,
+    startUnitOrder: startSnapshot.unitOrder,
+    endUnitOrder: endSnapshot.unitOrder,
+    visibleNodeIds: [...startSnapshot.visibleNodeIds],
+    budgetHiddenNodeIds: [...startSnapshot.budgetHiddenNodeIds],
+    effectiveChildCountByFolderId: { ...startSnapshot.effectiveChildCountByFolderId },
+    effectiveVisibleChildCountByFolderId: {
+      ...startSnapshot.effectiveVisibleChildCountByFolderId,
+    },
+    effectiveHiddenChildCountByFolderId: {
+      ...startSnapshot.effectiveHiddenChildCountByFolderId,
+    },
+    effectiveHiddenDescendantCountByFolderId: {
+      ...startSnapshot.effectiveHiddenDescendantCountByFolderId,
+    },
+    rowCountBeforeBudget: startSnapshot.rowCountBeforeBudget,
+    rowCountAfterBudget: startSnapshot.rowCountAfterBudget,
+    budgetApplied: startSnapshot.budgetApplied,
+  };
+}
+
+function buildVisibilitySnapshotKey(snapshot: InternalVisibilitySnapshot): string {
+  return [
+    snapshot.visibleNodeIds.join(','),
+    snapshot.budgetHiddenNodeIds.join(','),
+    serializeNumericRecord(snapshot.effectiveChildCountByFolderId),
+    serializeNumericRecord(snapshot.effectiveVisibleChildCountByFolderId),
+    serializeNumericRecord(snapshot.effectiveHiddenChildCountByFolderId),
+    serializeNumericRecord(snapshot.effectiveHiddenDescendantCountByFolderId),
+    String(snapshot.rowCountBeforeBudget),
+    String(snapshot.rowCountAfterBudget),
+    snapshot.budgetApplied ? '1' : '0',
+  ].join('||');
+}
+
+function serializeNumericRecord(record: Record<string, number>): string {
+  return Object.entries(record)
+    .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
+    .map(([key, value]) => `${key}:${value}`)
+    .join('|');
 }
 
 function compareCandidatePriority(left: DisplayCandidate, right: DisplayCandidate): number {
@@ -924,4 +1789,15 @@ function uniqueSortedStrings(values: string[]): string[] {
 
 function compareNumbersDescending(left: number, right: number): number {
   return right - left;
+}
+
+function stableStringHash(value: string): number {
+  let hash = 2166136261;
+
+  for (const character of value) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
 }

@@ -78,6 +78,7 @@ function isRepoDisplayModel(value: unknown): value is RepoDisplayModel {
   return (
     Array.isArray(candidate.nodes) &&
     Array.isArray(candidate.timeline) &&
+    Array.isArray(candidate.visibilityFrames) &&
     Array.isArray(candidate.warnings) &&
     typeof candidate.generatedAt === 'string' &&
     typeof candidate.sourceVisualModelPath === 'string' &&

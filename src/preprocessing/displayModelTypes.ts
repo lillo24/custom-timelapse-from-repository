@@ -28,11 +28,30 @@ export interface RepoDisplayTimelineUnit {
   sourceFilePath: string;
   displayNodeId: string;
   displayNodePath: string;
+  effectiveDisplayNodeId: string;
+  effectiveDisplayNodePath: string;
+  remappedBecauseHidden: boolean;
   type: string;
   lineDelta: number;
   activityWeight: number;
   beforeLineCount: number | null;
   afterLineCount: number | null;
+}
+
+export interface RepoDisplayVisibilityFrame {
+  startUnitIndex: number;
+  endUnitIndex: number;
+  startUnitOrder: number;
+  endUnitOrder: number;
+  visibleNodeIds: string[];
+  budgetHiddenNodeIds: string[];
+  effectiveChildCountByFolderId: Record<string, number>;
+  effectiveVisibleChildCountByFolderId: Record<string, number>;
+  effectiveHiddenChildCountByFolderId: Record<string, number>;
+  effectiveHiddenDescendantCountByFolderId: Record<string, number>;
+  rowCountBeforeBudget: number;
+  rowCountAfterBudget: number;
+  budgetApplied: boolean;
 }
 
 export interface RepoDisplayModel {
@@ -47,11 +66,18 @@ export interface RepoDisplayModel {
   };
   nodes: RepoDisplayNode[];
   timeline: RepoDisplayTimelineUnit[];
+  visibilityFrames: RepoDisplayVisibilityFrame[];
   summary: {
     visibleNodeCount: number;
     maxVisibleRows: number | null;
     visibleRowsBeforeBudget: number;
     visibleRowsAfterBudget: number;
+    peakRowsBeforeBudget: number;
+    peakRowsAfterBudget: number;
+    framesWithBudgetApplied: number;
+    totalDynamicHiddenEvents: number;
+    foldersReducedByBudget: number;
+    timelineUnitsRemappedBecauseHidden: number;
     fileNodeCount: number;
     folderNodeCount: number;
     collapsedFolderCount: number;
