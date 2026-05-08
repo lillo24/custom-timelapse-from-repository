@@ -60,6 +60,7 @@ function normalizeDisplayConfig(
   }
 
   const maxDepth = normalizeMaxDepth(value.maxDepth, configPath);
+  const maxVisibleRows = normalizeMaxVisibleRows(value.maxVisibleRows, configPath);
   const hideButCount = normalizePatternArray(
     value.hideButCount,
     'display.hideButCount',
@@ -77,6 +78,7 @@ function normalizeDisplayConfig(
 
   return {
     maxDepth,
+    maxVisibleRows,
     hideButCount,
     collapseFolders,
     maxChildrenByFolder,
@@ -86,6 +88,7 @@ function normalizeDisplayConfig(
 function createDefaultDisplayConfig(): LoadedAnimationDisplayConfig {
   return {
     maxDepth: 4,
+    maxVisibleRows: null,
     hideButCount: [],
     collapseFolders: [],
     maxChildrenByFolder: {},
@@ -138,6 +141,23 @@ function normalizeMaxDepth(value: number | undefined, configPath: string): numbe
   if (!Number.isInteger(value) || value < 0) {
     throw new Error(
       `Animation filter config field "display.maxDepth" must be a non-negative integer: ${configPath}`,
+    );
+  }
+
+  return value;
+}
+
+function normalizeMaxVisibleRows(
+  value: number | null | undefined,
+  configPath: string,
+): number | null {
+  if (value === undefined || value === null) {
+    return null;
+  }
+
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(
+      `Animation filter config field "display.maxVisibleRows" must be null or a positive integer: ${configPath}`,
     );
   }
 

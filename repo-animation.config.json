@@ -1,11 +1,15 @@
 {
   "exclude": [
+    "AGENTS.md",
+    "**/README.md",
+    ".gitignore",
+
     "History_Implementation_plans/**",
-    "History-Implementation-plans/**",
     "History-implementations/**",
-    "history-implementation-plans/**",
-    "tools/ingestion_debug_ui_react_3/.agents/**",
-    "tools/ingestion_debug_ui/**",
+
+
+    "tools/ingestion_debug_ui_react_3/**",
+
     "data/raw/**",
     "data/generated/**",
     "node_modules/**",
@@ -21,11 +25,12 @@
   "include": [],
   "display": {
     "maxDepth": 4,
+    "maxVisibleRows": 30,
     "hideButCount": [
       "**/__init__.py"
     ],
     "collapseFolders": [
-      "tools/ingestion_debug_ui_react_3/**",
+      "tools/ingestion_debug_ui/**",
       "ingestion_pipeline/configs/**",
       "ingestion_pipeline/tests/**",
       "ingestion_pipeline/docs/**",
@@ -34,9 +39,10 @@
     ],
     "maxChildrenByFolder": {
       "ingestion_pipeline/**": 20,
-      "assistant_runtime/**": 10,
+      "assistant_runtime/**": 5,
       "ingestion_pipeline/tools/**": 15,
       "ingestion_pipeline/crawler/**": 5,
+      "ingestion_pipeline/crawler/spider/**": 2,
       "ingestion_pipeline/extract/**": 5,
       "ingestion_pipeline/retrieval/**": 5
     }

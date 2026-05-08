@@ -40,6 +40,7 @@ export interface RepoDisplayModel {
   config: {
     path?: string;
     maxDepth: number;
+    maxVisibleRows: number | null;
     hideButCount: string[];
     collapseFolders: string[];
     maxChildrenByFolder: Record<string, number>;
@@ -48,12 +49,19 @@ export interface RepoDisplayModel {
   timeline: RepoDisplayTimelineUnit[];
   summary: {
     visibleNodeCount: number;
+    maxVisibleRows: number | null;
+    visibleRowsBeforeBudget: number;
+    visibleRowsAfterBudget: number;
     fileNodeCount: number;
     folderNodeCount: number;
     collapsedFolderCount: number;
     moreGroupCount: number;
     hiddenButCountedFileCount: number;
+    autoHiddenFiles: number;
+    autoCollapsedFolders: number;
+    autoMoreGroups: number;
     timelineUnitCount: number;
+    timelineUnitsMapped: number;
     sourceFileCount: number;
     sourceFolderCount: number;
     sourceTimelineUnitCount: number;

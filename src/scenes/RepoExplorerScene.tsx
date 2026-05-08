@@ -104,6 +104,8 @@ const SIDEBAR_TREE_INDENT = 14
 const FEATURED_SECTION_LIMIT = 4
 const SECTION_CARD_LIMIT = 8
 const INSPECTOR_NODE_LIMIT = 5
+const SUBTLE_SCROLLBAR_CLASS =
+  '[scrollbar-width:thin] [scrollbar-color:rgba(51,65,85,0.55)_transparent] [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-700/45 [&::-webkit-scrollbar-thumb:hover]:bg-slate-600/55'
 
 const NODE_TYPE_STYLES: Record<
   RepoDisplayNodeType,
@@ -466,17 +468,10 @@ function RepoExplorerCanvas({
           initial={panelMotion.initial}
           animate={panelMotion.animate}
           transition={{ ...springSoft, delay: getStaggerDelay(2, 0.06) }}
-          className="min-h-0 rounded-[28px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,28,0.94),rgba(4,8,18,0.94))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+          className="min-h-0"
         >
           <div className="flex h-full flex-col gap-4">
-            <div className="space-y-2">
-              <div className="text-[11px] uppercase tracking-[0.28em] text-slate-500">
-                Explorer
-              </div>
-              <div className="h-px bg-white/6" />
-            </div>
-
-            <div className="min-h-0 overflow-y-auto pr-1">
+            <div className={`min-h-0 overflow-y-auto pr-1 ${SUBTLE_SCROLLBAR_CLASS}`}>
               {explorerRows.length > 0 ? (
                 <div>
                   {explorerRows.map((row) => (
@@ -497,15 +492,12 @@ function RepoExplorerCanvas({
           initial={panelMotion.initial}
           animate={panelMotion.animate}
           transition={{ ...springSoft, delay: getStaggerDelay(3, 0.06) }}
-          className="min-h-0 rounded-[30px] border border-white/10 bg-[linear-gradient(180deg,rgba(7,12,24,0.92),rgba(4,8,18,0.94))] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+          className="min-h-0"
         >
           <div className="flex h-full flex-col gap-4">
-            <PanelHeader
-              title="Explorer clusters"
-              subtitle="Display-model sections rendered directly from visible nodes"
-            />
-
-            <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 2xl:grid-cols-2">
+            <div
+              className={`grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 2xl:grid-cols-2 ${SUBTLE_SCROLLBAR_CLASS}`}
+            >
               <AnimatePresence initial={false}>
                 {featuredSections.length > 0 ? (
                   featuredSections.map((section, index) => (

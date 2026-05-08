@@ -65,6 +65,42 @@ interface ChildStats {
   hiddenDirectChildCount: number;
 }
 
+interface CompressionStats {
+  maxVisibleRows: number | null;
+  visibleRowsBeforeBudget: number;
+  visibleRowsAfterBudget: number;
+  autoHiddenFiles: number;
+  autoCollapsedFolders: number;
+  autoMoreGroups: number;
+}
+
+interface FileHideCandidate {
+  nodeId: string;
+  path: string;
+  depth: number;
+  parentNodeId: string | null;
+  activityWeight: number;
+  lineScale: number;
+}
+
+interface FolderCollapseCandidate {
+  nodeId: string;
+  path: string;
+  depth: number;
+  rowsSaved: number;
+  activityWeight: number;
+  visualWeight: number;
+  isImportantTopLevelFolder: boolean;
+}
+
+const IMPORTANT_TOP_LEVEL_FOLDERS = new Set([
+  'ingestion_pipeline',
+  'assistant_runtime',
+  'tools',
+  'tests',
+  'src',
+]);
+
 void main();
 
 async function main(): Promise<void> {
@@ -92,11 +128,17 @@ async function main(): Promise<void> {
     await writeFile(publicOutputPath, serializedModel, 'utf8');
 
     console.log('Display model generated');
+    console.log(`Max visible rows: ${displayModel.summary.maxVisibleRows ?? 'none'}`);
+    console.log(`Visible rows before budget: ${displayModel.summary.visibleRowsBeforeBudget}`);
+    console.log(`Visible rows after budget: ${displayModel.summary.visibleRowsAfterBudget}`);
     console.log(`Visible nodes: ${displayModel.summary.visibleNodeCount}`);
     console.log(`Hidden-but-counted files: ${displayModel.summary.hiddenButCountedFileCount}`);
     console.log(`Collapsed folders: ${displayModel.summary.collapsedFolderCount}`);
     console.log(`More groups: ${displayModel.summary.moreGroupCount}`);
-    console.log(`Timeline units mapped: ${displayModel.summary.timelineUnitCount}`);
+    console.log(`Auto-hidden files: ${displayModel.summary.autoHiddenFiles}`);
+    console.log(`Auto-collapsed folders: ${displayModel.summary.autoCollapsedFolders}`);
+    console.log(`Auto more groups: ${displayModel.summary.autoMoreGroups}`);
+    console.log(`Timeline units mapped: ${displayModel.summary.timelineUnitsMapped}`);
     console.log(`Warnings: ${displayModel.warnings.length}`);
     console.log(`Wrote ${outputPath}`);
     console.log(`Mirrored ${publicOutputPath}`);
@@ -257,6 +299,10 @@ function buildDisplayModel(
   const displayNodeIdByFileId = new Map<string, string>();
   const nodes: RepoDisplayNode[] = [];
   const nodeById = new Map<string, RepoDisplayNode>();
+  const rootNodeIds: string[] = [];
+  const hideButCountPatternMatches = new Map(
+    displayConfig.hideButCount.map((pattern) => [pattern, false]),
+  );
   const collapsedPatternMatches = new Map(
     displayConfig.collapseFolders.map((pattern) => [pattern, false]),
   );
@@ -305,6 +351,12 @@ function buildDisplayModel(
 
   appendFolderContext('', null, 0);
 
+  for (const [pattern, matched] of hideButCountPatternMatches.entries()) {
+    if (!matched) {
+      warnings.push(`hide-but-count rule matches nothing: ${pattern}`);
+    }
+  }
+
   for (const [pattern, matched] of collapsedPatternMatches.entries()) {
     if (!matched) {
       warnings.push(`collapse rule matches nothing: ${pattern}`);
@@ -317,13 +369,21 @@ function buildDisplayModel(
     }
   }
 
+  const compressionStats = applyRowBudgetCompression(displayConfig.maxVisibleRows);
+  const finalNodes = flattenVisibleNodes();
   const timeline = buildDisplayTimeline(model.timeline, displayNodeIdByFileId, nodeById, warnings);
-  const collapsedFolderCount = nodes.filter((node) => node.type === 'collapsedFolder').length;
-  const moreGroupCount = nodes.filter((node) => node.type === 'moreGroup').length;
-  const fileNodeCount = nodes.filter((node) => node.type === 'file').length;
-  const folderNodeCount = nodes.filter(
+  const collapsedFolderCount = finalNodes.filter((node) => node.type === 'collapsedFolder').length;
+  const moreGroupCount = finalNodes.filter((node) => node.type === 'moreGroup').length;
+  const fileNodeCount = finalNodes.filter((node) => node.type === 'file').length;
+  const folderNodeCount = finalNodes.filter(
     (node) => node.type === 'folder' || node.type === 'collapsedFolder',
   ).length;
+
+  if (timeline.length !== model.timeline.length) {
+    warnings.push(
+      `display timeline mapped ${timeline.length} of ${model.timeline.length} source timeline units.`,
+    );
+  }
 
   return {
     generatedAt: new Date().toISOString(),
@@ -331,20 +391,28 @@ function buildDisplayModel(
     config: {
       path: configPath,
       maxDepth: displayConfig.maxDepth,
+      maxVisibleRows: displayConfig.maxVisibleRows,
       hideButCount: [...displayConfig.hideButCount],
       collapseFolders: [...displayConfig.collapseFolders],
       maxChildrenByFolder: { ...displayConfig.maxChildrenByFolder },
     },
-    nodes,
+    nodes: finalNodes,
     timeline,
     summary: {
-      visibleNodeCount: nodes.length,
+      visibleNodeCount: finalNodes.length,
+      maxVisibleRows: compressionStats.maxVisibleRows,
+      visibleRowsBeforeBudget: compressionStats.visibleRowsBeforeBudget,
+      visibleRowsAfterBudget: compressionStats.visibleRowsAfterBudget,
       fileNodeCount,
       folderNodeCount,
       collapsedFolderCount,
       moreGroupCount,
       hiddenButCountedFileCount: hiddenButCountedFileIds.size,
+      autoHiddenFiles: compressionStats.autoHiddenFiles,
+      autoCollapsedFolders: compressionStats.autoCollapsedFolders,
+      autoMoreGroups: compressionStats.autoMoreGroups,
       timelineUnitCount: timeline.length,
+      timelineUnitsMapped: timeline.length,
       sourceFileCount: model.files.length,
       sourceFolderCount: model.folders.length,
       sourceTimelineUnitCount: model.timeline.length,
@@ -464,6 +532,14 @@ function buildDisplayModel(
       const shouldHideButCount = displayConfig.hideButCount.some((pattern) =>
         matchesPathPattern(childFile.path, pattern),
       );
+
+      if (shouldHideButCount) {
+        for (const pattern of displayConfig.hideButCount) {
+          if (matchesPathPattern(childFile.path, pattern)) {
+            hideButCountPatternMatches.set(pattern, true);
+          }
+        }
+      }
 
       if (shouldHideButCount && parentNodeId) {
         hiddenButCountedFileIds.add(childFile.id);
@@ -659,6 +735,8 @@ function buildDisplayModel(
       if (parentNode) {
         parentNode.childNodeIds.push(node.id);
       }
+    } else {
+      rootNodeIds.push(node.id);
     }
 
     return node;
@@ -675,6 +753,12 @@ function buildDisplayModel(
         continue;
       }
 
+      displayNodeIdByFileId.set(fileId, nodeId);
+    }
+  }
+
+  function remapFilesToNode(fileIds: string[], nodeId: string): void {
+    for (const fileId of fileIds) {
       displayNodeIdByFileId.set(fileId, nodeId);
     }
   }
@@ -755,6 +839,480 @@ function buildDisplayModel(
     }
 
     return null;
+  }
+
+  function applyRowBudgetCompression(maxVisibleRows: number | null): CompressionStats {
+    const stats: CompressionStats = {
+      maxVisibleRows,
+      visibleRowsBeforeBudget: getVisibleRowCount(),
+      visibleRowsAfterBudget: getVisibleRowCount(),
+      autoHiddenFiles: 0,
+      autoCollapsedFolders: 0,
+      autoMoreGroups: 0,
+    };
+
+    if (maxVisibleRows === null || stats.visibleRowsBeforeBudget <= maxVisibleRows) {
+      return stats;
+    }
+
+    const boringHideCandidates = collectBoringFileHideCandidates();
+    const boringCandidateCountByParent = countCandidatesByParent(boringHideCandidates);
+
+    for (const candidate of boringHideCandidates) {
+      if (getVisibleRowCount() <= maxVisibleRows) {
+        break;
+      }
+
+      const parentKey = getParentKey(candidate.parentNodeId);
+      const remainingCandidatesForParent = boringCandidateCountByParent.get(parentKey) ?? 0;
+      const shouldUseMoreGroup =
+        candidate.parentNodeId === null ||
+        parentHasMoreGroup(candidate.parentNodeId) ||
+        remainingCandidatesForParent >= 2;
+
+      if (hideFileNode(candidate.nodeId, shouldUseMoreGroup, stats)) {
+        stats.autoHiddenFiles += 1;
+      }
+
+      if (remainingCandidatesForParent > 0) {
+        boringCandidateCountByParent.set(parentKey, remainingCandidatesForParent - 1);
+      }
+    }
+
+    while (getVisibleRowCount() > maxVisibleRows) {
+      const collapseCandidates = collectFolderCollapseCandidates();
+
+      if (collapseCandidates.length === 0) {
+        break;
+      }
+
+      const overflow = getVisibleRowCount() - maxVisibleRows;
+      const nextCandidate = selectNextCollapseCandidate(collapseCandidates, overflow);
+
+      if (!nextCandidate) {
+        break;
+      }
+
+      if (!collapseFolderNode(nextCandidate.nodeId)) {
+        break;
+      }
+
+      stats.autoCollapsedFolders += 1;
+    }
+
+    stats.visibleRowsAfterBudget = getVisibleRowCount();
+
+    if (maxVisibleRows !== null && stats.visibleRowsAfterBudget > maxVisibleRows) {
+      warnings.push(
+        `row budget could not be reached: ${stats.visibleRowsAfterBudget} visible rows remain for a budget of ${maxVisibleRows}.`,
+      );
+    }
+
+    return stats;
+  }
+
+  function collectBoringFileHideCandidates(): FileHideCandidate[] {
+    const candidates: FileHideCandidate[] = [];
+
+    for (const node of flattenVisibleNodes()) {
+      if (!isBoringLeafFileNode(node)) {
+        continue;
+      }
+
+      candidates.push({
+        nodeId: node.id,
+        path: node.path,
+        depth: node.depth,
+        parentNodeId: node.parentNodeId,
+        activityWeight: getNodeActivityWeight(node),
+        lineScale: Math.max(node.finalLineCount, node.maxLineCount),
+      });
+    }
+
+    return candidates.sort((left, right) => (
+      compareNumbersDescending(left.depth, right.depth) ||
+      compareNumbersAscending(getBoringNamePriority(left.path), getBoringNamePriority(right.path)) ||
+      compareNumbersAscending(left.lineScale, right.lineScale) ||
+      compareNumbersAscending(left.activityWeight, right.activityWeight) ||
+      left.path.localeCompare(right.path)
+    ));
+  }
+
+  function countCandidatesByParent(candidates: FileHideCandidate[]): Map<string, number> {
+    const counts = new Map<string, number>();
+
+    for (const candidate of candidates) {
+      const parentKey = getParentKey(candidate.parentNodeId);
+      counts.set(parentKey, (counts.get(parentKey) ?? 0) + 1);
+    }
+
+    return counts;
+  }
+
+  function hideFileNode(
+    nodeId: string,
+    useMoreGroup: boolean,
+    stats: CompressionStats,
+  ): boolean {
+    const fileNode = nodeById.get(nodeId);
+
+    if (!fileNode || fileNode.type !== 'file') {
+      return false;
+    }
+
+    const parentNode = fileNode.parentNodeId
+      ? nodeById.get(fileNode.parentNodeId) ?? null
+      : null;
+
+    if (fileNode.parentNodeId && !parentNode) {
+      warnings.push(`auto-hidden file has no visible parent: ${fileNode.path}`);
+      return false;
+    }
+
+    let targetNode: RepoDisplayNode | null = null;
+
+    if (useMoreGroup) {
+      targetNode = getOrCreateBudgetMoreGroup(fileNode.parentNodeId, stats);
+    } else if (parentNode) {
+      targetNode = parentNode;
+    } else {
+      targetNode = getOrCreateBudgetMoreGroup(null, stats);
+    }
+
+    if (!targetNode) {
+      warnings.push(`auto-hidden file could not be mapped to a visible target: ${fileNode.path}`);
+      return false;
+    }
+
+    if (parentNode) {
+      parentNode.hiddenChildCount += 1;
+    }
+
+    if (targetNode.type === 'moreGroup') {
+      absorbNodeIntoMoreGroup(targetNode, fileNode);
+    }
+
+    remapFilesToNode(fileNode.sourceFileIds, targetNode.id);
+    detachNode(nodeId);
+    return true;
+  }
+
+  function getOrCreateBudgetMoreGroup(
+    parentNodeId: string | null,
+    stats: CompressionStats,
+  ): RepoDisplayNode {
+    const existingMoreGroup = getExistingMoreGroup(parentNodeId);
+
+    if (existingMoreGroup) {
+      return existingMoreGroup;
+    }
+
+    const parentNode = parentNodeId ? nodeById.get(parentNodeId) ?? null : null;
+    const folderPath = parentNode ? normalizePathValue(parentNode.path) : '';
+    const syntheticPath =
+      folderPath.length === 0
+        ? '__budget_more__'
+        : `${folderPath}/__budget_more__`;
+    const syntheticId =
+      parentNodeId === null
+        ? 'display:budget-more:(root)'
+        : `display:budget-more:${parentNode?.path ?? parentNodeId}`;
+    const moreGroup = createNode({
+      id: syntheticId,
+      label: '+ 0 more',
+      path: syntheticPath,
+      type: 'moreGroup',
+      depth: parentNode ? parentNode.depth + 1 : 0,
+      parentNodeId,
+      sourceFileIds: [],
+      sourceFolderIds: [],
+      finalLineCount: 0,
+      maxLineCount: 0,
+      visualWeight: 0,
+      childCount: 0,
+      hiddenChildCount: 0,
+    });
+
+    stats.autoMoreGroups += 1;
+    return moreGroup;
+  }
+
+  function getExistingMoreGroup(parentNodeId: string | null): RepoDisplayNode | null {
+    const siblingIds = parentNodeId
+      ? nodeById.get(parentNodeId)?.childNodeIds ?? []
+      : rootNodeIds;
+
+    for (const siblingId of siblingIds) {
+      const siblingNode = nodeById.get(siblingId);
+
+      if (siblingNode?.type === 'moreGroup') {
+        return siblingNode;
+      }
+    }
+
+    return null;
+  }
+
+  function parentHasMoreGroup(parentNodeId: string | null): boolean {
+    return getExistingMoreGroup(parentNodeId) !== null;
+  }
+
+  function absorbNodeIntoMoreGroup(targetNode: RepoDisplayNode, sourceNode: RepoDisplayNode): void {
+    targetNode.sourceFileIds = uniqueSortedStrings([
+      ...targetNode.sourceFileIds,
+      ...sourceNode.sourceFileIds,
+    ]);
+    targetNode.sourceFolderIds = uniqueSortedStrings([
+      ...targetNode.sourceFolderIds,
+      ...sourceNode.sourceFolderIds,
+    ]);
+    targetNode.finalLineCount += sourceNode.finalLineCount;
+    targetNode.maxLineCount += sourceNode.maxLineCount;
+    targetNode.visualWeight += sourceNode.visualWeight;
+    targetNode.childCount += 1;
+    targetNode.hiddenChildCount += 1;
+    targetNode.label = `+ ${targetNode.childCount} more`;
+  }
+
+  function collectFolderCollapseCandidates(): FolderCollapseCandidate[] {
+    const candidates: FolderCollapseCandidate[] = [];
+
+    for (const node of flattenVisibleNodes()) {
+      if (node.type !== 'folder') {
+        continue;
+      }
+
+      if (node.parentNodeId && !nodeById.has(node.parentNodeId)) {
+        warnings.push(`auto-collapse candidate has no visible parent: ${node.path}`);
+        continue;
+      }
+
+      const rowsSaved = countVisibleDescendants(node.id);
+
+      if (rowsSaved <= 0) {
+        continue;
+      }
+
+      candidates.push({
+        nodeId: node.id,
+        path: node.path,
+        depth: node.depth,
+        rowsSaved,
+        activityWeight: getNodeActivityWeight(node),
+        visualWeight: node.visualWeight,
+        isImportantTopLevelFolder:
+          node.depth === 0 && IMPORTANT_TOP_LEVEL_FOLDERS.has(node.path),
+      });
+    }
+
+    return candidates.sort((left, right) => (
+      compareBooleans(left.isImportantTopLevelFolder, right.isImportantTopLevelFolder) ||
+      compareNumbersDescending(left.depth, right.depth) ||
+      left.path.localeCompare(right.path)
+    ));
+  }
+
+  function selectNextCollapseCandidate(
+    candidates: FolderCollapseCandidate[],
+    overflow: number,
+  ): FolderCollapseCandidate | null {
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    return [...candidates].sort((left, right) => {
+      const baseOrder =
+        compareBooleans(left.isImportantTopLevelFolder, right.isImportantTopLevelFolder) ||
+        compareNumbersDescending(left.depth, right.depth);
+
+      if (baseOrder !== 0) {
+        return baseOrder;
+      }
+
+      const leftCoversOverflow = left.rowsSaved >= overflow;
+      const rightCoversOverflow = right.rowsSaved >= overflow;
+
+      if (leftCoversOverflow !== rightCoversOverflow) {
+        return leftCoversOverflow ? -1 : 1;
+      }
+
+      if (leftCoversOverflow && rightCoversOverflow) {
+        return (
+          compareNumbersAscending(left.rowsSaved, right.rowsSaved) ||
+          compareNumbersAscending(left.activityWeight, right.activityWeight) ||
+          compareNumbersAscending(left.visualWeight, right.visualWeight) ||
+          left.path.localeCompare(right.path)
+        );
+      }
+
+      return (
+        compareNumbersDescending(left.rowsSaved, right.rowsSaved) ||
+        compareNumbersAscending(left.activityWeight, right.activityWeight) ||
+        compareNumbersAscending(left.visualWeight, right.visualWeight) ||
+        left.path.localeCompare(right.path)
+      );
+    })[0];
+  }
+
+  function collapseFolderNode(nodeId: string): boolean {
+    const folderNode = nodeById.get(nodeId);
+
+    if (!folderNode || folderNode.type !== 'folder') {
+      return false;
+    }
+
+    const visibleChildNodeIds = [...folderNode.childNodeIds];
+
+    if (visibleChildNodeIds.length === 0) {
+      warnings.push(`auto-collapse candidate has no visible descendants: ${folderNode.path}`);
+      return false;
+    }
+
+    for (const childNodeId of visibleChildNodeIds) {
+      deleteSubtree(childNodeId);
+    }
+
+    folderNode.type = 'collapsedFolder';
+    folderNode.hiddenChildCount = folderNode.childCount;
+    folderNode.childNodeIds = [];
+    remapFilesToNode(folderNode.sourceFileIds, folderNode.id);
+    return true;
+  }
+
+  function deleteSubtree(nodeId: string): void {
+    const node = nodeById.get(nodeId);
+
+    if (!node) {
+      return;
+    }
+
+    for (const childNodeId of [...node.childNodeIds]) {
+      deleteSubtree(childNodeId);
+    }
+
+    detachNode(nodeId);
+  }
+
+  function detachNode(nodeId: string): void {
+    const node = nodeById.get(nodeId);
+
+    if (!node) {
+      return;
+    }
+
+    if (node.parentNodeId) {
+      const parentNode = nodeById.get(node.parentNodeId);
+
+      if (parentNode) {
+        parentNode.childNodeIds = parentNode.childNodeIds.filter(
+          (childNodeId) => childNodeId !== nodeId,
+        );
+      }
+    } else {
+      removeFromArray(rootNodeIds, nodeId);
+    }
+
+    nodeById.delete(nodeId);
+  }
+
+  function countVisibleDescendants(nodeId: string): number {
+    const node = nodeById.get(nodeId);
+
+    if (!node) {
+      return 0;
+    }
+
+    let count = 0;
+
+    for (const childNodeId of node.childNodeIds) {
+      count += 1;
+      count += countVisibleDescendants(childNodeId);
+    }
+
+    return count;
+  }
+
+  function flattenVisibleNodes(): RepoDisplayNode[] {
+    const flattened: RepoDisplayNode[] = [];
+
+    for (const rootNodeId of rootNodeIds) {
+      appendVisibleNode(rootNodeId, flattened);
+    }
+
+    return flattened;
+  }
+
+  function appendVisibleNode(nodeId: string, destination: RepoDisplayNode[]): void {
+    const node = nodeById.get(nodeId);
+
+    if (!node) {
+      return;
+    }
+
+    destination.push(node);
+
+    for (const childNodeId of node.childNodeIds) {
+      appendVisibleNode(childNodeId, destination);
+    }
+  }
+
+  function getVisibleRowCount(): number {
+    return nodeById.size;
+  }
+
+  function getNodeActivityWeight(node: RepoDisplayNode): number {
+    return node.sourceFileIds.reduce(
+      (sum, fileId) => sum + (activityWeightByFileId.get(fileId) ?? 0),
+      0,
+    );
+  }
+
+  function isBoringLeafFileNode(node: RepoDisplayNode): boolean {
+    if (node.type !== 'file') {
+      return false;
+    }
+
+    const normalizedName = node.label.toLowerCase();
+
+    if (
+      normalizedName === '__init__.py' ||
+      normalizedName === 'index.ts' ||
+      normalizedName === 'index.tsx' ||
+      normalizedName === 'index.js' ||
+      normalizedName === 'index.jsx'
+    ) {
+      return true;
+    }
+
+    return (
+      node.depth >= 2 &&
+      Math.max(node.finalLineCount, node.maxLineCount) <= 12 &&
+      node.visualWeight <= 0.2 &&
+      getNodeActivityWeight(node) <= 2
+    );
+  }
+
+  function getBoringNamePriority(nodePath: string): number {
+    const name = path.posix.basename(normalizePathValue(nodePath)).toLowerCase();
+
+    if (name === '__init__.py') {
+      return 0;
+    }
+
+    if (
+      name === 'index.ts' ||
+      name === 'index.tsx' ||
+      name === 'index.js' ||
+      name === 'index.jsx'
+    ) {
+      return 1;
+    }
+
+    return 2;
+  }
+
+  function getParentKey(parentNodeId: string | null): string {
+    return parentNodeId ?? '__root__';
   }
 }
 
@@ -865,6 +1423,22 @@ function uniqueSortedStrings(values: string[]): string[] {
   return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }
 
+function compareNumbersAscending(left: number, right: number): number {
+  return left - right;
+}
+
 function compareNumbersDescending(left: number, right: number): number {
   return right - left;
+}
+
+function compareBooleans(left: boolean, right: boolean): number {
+  return Number(left) - Number(right);
+}
+
+function removeFromArray(values: string[], value: string): void {
+  const index = values.indexOf(value);
+
+  if (index >= 0) {
+    values.splice(index, 1);
+  }
 }
