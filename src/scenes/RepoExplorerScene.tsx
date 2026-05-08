@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
+import { LineCounterOverlay } from '../components/repo/LineCounterOverlay'
 import { PresentationStage } from '../components/presentation/PresentationStage'
 import { useRepoDisplayModel } from '../hooks/useRepoDisplayModel'
 import {
@@ -86,6 +87,7 @@ type ExplorerRow = {
   depth: number
   type: RepoDisplayNodeType
   hiddenChildCount: number
+  hiddenDescendantCount: number
   recentlyChanged: boolean
   ancestorHasNextSibling: boolean[]
   hasNextSibling: boolean
@@ -132,12 +134,6 @@ const NODE_TYPE_STYLES: Record<
       'border-amber-400/25 bg-amber-400/12 text-amber-100 shadow-[0_0_0_1px_rgba(245,158,11,0.04)]',
     glow: 'from-amber-300/45 via-amber-400/12 to-transparent',
     label: 'Collapsed',
-  },
-  moreGroup: {
-    badge:
-      'border-violet-400/25 bg-violet-400/12 text-violet-100 shadow-[0_0_0_1px_rgba(167,139,250,0.04)]',
-    glow: 'from-violet-300/45 via-violet-400/12 to-transparent',
-    label: 'More',
   },
 }
 
@@ -416,6 +412,13 @@ function RepoExplorerCanvas({
 
   return (
     <>
+      <LineCounterOverlay
+        timeline={model.timeline}
+        activeUnitIndex={clampedActiveUnitIndex}
+        shouldReduceMotion={shouldReduceMotion}
+        stageBounds={stageBounds}
+      />
+
       <FloatingPlaybackControls
         shouldReduceMotion={shouldReduceMotion}
         stageBounds={stageBounds}
@@ -998,9 +1001,7 @@ function ExplorerTreeRow({
             ? 'text-slate-200'
             : row.type === 'collapsedFolder'
               ? 'text-amber-100'
-              : row.type === 'moreGroup'
-                ? 'text-violet-200'
-                : 'text-slate-300'
+              : 'text-slate-300'
       }`}
     >
       {row.depth > 0 ? (
@@ -1049,9 +1050,9 @@ function ExplorerTreeRow({
         <span className="min-w-0 truncate pt-[1px]">
           {row.label}
         </span>
-        {row.hiddenChildCount > 0 && row.type !== 'file' ? (
+        {row.hiddenDescendantCount > 0 && row.type !== 'file' ? (
           <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-            {formatNumber(row.hiddenChildCount)} hidden
+            {formatNumber(row.hiddenDescendantCount)} hidden
           </span>
         ) : null}
       </div>
@@ -1356,7 +1357,11 @@ function RepoDisplayCard({
             <div className="mt-1 text-slate-200">
               {node.type === 'file'
                 ? formatNumber(node.maxLineCount)
-                : formatNumber(node.hiddenChildCount > 0 ? node.hiddenChildCount : node.childCount)}
+                : formatNumber(
+                    node.hiddenDescendantCount > 0
+                      ? node.hiddenDescendantCount
+                      : node.childCount,
+                  )}
             </div>
           </div>
         </div>
@@ -2184,6 +2189,7 @@ function buildExplorerRows(visibleNodes: VisibleRepoNode[]): ExplorerRow[] {
         depth: entry.node.depth,
         type: entry.node.type,
         hiddenChildCount: entry.node.hiddenChildCount,
+        hiddenDescendantCount: entry.node.hiddenDescendantCount,
         recentlyChanged: entry.state.recentlyChanged,
         ancestorHasNextSibling,
         hasNextSibling,
@@ -2232,19 +2238,15 @@ function getCardSecondaryLabel(
     return entry.node.path
   }
 
-  if (entry.node.type === 'moreGroup') {
-    return `${formatNumber(entry.node.hiddenChildCount || entry.node.childCount)} hidden descendants`
-  }
-
   if (entry.node.type === 'collapsedFolder') {
-    return `${formatNumber(entry.node.childCount)} collapsed children • ${formatNumber(entry.node.sourceFileIds.length)} source files`
+    return `${formatNumber(entry.node.childCount)} direct children • ${formatNumber(entry.node.hiddenDescendantCount)} hidden files`
   }
 
   if (entry.node.path === '') {
     return 'workspace'
   }
 
-  return `${formatNumber(entry.node.childCount)} direct children`
+  return `${formatNumber(entry.node.visibleChildCount)} visible • ${formatNumber(entry.node.hiddenDescendantCount)} hidden`
 }
 
 function getCardTertiaryLabel(entry: VisibleRepoNode) {
@@ -2252,7 +2254,7 @@ function getCardTertiaryLabel(entry: VisibleRepoNode) {
     return 'Peak'
   }
 
-  if (entry.node.hiddenChildCount > 0) {
+  if (entry.node.hiddenDescendantCount > 0) {
     return 'Hidden'
   }
 
@@ -2270,12 +2272,6 @@ function compareVisibleNodesForCards(
 
   if (leftIsFolderLike !== rightIsFolderLike) {
     return leftIsFolderLike ? -1 : 1
-  }
-
-  if (left.node.type === 'moreGroup' || right.node.type === 'moreGroup') {
-    if (left.node.type !== right.node.type) {
-      return left.node.type === 'moreGroup' ? 1 : -1
-    }
   }
 
   return (

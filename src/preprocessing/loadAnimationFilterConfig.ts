@@ -66,11 +66,6 @@ function normalizeDisplayConfig(
     'display.hideButCount',
     configPath,
   );
-  const collapseFolders = normalizePatternArray(
-    value.collapseFolders,
-    'display.collapseFolders',
-    configPath,
-  );
   const maxChildrenByFolder = normalizeMaxChildrenByFolder(
     value.maxChildrenByFolder,
     configPath,
@@ -80,7 +75,6 @@ function normalizeDisplayConfig(
     maxDepth,
     maxVisibleRows,
     hideButCount,
-    collapseFolders,
     maxChildrenByFolder,
   };
 }
@@ -90,7 +84,6 @@ function createDefaultDisplayConfig(): LoadedAnimationDisplayConfig {
     maxDepth: 4,
     maxVisibleRows: null,
     hideButCount: [],
-    collapseFolders: [],
     maxChildrenByFolder: {},
   };
 }
@@ -100,8 +93,7 @@ function normalizePatternArray(
   fieldName:
     | 'include'
     | 'exclude'
-    | 'display.hideButCount'
-    | 'display.collapseFolders',
+    | 'display.hideButCount',
   configPath: string,
 ): string[] {
   if (value === undefined) {

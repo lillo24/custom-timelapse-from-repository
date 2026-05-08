@@ -15,7 +15,6 @@ export interface AnimationDisplayConfigFile {
   maxDepth?: number;
   maxVisibleRows?: number | null;
   hideButCount?: string[];
-  collapseFolders?: string[];
   maxChildrenByFolder?: Record<string, number>;
 }
 
@@ -23,6 +22,5 @@ export interface LoadedAnimationDisplayConfig {
   maxDepth: number;
   maxVisibleRows: number | null;
   hideButCount: string[];
-  collapseFolders: string[];
   maxChildrenByFolder: Record<string, number>;
 }

@@ -1,7 +1,6 @@
 {
   "exclude": [
     "AGENTS.md",
-    "**/README.md",
     ".gitignore",
 
     "History_Implementation_plans/**",
@@ -27,18 +26,11 @@
     "maxDepth": 4,
     "maxVisibleRows": 30,
     "hideButCount": [
-      "**/__init__.py"
-    ],
-    "collapseFolders": [
-      "tools/ingestion_debug_ui/**",
-      "ingestion_pipeline/configs/**",
-      "ingestion_pipeline/tests/**",
-      "ingestion_pipeline/docs/**",
-      "ingestion_pipeline/storage/**",
-      "assistant_runtime/providers/**"
+      "**/__init__.py",
+      "**/README.md"
     ],
     "maxChildrenByFolder": {
-      "ingestion_pipeline/**": 20,
+      "ingestion_pipeline": 20,
       "assistant_runtime/**": 5,
       "ingestion_pipeline/tools/**": 15,
       "ingestion_pipeline/crawler/**": 5,

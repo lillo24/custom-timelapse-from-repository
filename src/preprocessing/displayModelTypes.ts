@@ -1,8 +1,7 @@
 export type RepoDisplayNodeType =
   | 'folder'
   | 'file'
-  | 'collapsedFolder'
-  | 'moreGroup';
+  | 'collapsedFolder';
 
 export interface RepoDisplayNode {
   id: string;
@@ -18,7 +17,9 @@ export interface RepoDisplayNode {
   maxLineCount: number;
   visualWeight: number;
   childCount: number;
+  visibleChildCount: number;
   hiddenChildCount: number;
+  hiddenDescendantCount: number;
 }
 
 export interface RepoDisplayTimelineUnit {
@@ -42,7 +43,6 @@ export interface RepoDisplayModel {
     maxDepth: number;
     maxVisibleRows: number | null;
     hideButCount: string[];
-    collapseFolders: string[];
     maxChildrenByFolder: Record<string, number>;
   };
   nodes: RepoDisplayNode[];
@@ -55,7 +55,6 @@ export interface RepoDisplayModel {
     fileNodeCount: number;
     folderNodeCount: number;
     collapsedFolderCount: number;
-    moreGroupCount: number;
     hiddenButCountedFileCount: number;
     autoHiddenFiles: number;
     autoCollapsedFolders: number;

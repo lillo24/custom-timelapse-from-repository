@@ -35,7 +35,8 @@ scene from generated data without hardcoding the dataset inside React.
 
 
 # Tools for Fast Changes to Layout
-## Changing maxVisibleRows until it looks good in the screen that you want to present on
+## `maxVisibleRows` is currently advisory only in preprocessing
+The display model records when the row count exceeds this budget, but it does not auto-collapse the tree.
 
 ## Changing gap between right line and text (gap-5)
 className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] leading-5 transition ${
