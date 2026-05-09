@@ -69,6 +69,38 @@ className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] 
 width: `${SIDEBAR_TREE_INDENT / 2 + 12}px`
 
 
+## For changing Call_of_Duty number of lines counter
+const LINE_COUNTER_SETTINGS = {
+  topOffsetPx: 40, //How far the counter is from the top. Bigger = lower on screen.
+  minBadgeIntervalMs: 500, //Minimum time between visible +N / -N badge events. Prevents spam.
+  badgeAppearMs: 500, //How long the badge takes to appear.
+  badgeHoldMs: 700, //How long the badge stays readable before merging.
+  badgeMergeMs: 450, //How long the slide-left merge animation takes.
+  minAbsDeltaForImmediateBadge: 20, //If the accumulated line delta reaches at least 20, show a badge immediately instead of waiting.
+} as const
+
+
+## To change how files get bigger during growth
+    "sizeTrackingStyle": {
+      "baseRowHeightRem": 1.1,
+      "maxExtraHeightRem": 2.0,
+      "baseFontSizeRem": 0.8125,
+      "maxExtraFontSizeRem": 1
+    },
+
+
+## Fire
+### Change Fire sensitivity
+const DEFAULT_FIRE_WINDOW_SIZE = 30
+const DEFAULT_FIRE_TIER_ONE_THRESHOLD = 0.05
+const DEFAULT_FIRE_TIER_TWO_THRESHOLD = 0.13
+const DEFAULT_FIRE_TIER_THREE_THRESHOLD = 0.28
+### Change Fire position
+{ key: 'core', x: -16, y: -9, rotation: -82, opacity: 0.96 },
+{ key: 'lower', x: -6, y: 2, rotation: -108, opacity: 0.84 },
+{ key: 'upper', x: -4, y: -19, rotation: -58, opacity: 0.78 },
+
+
 
 # To improve
 ## Maybe some changes in config don't need the whole pipeline to start again (especially the downloading github history)

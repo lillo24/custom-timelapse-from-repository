@@ -16,6 +16,8 @@ type ViewportBounds = {
 type LineCounterOverlayProps = {
   timeline: RepoDisplayTimelineUnit[]
   activeUnitIndex: number
+  isPlaying: boolean
+  playbackSpeed: number
   shouldReduceMotion: boolean
   stageBounds: ViewportBounds | null
 }
@@ -25,18 +27,30 @@ type CounterBadgeState = {
   delta: number
 }
 
-const BADGE_APPEAR_DURATION_SECONDS = 0.1
-const BADGE_HOLD_DURATION_SECONDS = 0.25
-const BADGE_MERGE_DURATION_SECONDS = 0.3
+const LINE_COUNTER_SETTINGS = {
+  topOffsetPx: 40, //How far the counter is from the top. Bigger = lower on screen.
+  minBadgeIntervalMs: 500, //Minimum time between visible +N / -N badge events. Prevents spam.
+  badgeAppearMs: 500, //How long the badge takes to appear.
+  badgeHoldMs: 700, //How long the badge stays readable before merging.
+  badgeMergeMs: 450, //How long the slide-left merge animation takes.
+  minAbsDeltaForImmediateBadge: 20, //If the accumulated line delta reaches at least 20, show a badge immediately instead of waiting.
+} as const
+
 const BADGE_TOTAL_DURATION_MS =
-  (BADGE_APPEAR_DURATION_SECONDS +
-    BADGE_HOLD_DURATION_SECONDS +
-    BADGE_MERGE_DURATION_SECONDS) *
-  1000
+  LINE_COUNTER_SETTINGS.badgeAppearMs +
+  LINE_COUNTER_SETTINGS.badgeHoldMs +
+  LINE_COUNTER_SETTINGS.badgeMergeMs
+const BADGE_APPEAR_END =
+  LINE_COUNTER_SETTINGS.badgeAppearMs / BADGE_TOTAL_DURATION_MS
+const BADGE_HOLD_END =
+  (LINE_COUNTER_SETTINGS.badgeAppearMs + LINE_COUNTER_SETTINGS.badgeHoldMs) /
+  BADGE_TOTAL_DURATION_MS
 
 export function LineCounterOverlay({
   timeline,
   activeUnitIndex,
+  isPlaying,
+  playbackSpeed,
   shouldReduceMotion,
   stageBounds,
 }: LineCounterOverlayProps) {
@@ -50,10 +64,23 @@ export function LineCounterOverlay({
   const [badge, setBadge] = useState<CounterBadgeState | null>(null)
   const displayedTotalRef = useRef(targetTotal)
   const observedTotalRef = useRef(targetTotal)
+  const previousActiveUnitIndexRef = useRef(activeUnitIndex)
   const pendingDeltaRef = useRef(0)
   const badgeIdRef = useRef(0)
+  const startTimeoutRef = useRef<number | null>(null)
   const mergeTimeoutRef = useRef<number | null>(null)
+  const pendingWindowStartedAtRef = useRef<number | null>(null)
+  const currentBadgeDeltaRef = useRef(0)
+  const isPlayingRef = useRef(isPlaying)
+  const playbackSpeedRef = useRef(playbackSpeed)
   const isBadgeAnimatingRef = useRef(false)
+
+  const clearStartTimeout = () => {
+    if (startTimeoutRef.current !== null) {
+      window.clearTimeout(startTimeoutRef.current)
+      startTimeoutRef.current = null
+    }
+  }
 
   const clearBadgeTimeout = () => {
     if (mergeTimeoutRef.current !== null) {
@@ -63,7 +90,10 @@ export function LineCounterOverlay({
   }
 
   const cancelBadgeCycle = () => {
+    clearStartTimeout()
     clearBadgeTimeout()
+    currentBadgeDeltaRef.current = 0
+    pendingWindowStartedAtRef.current = null
     isBadgeAnimatingRef.current = false
     setBadge(null)
   }
@@ -73,46 +103,115 @@ export function LineCounterOverlay({
       return
     }
 
+    clearStartTimeout()
+    const badgeDelta = pendingDeltaRef.current
+    pendingDeltaRef.current = 0
+    pendingWindowStartedAtRef.current = null
+    currentBadgeDeltaRef.current = badgeDelta
     isBadgeAnimatingRef.current = true
     badgeIdRef.current += 1
     setBadge({
       id: badgeIdRef.current,
-      delta: pendingDeltaRef.current,
+      delta: badgeDelta,
     })
 
     mergeTimeoutRef.current = window.setTimeout(() => {
-      const mergeDelta = pendingDeltaRef.current
+      const mergeDelta = currentBadgeDeltaRef.current
 
       if (mergeDelta !== 0) {
         const nextDisplayedTotal = Math.max(0, displayedTotalRef.current + mergeDelta)
         displayedTotalRef.current = nextDisplayedTotal
-        pendingDeltaRef.current = 0
         setDisplayedTotal(nextDisplayedTotal)
       }
 
+      currentBadgeDeltaRef.current = 0
       setBadge(null)
       isBadgeAnimatingRef.current = false
       mergeTimeoutRef.current = null
 
-      if (observedTotalRef.current !== displayedTotalRef.current) {
-        pendingDeltaRef.current += observedTotalRef.current - displayedTotalRef.current
-      }
-
       if (pendingDeltaRef.current !== 0) {
-        startBadgeCycle()
+        scheduleBadgeStart()
       }
     }, BADGE_TOTAL_DURATION_MS)
   }
+
+  const scheduleBadgeStart = () => {
+    if (pendingDeltaRef.current === 0 || isBadgeAnimatingRef.current) {
+      clearStartTimeout()
+      return
+    }
+
+    clearStartTimeout()
+
+    const now = Date.now()
+
+    if (pendingWindowStartedAtRef.current === null) {
+      pendingWindowStartedAtRef.current = now
+    }
+
+    const isCurrentlyPlaying = isPlayingRef.current
+    const effectiveMinIntervalMs = isCurrentlyPlaying
+      ? getEffectiveBadgeIntervalMs(playbackSpeedRef.current)
+      : 0
+    const immediateThreshold = getImmediateBadgeThreshold(
+      playbackSpeedRef.current,
+      isCurrentlyPlaying,
+    )
+
+    if (
+      effectiveMinIntervalMs === 0 ||
+      Math.abs(pendingDeltaRef.current) >= immediateThreshold
+    ) {
+      startBadgeCycle()
+      return
+    }
+
+    const elapsedMs = now - pendingWindowStartedAtRef.current
+    const remainingMs = Math.max(0, effectiveMinIntervalMs - elapsedMs)
+
+    startTimeoutRef.current = window.setTimeout(() => {
+      startTimeoutRef.current = null
+
+      if (!isBadgeAnimatingRef.current && pendingDeltaRef.current !== 0) {
+        startBadgeCycle()
+      }
+    }, remainingMs)
+  }
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying
+  }, [isPlaying])
+
+  useEffect(() => {
+    playbackSpeedRef.current = playbackSpeed
+  }, [playbackSpeed])
 
   useEffect(() => {
     cancelBadgeCycle()
     pendingDeltaRef.current = 0
     displayedTotalRef.current = initialTimelineTotal
     observedTotalRef.current = initialTimelineTotal
+    previousActiveUnitIndexRef.current = activeUnitIndex
     setDisplayedTotal(initialTimelineTotal)
   }, [initialTimelineTotal])
 
   useEffect(() => {
+    const previousActiveUnitIndex = previousActiveUnitIndexRef.current
+    previousActiveUnitIndexRef.current = activeUnitIndex
+    const didWrapFromRestFrameToStart =
+      timeline.length > 0 &&
+      previousActiveUnitIndex === timeline.length &&
+      activeUnitIndex === 0
+
+    if (didWrapFromRestFrameToStart) {
+      cancelBadgeCycle()
+      pendingDeltaRef.current = 0
+      displayedTotalRef.current = targetTotal
+      observedTotalRef.current = targetTotal
+      setDisplayedTotal(targetTotal)
+      return
+    }
+
     const delta = targetTotal - observedTotalRef.current
     observedTotalRef.current = targetTotal
 
@@ -123,27 +222,23 @@ export function LineCounterOverlay({
     pendingDeltaRef.current += delta
 
     if (pendingDeltaRef.current === 0) {
-      cancelBadgeCycle()
+      clearStartTimeout()
+      pendingWindowStartedAtRef.current = null
       return
     }
 
-    if (isBadgeAnimatingRef.current) {
-      setBadge((currentBadge) =>
-        currentBadge
-          ? {
-              ...currentBadge,
-              delta: pendingDeltaRef.current,
-            }
-          : currentBadge,
-      )
-      return
-    }
+    scheduleBadgeStart()
+  }, [activeUnitIndex, targetTotal, timeline.length])
 
-    startBadgeCycle()
-  }, [targetTotal])
+  useEffect(() => {
+    if (pendingDeltaRef.current !== 0 && !isBadgeAnimatingRef.current) {
+      scheduleBadgeStart()
+    }
+  }, [isPlaying, playbackSpeed])
 
   useEffect(() => {
     return () => {
+      clearStartTimeout()
       clearBadgeTimeout()
     }
   }, [])
@@ -210,21 +305,21 @@ export function LineCounterOverlay({
                 shouldReduceMotion
                   ? {
                       opacity: [0, 1, 1, 0],
-                      scale: [0.92, 1, 1, 0.96],
+                      scale: [0.92, 1, 1, 0.94],
                     }
                   : {
                       opacity: [0, 1, 1, 0],
-                      scale: [0.88, 1, 1, 0.84],
-                      x: [0, 0, -84, -112],
+                      scale: [0.88, 1, 1, 0.82],
+                      x: [0, 0, -96, -132],
                     }
               }
               exit={{ opacity: 0 }}
               transition={{
                 duration: BADGE_TOTAL_DURATION_MS / 1000,
-                times: [0, 0.16, 0.54, 1],
+                times: [0, BADGE_APPEAR_END, BADGE_HOLD_END, 1],
                 ease: 'easeOut',
               }}
-              className={`pointer-events-none absolute bottom-0 left-[calc(100%+0.75rem)] top-0 flex items-center rounded-full border px-3 py-1.5 font-mono text-[13px] font-semibold tabular-nums shadow-[0_14px_30px_rgba(2,6,23,0.28)] ${
+              className={`pointer-events-none absolute bottom-0 left-[calc(100%+0.8rem)] top-0 flex items-center rounded-full border px-3 py-1.5 font-mono text-[16px] font-semibold tabular-nums shadow-[0_16px_32px_rgba(2,6,23,0.28)] ${
                 badge.delta > 0
                   ? 'border-emerald-300/24 bg-emerald-300/14 text-emerald-50'
                   : 'border-rose-300/24 bg-rose-300/14 text-rose-50'
@@ -286,11 +381,27 @@ function getFloatingCounterPosition(stageBounds: ViewportBounds | null) {
   }
 
   return {
-    top: Math.max(viewportInset, stageBounds.top + 18),
+    top: Math.max(viewportInset, stageBounds.top + LINE_COUNTER_SETTINGS.topOffsetPx),
     left: stageBounds.left + stageBounds.width / 2,
     transform: 'translateX(-50%)',
     maxWidth: `min(22rem, calc(100vw - ${viewportInset * 2}px))`,
   }
+}
+
+function getEffectiveBadgeIntervalMs(playbackSpeed: number) {
+  const speedFactor =
+    playbackSpeed >= 4 ? 1.6 : playbackSpeed >= 2 ? 1.25 : playbackSpeed < 1 ? 0.9 : 1
+
+  return Math.round(LINE_COUNTER_SETTINGS.minBadgeIntervalMs * speedFactor)
+}
+
+function getImmediateBadgeThreshold(playbackSpeed: number, isPlaying: boolean) {
+  if (!isPlaying) {
+    return LINE_COUNTER_SETTINGS.minAbsDeltaForImmediateBadge
+  }
+
+  const speedFactor = clampNumber(1 + Math.max(playbackSpeed - 1, 0) * 0.35, 1, 2)
+  return Math.round(LINE_COUNTER_SETTINGS.minAbsDeltaForImmediateBadge * speedFactor)
 }
 
 function clampNumber(value: number, min: number, max: number) {

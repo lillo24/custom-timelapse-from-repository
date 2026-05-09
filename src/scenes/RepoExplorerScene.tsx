@@ -77,13 +77,29 @@ type RepoNodeSizeTrackingState = {
   fontSizeRem: number
 }
 
+type RepoNodeActivityFireState = {
+  heatScore: number
+  recentHits: number
+  fireTier: 0 | 1 | 2 | 3
+}
+
+type RepoExplorerFireTuningState = {
+  fireWindowSize: number
+  tier1Threshold: number
+  tier2Threshold: number
+  tier3Threshold: number
+  fireSizePx: number
+}
+
 type RepoExplorerTuningState = {
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle
+  fireTuning: RepoExplorerFireTuningState
   maxVisualPercentByNodePath: Record<string, number>
 }
 
 type RepoExplorerTuningStoragePayload = {
   sizeTrackingStyle?: Partial<RepoDisplaySizeTrackingStyle>
+  fireTuning?: Partial<RepoExplorerFireTuningState>
   sizeTrackedNodes?: Record<string, { maxVisualPercent?: number }>
 }
 
@@ -102,6 +118,7 @@ type VisibleRepoNode = {
   persistentVisualWeight: number
   highlightStrength: number
   sizeTracking: RepoNodeSizeTrackingState | null
+  activityFire: RepoNodeActivityFireState | null
 }
 
 type FeaturedSection = {
@@ -120,6 +137,14 @@ type RepoProgressState = {
   recentTouchedCount: number
 }
 
+type RepoExplorerFireDebugState = {
+  nodePath: string
+  nodeLabel: string
+  heatScore: number
+  recentHits: number
+  fireTier: 0 | 1 | 2 | 3
+}
+
 type ExplorerRow = {
   id: string
   label: string
@@ -132,6 +157,7 @@ type ExplorerRow = {
   ancestorHasNextSibling: boolean[]
   hasNextSibling: boolean
   sizeTracking: RepoNodeSizeTrackingState | null
+  activityFire: RepoNodeActivityFireState | null
 }
 
 type RepoProgressCache = {
@@ -146,6 +172,13 @@ const RECENT_UNIT_WINDOW = 20
 const REPO_EXPLORER_V2_TUNING_STORAGE_KEY = 'repoExplorerV2Tuning'
 // 0.8125rem = 13px at the browser-default 16px root font size.
 const NORMAL_EXPLORER_FONT_REM = 0.8125
+const FIRE_GIF_ASSET_URL = '/assets/fire.gif'
+const DEFAULT_FIRE_WINDOW_SIZE = 36
+const DEFAULT_FIRE_TIER_ONE_THRESHOLD = 0.08
+const DEFAULT_FIRE_TIER_TWO_THRESHOLD = 0.2
+const DEFAULT_FIRE_TIER_THREE_THRESHOLD = 0.38
+const DEFAULT_FIRE_SIZE_PX = 18
+const FIRE_HEAT_DAMPING_MULTIPLIER = 1.5
 const SIDEBAR_TREE_INDENT = 14
 const FEATURED_SECTION_LIMIT = 4
 const SECTION_CARD_LIMIT = 8
@@ -240,16 +273,26 @@ const MAX_VISUAL_PERCENT_RANGE = {
   step: 5,
 } as const
 
+const FIRE_TUNING_RANGES = {
+  fireWindowSize: { min: 12, max: 72, step: 1 },
+  tier1Threshold: { min: 0, max: 0.5, step: 0.01 },
+  tier2Threshold: { min: 0.02, max: 0.75, step: 0.01 },
+  tier3Threshold: { min: 0.04, max: 1, step: 0.01 },
+  fireSizePx: { min: 12, max: 28, step: 1 },
+} as const
+
 type RepoExplorerSceneProps = {
   modelUrl?: string
   snapshotLabel?: string
   enableTuningPanel?: boolean
+  enableActivityFireIndicators?: boolean
 }
 
 export function RepoExplorerScene({
   modelUrl = LIVE_REPO_DISPLAY_MODEL_URL,
   snapshotLabel,
   enableTuningPanel = false,
+  enableActivityFireIndicators = false,
 }: RepoExplorerSceneProps) {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
@@ -291,6 +334,7 @@ export function RepoExplorerScene({
                   shouldReduceMotion={shouldReduceMotion}
                   stageBounds={stageBounds}
                   enableTuningPanel={enableTuningPanel}
+                  enableActivityFireIndicators={enableActivityFireIndicators}
                 />
               ) : (
                 <RepoExplorerError
@@ -311,11 +355,13 @@ function RepoExplorerCanvas({
   shouldReduceMotion,
   stageBounds,
   enableTuningPanel,
+  enableActivityFireIndicators,
 }: {
   model: RepoDisplayModel
   shouldReduceMotion: boolean
   stageBounds: ViewportBounds | null
   enableTuningPanel: boolean
+  enableActivityFireIndicators: boolean
 }) {
   const panelMotion = getFadeSlideSide(shouldReduceMotion, 16)
   const sectionPresenceMotion = getFadeSlideUp(shouldReduceMotion, 8)
@@ -365,6 +411,7 @@ function RepoExplorerCanvas({
     ? (tuningState ?? defaultTuningState)
     : defaultTuningState
   const effectiveSizeTrackingStyle = effectiveTuningState.sizeTrackingStyle
+  const effectiveFireTuning = effectiveTuningState.fireTuning
   const effectiveMaxVisualPercentByNodePath =
     effectiveTuningState.maxVisualPercentByNodePath
 
@@ -554,6 +601,27 @@ function RepoExplorerCanvas({
     })
   }
 
+  function updateFireTuningValue(
+    key: keyof RepoExplorerFireTuningState,
+    nextValue: number,
+  ) {
+    if (!canTuneLiveScene) {
+      return
+    }
+
+    setTuningState((current) => {
+      const baseState = current ?? defaultTuningState
+
+      return {
+        ...baseState,
+        fireTuning: normalizeRepoExplorerFireTuningState({
+          ...baseState.fireTuning,
+          [key]: nextValue,
+        }),
+      }
+    })
+  }
+
   async function handleCopyTuningConfig() {
     const didCopy = await copyTextToClipboard(
       JSON.stringify(
@@ -589,10 +657,16 @@ function RepoExplorerCanvas({
     model,
     clampedActiveUnitIndex,
     effectiveSizeTrackingStyle,
+    effectiveFireTuning,
     effectiveMaxVisualPercentByNodePath,
+    enableActivityFireIndicators,
   )
   const activeUnit = progressState.activeUnit
   const visibleNodes = progressState.visibleNodes
+  const hottestActivityFire = useMemo(
+    () => getHottestActivityFireState(visibleNodes),
+    [visibleNodes],
+  )
   const {
     explorerRows,
     featuredSections,
@@ -626,6 +700,8 @@ function RepoExplorerCanvas({
       <LineCounterOverlay
         timeline={model.timeline}
         activeUnitIndex={clampedActiveUnitIndex}
+        isPlaying={isPlaying}
+        playbackSpeed={playbackSpeed}
         shouldReduceMotion={shouldReduceMotion}
         stageBounds={stageBounds}
       />
@@ -681,8 +757,10 @@ function RepoExplorerCanvas({
           shouldReduceMotion={shouldReduceMotion}
           trackedNodeControls={trackedNodeControls}
           tuningState={effectiveTuningState}
+          hottestActivityFire={hottestActivityFire}
           statusMessage={tuningStatusMessage}
           onUpdateStyleValue={updateSizeTrackingStyleValue}
+          onUpdateFireTuningValue={updateFireTuningValue}
           onUpdateTrackedNodePercent={updateTrackedNodeMaxVisualPercent}
           onSetBaseFontToNormal={handleSetBaseFontToNormal}
           onCopyConfig={handleCopyTuningConfig}
@@ -698,13 +776,14 @@ function RepoExplorerCanvas({
           className="min-h-0"
         >
           <div className="flex h-full flex-col gap-4">
-            <div className={`min-h-0 overflow-y-auto pr-1 ${SUBTLE_SCROLLBAR_CLASS}`}>
+            <div className={`min-h-0 overflow-y-auto pl-3 pr-1 ${SUBTLE_SCROLLBAR_CLASS}`}>
               {explorerRows.length > 0 ? (
                 <div>
                   {explorerRows.map((row) => (
                     <ExplorerTreeRow
                       key={row.id}
                       row={row}
+                      fireSizePx={effectiveFireTuning.fireSizePx}
                     />
                   ))}
                 </div>
@@ -1203,29 +1282,28 @@ function DurationButton({
 
 function ExplorerTreeRow({
   row,
+  fireSizePx,
 }: {
   row: ExplorerRow
+  fireSizePx: number
 }) {
   const gutterWidth = row.depth * SIDEBAR_TREE_INDENT
   const trackedGrowthIntensity = row.sizeTracking?.growthIntensity ?? 0
   const rowMinHeightRem = row.sizeTracking?.rowHeightRem ?? null
   const rowFontSizeRem = row.sizeTracking?.fontSizeRem ?? null
   const rowFontWeight = Math.round(500 + trackedGrowthIntensity * 110)
-  const rowGlowOpacity = trackedGrowthIntensity > 0 ? 0.05 + trackedGrowthIntensity * 0.08 : 0
-  const trackedBaseLineOpacity = 0.3 + trackedGrowthIntensity * 0.14
-  const trackedHighlightLineOpacity = 0.32 + trackedGrowthIntensity * 0.18
   const currentColumnOffset =
     row.depth > 0
       ? (row.depth - 1) * SIDEBAR_TREE_INDENT + SIDEBAR_TREE_INDENT / 2
       : 0
-  const lineColor = `rgba(148, 163, 184, ${trackedBaseLineOpacity})`
-  const highlightLineColor = `rgba(94, 234, 212, ${trackedHighlightLineOpacity})`
+  const lineColor = 'rgba(148, 163, 184, 0.3)'
+  const highlightLineColor = 'rgba(94, 234, 212, 0.32)'
   const connectorColor = row.recentlyChanged ? highlightLineColor : lineColor
 
   return (
     <div
       title={row.path}
-      className={`flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] leading-5 transition ${
+      className={`relative flex min-h-6 items-stretch gap-5 rounded-md px-2 py-0.5 text-[13px] leading-5 transition ${
         row.recentlyChanged
           ? 'bg-teal-400/[0.07] text-slate-100'
           : row.type === 'folder'
@@ -1237,10 +1315,6 @@ function ExplorerTreeRow({
       style={{
         minHeight: rowMinHeightRem ? `${rowMinHeightRem}rem` : undefined,
         fontSize: rowFontSizeRem ? `${rowFontSizeRem}rem` : undefined,
-        boxShadow:
-          rowGlowOpacity > 0
-            ? `inset 0 0 0 1px rgba(45, 212, 191, ${rowGlowOpacity * 0.7}), 0 0 28px rgba(45, 212, 191, ${rowGlowOpacity})`
-            : undefined,
       }}
     >
       {row.depth > 0 ? (
@@ -1285,16 +1359,16 @@ function ExplorerTreeRow({
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+      <div className="relative flex min-w-0 flex-1 items-center justify-between gap-3">
+        <RowFireIndicators
+          fireTier={row.activityFire?.fireTier ?? 0}
+          fireSizePx={fireSizePx}
+        />
         <span
           className="min-w-0 truncate pt-[1px]"
           style={{
             fontWeight: rowFontWeight,
             transform: 'translateY(-2px)',
-            textShadow:
-              rowGlowOpacity > 0
-                ? `0 0 14px rgba(45, 212, 191, ${rowGlowOpacity * 1.6})`
-                : undefined,
           }}
         >
           {row.label}
@@ -1373,8 +1447,10 @@ function FloatingRepoTuningPanel({
   shouldReduceMotion,
   trackedNodeControls,
   tuningState,
+  hottestActivityFire,
   statusMessage,
   onUpdateStyleValue,
+  onUpdateFireTuningValue,
   onUpdateTrackedNodePercent,
   onSetBaseFontToNormal,
   onCopyConfig,
@@ -1383,9 +1459,14 @@ function FloatingRepoTuningPanel({
   shouldReduceMotion: boolean
   trackedNodeControls: TrackedRepoNodeTuningControl[]
   tuningState: RepoExplorerTuningState
+  hottestActivityFire: RepoExplorerFireDebugState | null
   statusMessage: string | null
   onUpdateStyleValue: (
     key: keyof RepoDisplaySizeTrackingStyle,
+    nextValue: number,
+  ) => void
+  onUpdateFireTuningValue: (
+    key: keyof RepoExplorerFireTuningState,
     nextValue: number,
   ) => void
   onUpdateTrackedNodePercent: (path: string, nextValue: number) => void
@@ -1521,6 +1602,97 @@ function FloatingRepoTuningPanel({
                       />
                     ))}
                   </section>
+
+                  <section className="space-y-3">
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                      Fire
+                    </div>
+                    <TuningRangeControl
+                      label="Fire window size"
+                      value={tuningState.fireTuning.fireWindowSize}
+                      min={FIRE_TUNING_RANGES.fireWindowSize.min}
+                      max={FIRE_TUNING_RANGES.fireWindowSize.max}
+                      step={FIRE_TUNING_RANGES.fireWindowSize.step}
+                      valueSuffix="u"
+                      valueDecimals={0}
+                      onChange={(nextValue) => {
+                        onUpdateFireTuningValue('fireWindowSize', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Tier 1 threshold"
+                      value={tuningState.fireTuning.tier1Threshold}
+                      min={FIRE_TUNING_RANGES.tier1Threshold.min}
+                      max={FIRE_TUNING_RANGES.tier1Threshold.max}
+                      step={FIRE_TUNING_RANGES.tier1Threshold.step}
+                      valueSuffix=""
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateFireTuningValue('tier1Threshold', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Tier 2 threshold"
+                      value={tuningState.fireTuning.tier2Threshold}
+                      min={FIRE_TUNING_RANGES.tier2Threshold.min}
+                      max={FIRE_TUNING_RANGES.tier2Threshold.max}
+                      step={FIRE_TUNING_RANGES.tier2Threshold.step}
+                      valueSuffix=""
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateFireTuningValue('tier2Threshold', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Tier 3 threshold"
+                      value={tuningState.fireTuning.tier3Threshold}
+                      min={FIRE_TUNING_RANGES.tier3Threshold.min}
+                      max={FIRE_TUNING_RANGES.tier3Threshold.max}
+                      step={FIRE_TUNING_RANGES.tier3Threshold.step}
+                      valueSuffix=""
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateFireTuningValue('tier3Threshold', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Fire size"
+                      value={tuningState.fireTuning.fireSizePx}
+                      min={FIRE_TUNING_RANGES.fireSizePx.min}
+                      max={FIRE_TUNING_RANGES.fireSizePx.max}
+                      step={FIRE_TUNING_RANGES.fireSizePx.step}
+                      valueSuffix="px"
+                      valueDecimals={0}
+                      onChange={(nextValue) => {
+                        onUpdateFireTuningValue('fireSizePx', nextValue)
+                      }}
+                    />
+                    <div className="rounded-[16px] border border-white/10 bg-white/[0.03] px-3 py-2.5 text-[11px] leading-5 text-slate-300">
+                      {hottestActivityFire ? (
+                        <>
+                          <div className="font-mono uppercase tracking-[0.18em] text-slate-500">
+                            Hottest tracked node
+                          </div>
+                          <div className="mt-1 truncate text-slate-100">
+                            {hottestActivityFire.nodePath}
+                          </div>
+                          <div className="mt-1 font-mono text-slate-400">
+                            heat {formatTuningValue(hottestActivityFire.heatScore, 2)} · tier{' '}
+                            {hottestActivityFire.fireTier} · {formatNumber(hottestActivityFire.recentHits)} hits
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="font-mono uppercase tracking-[0.18em] text-slate-500">
+                            Hottest tracked node
+                          </div>
+                          <div className="mt-1 text-slate-400">
+                            No recent fire activity in the current window.
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </section>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -1604,6 +1776,49 @@ function TuningRangeControl({
         className="mt-1.5 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-teal-300"
       />
     </label>
+  )
+}
+
+function RowFireIndicators({
+  fireTier,
+  fireSizePx,
+}: {
+  fireTier: 0 | 1 | 2 | 3
+  fireSizePx: number
+}) {
+  if (fireTier < 1) {
+    return null
+  }
+
+  const fireScale = fireSizePx / DEFAULT_FIRE_SIZE_PX
+  const fires = [
+    { key: 'core', x: -16, y: -9, rotation: -82, opacity: 0.96 },
+    { key: 'lower', x: -6, y: 2, rotation: -108, opacity: 0.84 },
+    { key: 'upper', x: -4, y: -19, rotation: -58, opacity: 0.78 },
+  ].slice(0, fireTier)
+
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute left-[-4px] top-1/2 z-10"
+    >
+      {fires.map((fire) => (
+        <img
+          key={fire.key}
+          src={FIRE_GIF_ASSET_URL}
+          alt=""
+          className="absolute max-w-none select-none mix-blend-screen"
+          style={{
+            width: `${fireSizePx}px`,
+            height: `${fireSizePx}px`,
+            left: `${Math.round(fire.x * fireScale)}px`,
+            top: `${Math.round(fire.y * fireScale)}px`,
+            opacity: fire.opacity,
+            transform: `rotate(${fire.rotation}deg)`,
+          }}
+        />
+      ))}
+    </div>
   )
 }
 
@@ -2013,7 +2228,9 @@ function useRepoProgressState(
   model: RepoDisplayModel,
   activeUnitIndex: number,
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  fireTuning: RepoExplorerFireTuningState,
   maxVisualPercentByNodePath: Record<string, number>,
+  enableActivityFireIndicators: boolean,
 ): RepoProgressState {
   const progressCacheRef = useRef<RepoProgressCache | null>(null)
 
@@ -2035,9 +2252,18 @@ function useRepoProgressState(
       activeUnitIndex,
       progressCache.sourceFileStateById,
       sizeTrackingStyle,
+      fireTuning,
       maxVisualPercentByNodePath,
+      enableActivityFireIndicators,
     )
-  }, [activeUnitIndex, maxVisualPercentByNodePath, model, sizeTrackingStyle])
+  }, [
+    activeUnitIndex,
+    enableActivityFireIndicators,
+    fireTuning,
+    maxVisualPercentByNodePath,
+    model,
+    sizeTrackingStyle,
+  ])
 }
 
 function getRepoProgressCache(
@@ -2133,7 +2359,9 @@ function buildRepoProgressState(
   activeUnitIndex: number,
   sourceFileStateById: Map<string, SourceFileReplayState>,
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  fireTuning: RepoExplorerFireTuningState,
   maxVisualPercentByNodePath: Record<string, number>,
+  enableActivityFireIndicators: boolean,
 ): RepoProgressState {
   const visualWeightReference = calculateDisplayWeightReference(model.nodes)
   const nodeById = new Map(model.nodes.map((node) => [node.id, node]))
@@ -2168,18 +2396,27 @@ function buildRepoProgressState(
   }
 
   const recentActivityByDisplayNodeId = new Map<string, number>()
+  const recentFireHitCountByDisplayNodeId = new Map<string, number>()
   const visibilityFrame = findVisibilityFrameForUnitIndex(
     model.visibilityFrames,
     replayUnitIndex,
   )
 
   if (!isRestFrame) {
-    const recentUnitStartIndex = Math.max(
+    const recentHighlightUnitStartIndex = Math.max(
       0,
       replayUnitIndex - (RECENT_UNIT_WINDOW - 1),
     )
+    const recentHeatUnitStartIndex = Math.max(
+      0,
+      replayUnitIndex - (fireTuning.fireWindowSize - 1),
+    )
 
-    for (let index = recentUnitStartIndex; index <= replayUnitIndex; index += 1) {
+    for (
+      let index = recentHighlightUnitStartIndex;
+      index <= replayUnitIndex;
+      index += 1
+    ) {
       const unit = model.timeline[index]
 
       if (!unit) {
@@ -2194,6 +2431,21 @@ function buildRepoProgressState(
 
       if (intensity > previousIntensity) {
         recentActivityByDisplayNodeId.set(unit.effectiveDisplayNodeId, intensity)
+      }
+    }
+
+    if (enableActivityFireIndicators) {
+      for (let index = recentHeatUnitStartIndex; index <= replayUnitIndex; index += 1) {
+        const unit = model.timeline[index]
+
+        if (!unit) {
+          continue
+        }
+
+        recentFireHitCountByDisplayNodeId.set(
+          unit.effectiveDisplayNodeId,
+          (recentFireHitCountByDisplayNodeId.get(unit.effectiveDisplayNodeId) ?? 0) + 1,
+        )
       }
     }
   }
@@ -2216,10 +2468,13 @@ function buildRepoProgressState(
           node,
           sourceFileStateById,
           recentActivityByDisplayNodeId.get(node.id) ?? 0,
+          recentFireHitCountByDisplayNodeId.get(node.id) ?? 0,
           visualWeightReference,
           getRepoDisplayNodeCountOverrides(node, visibilityFrame),
           sizeTrackingStyle,
+          fireTuning,
           maxVisualPercentByNodePath,
+          enableActivityFireIndicators,
         )
       })
       .filter((entry): entry is VisibleRepoNode => entry !== null),
@@ -2289,10 +2544,13 @@ function createVisibleRepoNode(
   node: RepoDisplayNode,
   sourceFileStateById: Map<string, SourceFileReplayState>,
   highlightStrength: number,
+  recentFireHits: number,
   visualWeightReference: number,
   countOverrides: RepoDisplayNodeCountOverrides | null,
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  fireTuning: RepoExplorerFireTuningState,
   maxVisualPercentByNodePath: Record<string, number>,
+  enableActivityFireIndicators: boolean,
 ): VisibleRepoNode | null {
   let exists = false
   let currentLineCount = 0
@@ -2320,10 +2578,13 @@ function createVisibleRepoNode(
     exists,
     currentLineCount,
     highlightStrength,
+    recentFireHits,
     visualWeightReference,
     countOverrides,
     sizeTrackingStyle,
+    fireTuning,
     maxVisualPercentByNodePath,
+    enableActivityFireIndicators,
   )
 }
 
@@ -2342,10 +2603,13 @@ function createStaticVisibleRepoNode(
     true,
     node.finalLineCount,
     0,
+    0,
     visualWeightReference,
     null,
     sizeTrackingStyle,
+    createDefaultRepoExplorerFireTuningState(),
     maxVisualPercentByNodePath,
+    false,
   )
 }
 
@@ -2354,10 +2618,13 @@ function createVisibleRepoNodeEntry(
   exists: boolean,
   currentLineCount: number,
   highlightStrength: number,
+  recentFireHits: number,
   visualWeightReference: number,
   countOverrides: RepoDisplayNodeCountOverrides | null,
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  fireTuning: RepoExplorerFireTuningState,
   maxVisualPercentByNodePath: Record<string, number>,
+  enableActivityFireIndicators: boolean,
 ): VisibleRepoNode {
   const effectiveNode = countOverrides
     ? {
@@ -2382,6 +2649,16 @@ function createVisibleRepoNodeEntry(
     mapVisualSize(persistentVisualWeight),
     currentVisualScale,
   )
+  // Mild damping keeps dense edit bursts from jumping straight to max fire.
+  const recentHeatScore =
+    fireTuning.fireWindowSize > 0
+      ? clampNumber(
+          recentFireHits /
+            (fireTuning.fireWindowSize * FIRE_HEAT_DAMPING_MULTIPLIER),
+          0,
+          1,
+        )
+      : 0
 
   return {
     node: effectiveNode,
@@ -2402,6 +2679,13 @@ function createVisibleRepoNodeEntry(
       currentLineCount,
       sizeTrackingStyle,
       maxVisualPercentByNodePath[effectiveNode.path],
+    ),
+    activityFire: deriveRepoNodeActivityFireState(
+      effectiveNode,
+      recentHeatScore,
+      recentFireHits,
+      enableActivityFireIndicators,
+      fireTuning,
     ),
   }
 }
@@ -2442,6 +2726,24 @@ function deriveRepoNodeSizeTrackingState(
     normalizationMaxLines,
     rowHeightRem,
     fontSizeRem,
+  }
+}
+
+function deriveRepoNodeActivityFireState(
+  node: RepoDisplayNode,
+  recentHeatScore: number,
+  recentFireHits: number,
+  enableActivityFireIndicators: boolean,
+  fireTuning: RepoExplorerFireTuningState,
+): RepoNodeActivityFireState | null {
+  if (!enableActivityFireIndicators || !node.sizeTracking?.enabled) {
+    return null
+  }
+
+  return {
+    heatScore: recentHeatScore,
+    recentHits: recentFireHits,
+    fireTier: deriveFireTier(recentHeatScore, fireTuning),
   }
 }
 
@@ -2749,6 +3051,7 @@ function buildExplorerRows(visibleNodes: VisibleRepoNode[]): ExplorerRow[] {
         ancestorHasNextSibling,
         hasNextSibling,
         sizeTracking: entry.sizeTracking,
+        activityFire: entry.activityFire,
       })
 
       if (entry.node.type === 'folder') {
@@ -2776,6 +3079,47 @@ function countVisibleFolderNodes(visibleNodes: VisibleRepoNode[]) {
     (entry) =>
       entry.node.type === 'folder' || entry.node.type === 'collapsedFolder',
   ).length
+}
+
+function getHottestActivityFireState(
+  visibleNodes: VisibleRepoNode[],
+): RepoExplorerFireDebugState | null {
+  const hottestEntry = visibleNodes
+    .filter(
+      (entry) =>
+        entry.activityFire !== null && entry.activityFire.heatScore > 0,
+    )
+    .sort((left, right) => {
+      const leftFire = left.activityFire
+      const rightFire = right.activityFire
+
+      if (!leftFire || !rightFire) {
+        return 0
+      }
+
+      if (rightFire.heatScore !== leftFire.heatScore) {
+        return rightFire.heatScore - leftFire.heatScore
+      }
+
+      if (rightFire.recentHits !== leftFire.recentHits) {
+        return rightFire.recentHits - leftFire.recentHits
+      }
+
+      return left.node.path.localeCompare(right.node.path)
+    })
+    .at(0)
+
+  if (!hottestEntry?.activityFire) {
+    return null
+  }
+
+  return {
+    nodePath: hottestEntry.node.path,
+    nodeLabel: hottestEntry.node.label,
+    heatScore: hottestEntry.activityFire.heatScore,
+    recentHits: hottestEntry.activityFire.recentHits,
+    fireTier: hottestEntry.activityFire.fireTier,
+  }
 }
 
 function getCardSecondaryLabel(
@@ -2863,6 +3207,7 @@ function createDefaultRepoExplorerTuningState(
         maxExtraFontSizeRem: 0.25,
       }),
     },
+    fireTuning: createDefaultRepoExplorerFireTuningState(),
     maxVisualPercentByNodePath: Object.fromEntries(
       trackedNodeControls.map((node) => [
         node.path,
@@ -2920,6 +3265,33 @@ function loadRepoExplorerTuningState(
           defaultState.sizeTrackingStyle.maxExtraFontSizeRem,
         ),
       },
+      fireTuning: normalizeRepoExplorerFireTuningState({
+        fireWindowSize: normalizeLoadedFireTuningValue(
+          'fireWindowSize',
+          payload.fireTuning?.fireWindowSize,
+          defaultState.fireTuning.fireWindowSize,
+        ),
+        tier1Threshold: normalizeLoadedFireTuningValue(
+          'tier1Threshold',
+          payload.fireTuning?.tier1Threshold,
+          defaultState.fireTuning.tier1Threshold,
+        ),
+        tier2Threshold: normalizeLoadedFireTuningValue(
+          'tier2Threshold',
+          payload.fireTuning?.tier2Threshold,
+          defaultState.fireTuning.tier2Threshold,
+        ),
+        tier3Threshold: normalizeLoadedFireTuningValue(
+          'tier3Threshold',
+          payload.fireTuning?.tier3Threshold,
+          defaultState.fireTuning.tier3Threshold,
+        ),
+        fireSizePx: normalizeLoadedFireTuningValue(
+          'fireSizePx',
+          payload.fireTuning?.fireSizePx,
+          defaultState.fireTuning.fireSizePx,
+        ),
+      }),
       maxVisualPercentByNodePath: Object.fromEntries(
         trackedNodeControls.map((node) => [
           node.path,
@@ -2941,6 +3313,7 @@ function serializeRepoExplorerTuningState(
 ): RepoExplorerTuningStoragePayload {
   return {
     sizeTrackingStyle: { ...tuningState.sizeTrackingStyle },
+    fireTuning: { ...tuningState.fireTuning },
     sizeTrackedNodes: Object.fromEntries(
       Object.entries(tuningState.maxVisualPercentByNodePath).map(
         ([path, maxVisualPercent]) => [
@@ -2973,6 +3346,53 @@ function buildRepoExplorerTuningConfigSnippet(
         ]),
       ),
     },
+    repoExplorerLive: {
+      fireTuning: {
+        ...tuningState.fireTuning,
+      },
+    },
+  }
+}
+
+function createDefaultRepoExplorerFireTuningState(): RepoExplorerFireTuningState {
+  return {
+    fireWindowSize: DEFAULT_FIRE_WINDOW_SIZE,
+    tier1Threshold: DEFAULT_FIRE_TIER_ONE_THRESHOLD,
+    tier2Threshold: DEFAULT_FIRE_TIER_TWO_THRESHOLD,
+    tier3Threshold: DEFAULT_FIRE_TIER_THREE_THRESHOLD,
+    fireSizePx: DEFAULT_FIRE_SIZE_PX,
+  }
+}
+
+function normalizeRepoExplorerFireTuningState(
+  fireTuning: RepoExplorerFireTuningState,
+): RepoExplorerFireTuningState {
+  const fireWindowSize = clampFireTuningValue(
+    'fireWindowSize',
+    fireTuning.fireWindowSize,
+  )
+  const fireSizePx = clampFireTuningValue('fireSizePx', fireTuning.fireSizePx)
+  const tier1Threshold = clampFireTuningValue(
+    'tier1Threshold',
+    fireTuning.tier1Threshold,
+  )
+  const tier2Threshold = clampNumber(
+    clampFireTuningValue('tier2Threshold', fireTuning.tier2Threshold),
+    tier1Threshold,
+    FIRE_TUNING_RANGES.tier2Threshold.max,
+  )
+  const tier3Threshold = clampNumber(
+    clampFireTuningValue('tier3Threshold', fireTuning.tier3Threshold),
+    tier2Threshold,
+    FIRE_TUNING_RANGES.tier3Threshold.max,
+  )
+
+  return {
+    fireWindowSize,
+    tier1Threshold,
+    tier2Threshold,
+    tier3Threshold,
+    fireSizePx,
   }
 }
 
@@ -2986,6 +3406,16 @@ function normalizeLoadedSizeTrackingStyleValue(
     : defaultValue
 }
 
+function normalizeLoadedFireTuningValue(
+  key: keyof RepoExplorerFireTuningState,
+  rawValue: number | undefined,
+  defaultValue: number,
+) {
+  return typeof rawValue === 'number' && Number.isFinite(rawValue)
+    ? clampFireTuningValue(key, rawValue)
+    : defaultValue
+}
+
 function clampSizeTrackingStyleValue(
   key: keyof RepoDisplaySizeTrackingStyle,
   value: number,
@@ -2993,6 +3423,15 @@ function clampSizeTrackingStyleValue(
   const range = SIZE_TRACKING_STYLE_RANGES[key]
 
   return clampNumber(value, range.min, range.max)
+}
+
+function clampFireTuningValue(
+  key: keyof RepoExplorerFireTuningState,
+  value: number,
+) {
+  const range = FIRE_TUNING_RANGES[key]
+
+  return roundToStep(clampNumber(value, range.min, range.max), range.step)
 }
 
 function clampTrackedNodeVisualPercent(value: number) {
@@ -3068,6 +3507,25 @@ function formatDurationSeconds(durationSeconds: number) {
 
 function isAncestorPath(leftPath: string, rightPath: string) {
   return rightPath.startsWith(`${leftPath}/`)
+}
+
+function deriveFireTier(
+  heatScore: number,
+  fireTuning: RepoExplorerFireTuningState,
+): 0 | 1 | 2 | 3 {
+  if (heatScore >= fireTuning.tier3Threshold) {
+    return 3
+  }
+
+  if (heatScore >= fireTuning.tier2Threshold) {
+    return 2
+  }
+
+  if (heatScore >= fireTuning.tier1Threshold) {
+    return 1
+  }
+
+  return 0
 }
 
 function clampNumber(value: number, min: number, max: number) {

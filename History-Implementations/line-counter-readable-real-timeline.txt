@@ -1,0 +1,159 @@
+# Prompt: Make the line counter feel connected and readable
+
+## Goal
+
+Improve the Call-of-Duty-style line counter overlay.
+
+Right now it technically follows the repo timeline, but visually it feels too detached / mock-like because the badge animation always has the same rhythm and the numbers are too fast/small.
+
+Make it feel clearly connected to the file-explorer playback.
+
+## What to change
+
+Work in the repo scene / line counter components only.
+
+Likely files:
+
+```txt
+src/scenes/RepoExplorerScene.tsx
+src/components/.../LineCounterOverlay.tsx
+```
+
+Use the real file names in the repo.
+
+## Requirements
+
+### 1. Keep using real timeline data
+
+The counter must still be based on real timeline line deltas:
+
+```txt
+netDelta = afterLineCount - beforeLineCount
+```
+
+Do not use mock data.
+
+Do not use:
+
+```txt
+addedLines + deletedLines
+```
+
+as the counter value.
+
+### 2. Aggregate into readable edit blocks
+
+If playback advances many timeline units quickly, group the deltas into bigger visible badge events.
+
+Goal:
+
+```txt
+many tiny +1/+2 edits
+→ one readable +47 badge
+```
+
+Instead of a flood of tiny unreadable badges.
+
+This should be frontend display aggregation only. Do not change preprocessing data.
+
+### 3. Make badge animation slower and more visible
+
+Increase readability:
+
+- bigger `+N` / `-N` font size
+- longer hold time before merge
+- smoother slide-left merge into the total counter
+- the badge should remain readable even at 2x / 4x playback
+
+Suggested timing constants:
+
+```ts
+BADGE_HOLD_MS = 700
+BADGE_MERGE_MS = 450
+MIN_BADGE_INTERVAL_MS = 500
+```
+
+Tune as needed.
+
+### 4. Make it configurable in code
+
+Add simple constants near the component, not a big UI:
+
+```ts
+const LINE_COUNTER_SETTINGS = {
+  minBadgeIntervalMs: 500,
+  badgeHoldMs: 700,
+  badgeMergeMs: 450,
+  minAbsDeltaForImmediateBadge: 20,
+};
+```
+
+No settings panel needed yet.
+
+### 5. Connect visually to playback speed
+
+If the timeline moves faster, the counter can aggregate more units into one badge.
+
+But the badge should not become impossible to read.
+
+So:
+
+```txt
+speed affects how much gets grouped
+not how unreadably fast the badge animates
+```
+
+### 6. Position
+
+Put the counter as a true fixed floating overlay near the top-left of the viewport/stage.
+
+It should not push layout.
+
+It should not cover the explorer too much.
+
+## Keep
+
+- existing repo playback controls
+- existing file explorer
+- existing document scene
+- existing preprocessing pipeline
+- current-line-count geometry invariant
+
+## Critical invariant
+
+Never use total activity mass as geometry or line-counter value.
+
+Wrong:
+
+```txt
+counter/change = addedLines + deletedLines
+```
+
+Correct:
+
+```txt
+counter/change = afterLineCount - beforeLineCount
+```
+
+Example:
+
+```txt
++100 / -90
+```
+
+should contribute about:
+
+```txt
++10
+```
+
+to the counter, not `+190`.
+
+## Success criteria
+
+- Counter follows the real repo timeline.
+- It no longer feels like fixed mock data.
+- `+N` / `-N` badges are bigger and readable.
+- Fast playback groups edits into larger blocks instead of unreadable spam.
+- Badge slides/merges into the total counter.
+- `npm run build` passes.

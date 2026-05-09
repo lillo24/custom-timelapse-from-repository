@@ -33,16 +33,19 @@
     },
     "sizeTrackedNodes": {
       "assistant_runtime": {
-        "maxVisualPercent": 120
+        "maxVisualPercent": 100
       },
       "ingestion_pipeline/crawler": {
-        "maxVisualPercent": 100
+        "maxVisualPercent": 110
       },
       "ingestion_pipeline/extract": {
-        "maxVisualPercent": 80
+        "maxVisualPercent": 90
       },
       "ingestion_pipeline/retrieval": {
-        "maxVisualPercent": 100
+        "maxVisualPercent": 120
+      },
+      "ingestion_pipeline/tools": {
+        "maxVisualPercent": 120
       }
     },
     "sizeNormalization": "trackedMax",
