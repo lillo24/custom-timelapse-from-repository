@@ -1,8 +1,11 @@
 import type {
   AnimationDisplayConfigFile,
+  AnimationDisplaySizeNormalization,
   AnimationFilterConfigFile,
   LoadedAnimationDisplayConfig,
   LoadedAnimationFilterConfig,
+  LoadedAnimationDisplaySizeTrackedNodeConfig,
+  LoadedAnimationDisplaySizeTrackingStyleConfig,
 } from './animationFilterConfigTypes.ts';
 import { normalizePathPattern } from './pathPattern.ts';
 
@@ -66,6 +69,18 @@ function normalizeDisplayConfig(
     'display.hideButCount',
     configPath,
   );
+  const sizeTrackedNodes = normalizeSizeTrackedNodes(
+    value.sizeTrackedNodes,
+    configPath,
+  );
+  const sizeTrackingStyle = normalizeSizeTrackingStyle(
+    value.sizeTrackingStyle,
+    configPath,
+  );
+  const sizeNormalization = normalizeSizeNormalization(
+    value.sizeNormalization,
+    configPath,
+  );
   const maxChildrenByFolder = normalizeMaxChildrenByFolder(
     value.maxChildrenByFolder,
     configPath,
@@ -76,6 +91,9 @@ function normalizeDisplayConfig(
     maxVisibleRows,
     hideButCount,
     maxChildrenByFolder,
+    sizeTrackedNodes,
+    sizeTrackingStyle,
+    sizeNormalization,
   };
 }
 
@@ -85,6 +103,14 @@ function createDefaultDisplayConfig(): LoadedAnimationDisplayConfig {
     maxVisibleRows: null,
     hideButCount: [],
     maxChildrenByFolder: {},
+    sizeTrackedNodes: {},
+    sizeTrackingStyle: {
+      baseRowHeightRem: 1.1,
+      maxExtraHeightRem: 2,
+      baseFontSizeRem: 0.72,
+      maxExtraFontSizeRem: 0.25,
+    },
+    sizeNormalization: 'trackedMax',
   };
 }
 
@@ -193,4 +219,164 @@ function normalizeMaxChildrenByFolder(
       leftPattern.localeCompare(rightPattern),
     ),
   );
+}
+
+function normalizeSizeTrackedNodes(
+  value: Record<string, { maxVisualPercent?: number }> | undefined,
+  configPath: string,
+): Record<string, LoadedAnimationDisplaySizeTrackedNodeConfig> {
+  if (value === undefined) {
+    return {};
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(
+      `Animation filter config field "display.sizeTrackedNodes" must be an object of path-to-config entries: ${configPath}`,
+    );
+  }
+
+  const entries = Object.entries(value).map(([rawPath, config]) => {
+    const normalizedPath = normalizePathPattern(rawPath);
+
+    if (normalizedPath.length === 0) {
+      throw new Error(
+        `Animation filter config field "display.sizeTrackedNodes" cannot contain empty paths: ${configPath}`,
+      );
+    }
+
+    if (!config || typeof config !== 'object' || Array.isArray(config)) {
+      throw new Error(
+        `Animation filter config field "display.sizeTrackedNodes" must contain object values. Invalid config for path "${rawPath}" in ${configPath}.`,
+      );
+    }
+
+    const maxVisualPercent = config.maxVisualPercent ?? 100;
+
+    if (
+      typeof maxVisualPercent !== 'number' ||
+      !Number.isFinite(maxVisualPercent) ||
+      maxVisualPercent < 0
+    ) {
+      throw new Error(
+        `Animation filter config field "display.sizeTrackedNodes" must contain maxVisualPercent values >= 0. Invalid config for path "${rawPath}" in ${configPath}.`,
+      );
+    }
+
+    return [normalizedPath, { maxVisualPercent }] as const;
+  });
+
+  return Object.fromEntries(
+    entries.sort(([leftPath], [rightPath]) => leftPath.localeCompare(rightPath)),
+  );
+}
+
+function normalizeSizeTrackingStyle(
+  value:
+    | {
+        baseRowHeightRem?: number
+        maxExtraHeightRem?: number
+        baseFontSizeRem?: number
+        maxExtraFontSizeRem?: number
+      }
+    | undefined,
+  configPath: string,
+): LoadedAnimationDisplaySizeTrackingStyleConfig {
+  const defaults = createDefaultDisplayConfig().sizeTrackingStyle;
+
+  if (value === undefined) {
+    return { ...defaults };
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(
+      `Animation filter config field "display.sizeTrackingStyle" must be a JSON object: ${configPath}`,
+    );
+  }
+
+  const baseRowHeightRem = normalizePositiveNumber(
+    value.baseRowHeightRem,
+    defaults.baseRowHeightRem,
+    'display.sizeTrackingStyle.baseRowHeightRem',
+    configPath,
+  );
+  const maxExtraHeightRem = normalizeNonNegativeNumber(
+    value.maxExtraHeightRem,
+    defaults.maxExtraHeightRem,
+    'display.sizeTrackingStyle.maxExtraHeightRem',
+    configPath,
+  );
+  const baseFontSizeRem = normalizePositiveNumber(
+    value.baseFontSizeRem,
+    defaults.baseFontSizeRem,
+    'display.sizeTrackingStyle.baseFontSizeRem',
+    configPath,
+  );
+  const maxExtraFontSizeRem = normalizeNonNegativeNumber(
+    value.maxExtraFontSizeRem,
+    defaults.maxExtraFontSizeRem,
+    'display.sizeTrackingStyle.maxExtraFontSizeRem',
+    configPath,
+  );
+
+  return {
+    baseRowHeightRem,
+    maxExtraHeightRem,
+    baseFontSizeRem,
+    maxExtraFontSizeRem,
+  };
+}
+
+function normalizeSizeNormalization(
+  value: AnimationDisplaySizeNormalization | undefined,
+  configPath: string,
+): AnimationDisplaySizeNormalization {
+  if (value === undefined) {
+    return 'trackedMax';
+  }
+
+  if (value !== 'trackedMax') {
+    throw new Error(
+      `Animation filter config field "display.sizeNormalization" must be "trackedMax": ${configPath}`,
+    );
+  }
+
+  return value;
+}
+
+function normalizePositiveNumber(
+  value: number | undefined,
+  defaultValue: number,
+  fieldName: string,
+  configPath: string,
+): number {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) {
+    throw new Error(
+      `Animation filter config field "${fieldName}" must be a positive number: ${configPath}`,
+    );
+  }
+
+  return value;
+}
+
+function normalizeNonNegativeNumber(
+  value: number | undefined,
+  defaultValue: number,
+  fieldName: string,
+  configPath: string,
+): number {
+  if (value === undefined) {
+    return defaultValue;
+  }
+
+  if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+    throw new Error(
+      `Animation filter config field "${fieldName}" must be a non-negative number: ${configPath}`,
+    );
+  }
+
+  return value;
 }

@@ -25,6 +25,27 @@
     "hideButCount": [
       "**/__init__.py"
     ],
+    "sizeTrackingStyle": {
+      "baseRowHeightRem": 1.1,
+      "maxExtraHeightRem": 2.0,
+      "baseFontSizeRem": 0.72,
+      "maxExtraFontSizeRem": 1
+    },
+    "sizeTrackedNodes": {
+      "assistant_runtime": {
+        "maxVisualPercent": 120
+      },
+      "ingestion_pipeline/crawler": {
+        "maxVisualPercent": 100
+      },
+      "ingestion_pipeline/extract": {
+        "maxVisualPercent": 80
+      },
+      "ingestion_pipeline/retrieval": {
+        "maxVisualPercent": 100
+      }
+    },
+    "sizeNormalization": "trackedMax",
     "maxChildrenByFolder": {
       "ingestion_pipeline": 20,
       "assistant_runtime": 5,

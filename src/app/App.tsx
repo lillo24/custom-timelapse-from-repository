@@ -21,11 +21,13 @@ function App() {
       <RepoExplorerScene
         key="repository-v1"
         modelUrl="/data/snapshots/repo-display-model-v1.json"
+        enableTuningPanel={false}
       />
     ) : (
       <RepoExplorerScene
         key="repository"
         modelUrl={LIVE_REPO_DISPLAY_MODEL_URL}
+        enableTuningPanel
       />
     )
 

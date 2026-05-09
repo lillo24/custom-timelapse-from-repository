@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-08T19:07:05.325Z",
+  "generatedAt": "2026-05-08T20:25:06.710Z",
   "sourceVisualModelPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-visual-model.json",
   "config": {
     "path": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\repo-animation.config.json",
@@ -15,8 +15,29 @@
       "ingestion_pipeline/crawler/spider": 2,
       "ingestion_pipeline/extract": 5,
       "ingestion_pipeline/retrieval": 5,
-      "ingestion_pipeline/tools": 15
-    }
+      "ingestion_pipeline/tools": 5
+    },
+    "sizeTrackedNodes": {
+      "assistant_runtime": {
+        "maxVisualPercent": 120
+      },
+      "ingestion_pipeline/crawler": {
+        "maxVisualPercent": 100
+      },
+      "ingestion_pipeline/extract": {
+        "maxVisualPercent": 80
+      },
+      "ingestion_pipeline/retrieval": {
+        "maxVisualPercent": 100
+      }
+    },
+    "sizeTrackingStyle": {
+      "baseRowHeightRem": 1.1,
+      "maxExtraHeightRem": 2,
+      "baseFontSizeRem": 0.72,
+      "maxExtraFontSizeRem": 2
+    },
+    "sizeNormalization": "trackedMax"
   },
   "nodes": [
     {
@@ -68,7 +89,12 @@
         "display:file:assistant_runtime/api.py",
         "display:file:assistant_runtime/models.py",
         "display:file:assistant_runtime/run_rewrite_retrieve_answer.py"
-      ]
+      ],
+      "sizeTracking": {
+        "enabled": true,
+        "maxVisualPercent": 120,
+        "normalizationMaxLines": 2966
+      }
     },
     {
       "id": "display:collapsed:assistant_runtime/prompts",
@@ -371,7 +397,12 @@
         "display:file:ingestion_pipeline/crawler/pipelines.py",
         "display:file:ingestion_pipeline/crawler/policy.py",
         "display:file:ingestion_pipeline/crawler/run_discovery_crawl.py"
-      ]
+      ],
+      "sizeTracking": {
+        "enabled": true,
+        "maxVisualPercent": 100,
+        "normalizationMaxLines": 2966
+      }
     },
     {
       "id": "display:collapsed:ingestion_pipeline/crawler/spiders",
@@ -542,7 +573,12 @@
         "display:file:ingestion_pipeline/extract/pdf_v1.py",
         "display:file:ingestion_pipeline/extract/run_extract.py",
         "display:file:ingestion_pipeline/extract/storage.py"
-      ]
+      ],
+      "sizeTracking": {
+        "enabled": true,
+        "maxVisualPercent": 80,
+        "normalizationMaxLines": 2966
+      }
     },
     {
       "id": "display:file:ingestion_pipeline/extract/html_v1.py",
@@ -713,7 +749,12 @@
         "display:file:ingestion_pipeline/retrieval/opensearch_search.py",
         "display:file:ingestion_pipeline/retrieval/opensearch_write.py",
         "display:file:ingestion_pipeline/retrieval/run_eval_bm25.py"
-      ]
+      ],
+      "sizeTracking": {
+        "enabled": true,
+        "maxVisualPercent": 100,
+        "normalizationMaxLines": 2966
+      }
     },
     {
       "id": "display:file:ingestion_pipeline/retrieval/materialize.py",
@@ -92838,7 +92879,10 @@
     "timelineUnitsMapped": 5463,
     "sourceFileCount": 128,
     "sourceFolderCount": 19,
-    "sourceTimelineUnitCount": 5463
+    "sourceTimelineUnitCount": 5463,
+    "sizeTrackedNodeCount": 4,
+    "sizeTrackingNormalizationMaxLines": 2966,
+    "sizeTrackedWarnings": []
   },
   "warnings": [
     "visual-model: change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",

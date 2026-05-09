@@ -27,6 +27,7 @@ import type {
   RepoDisplayModel,
   RepoDisplayNode,
   RepoDisplayNodeType,
+  RepoDisplaySizeTrackingStyle,
   RepoDisplayTimelineUnit,
   RepoDisplayVisibilityFrame,
 } from '../preprocessing/displayModelTypes'
@@ -65,6 +66,33 @@ type RepoDisplayNodeCountOverrides = {
   hiddenDescendantCount: number
 }
 
+type RepoNodeSizeTrackingState = {
+  enabled: boolean
+  ratio: number
+  growthIntensity: number
+  maxVisualPercent: number
+  visualPercentRatio: number
+  normalizationMaxLines: number
+  rowHeightRem: number
+  fontSizeRem: number
+}
+
+type RepoExplorerTuningState = {
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle
+  maxVisualPercentByNodePath: Record<string, number>
+}
+
+type RepoExplorerTuningStoragePayload = {
+  sizeTrackingStyle?: Partial<RepoDisplaySizeTrackingStyle>
+  sizeTrackedNodes?: Record<string, { maxVisualPercent?: number }>
+}
+
+type TrackedRepoNodeTuningControl = {
+  path: string
+  label: string
+  defaultMaxVisualPercent: number
+}
+
 type VisibleRepoNode = {
   node: RepoDisplayNode
   state: CurrentRepoNodeState
@@ -73,6 +101,7 @@ type VisibleRepoNode = {
   currentVisualWeight: number
   persistentVisualWeight: number
   highlightStrength: number
+  sizeTracking: RepoNodeSizeTrackingState | null
 }
 
 type FeaturedSection = {
@@ -102,6 +131,7 @@ type ExplorerRow = {
   recentlyChanged: boolean
   ancestorHasNextSibling: boolean[]
   hasNextSibling: boolean
+  sizeTracking: RepoNodeSizeTrackingState | null
 }
 
 type RepoProgressCache = {
@@ -113,6 +143,7 @@ type RepoProgressCache = {
 const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
 const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 const RECENT_UNIT_WINDOW = 20
+const REPO_EXPLORER_V2_TUNING_STORAGE_KEY = 'repoExplorerV2Tuning'
 const SIDEBAR_TREE_INDENT = 14
 const FEATURED_SECTION_LIMIT = 4
 const SECTION_CARD_LIMIT = 8
@@ -194,14 +225,29 @@ const VISUAL_SIZE_RANK: Record<RepoVisualSize, number> = {
   xl: 4,
 }
 
+const SIZE_TRACKING_STYLE_RANGES = {
+  baseRowHeightRem: { min: 0.8, max: 2, step: 0.05 },
+  maxExtraHeightRem: { min: 0, max: 4, step: 0.05 },
+  baseFontSizeRem: { min: 0.55, max: 1.2, step: 0.05 },
+  maxExtraFontSizeRem: { min: 0, max: 0.8, step: 0.05 },
+} as const
+
+const MAX_VISUAL_PERCENT_RANGE = {
+  min: 0,
+  max: 200,
+  step: 5,
+} as const
+
 type RepoExplorerSceneProps = {
   modelUrl?: string
   snapshotLabel?: string
+  enableTuningPanel?: boolean
 }
 
 export function RepoExplorerScene({
   modelUrl = LIVE_REPO_DISPLAY_MODEL_URL,
   snapshotLabel,
+  enableTuningPanel = false,
 }: RepoExplorerSceneProps) {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
@@ -242,6 +288,7 @@ export function RepoExplorerScene({
                   model={model}
                   shouldReduceMotion={shouldReduceMotion}
                   stageBounds={stageBounds}
+                  enableTuningPanel={enableTuningPanel}
                 />
               ) : (
                 <RepoExplorerError
@@ -261,19 +308,35 @@ function RepoExplorerCanvas({
   model,
   shouldReduceMotion,
   stageBounds,
+  enableTuningPanel,
 }: {
   model: RepoDisplayModel
   shouldReduceMotion: boolean
   stageBounds: ViewportBounds | null
+  enableTuningPanel: boolean
 }) {
   const panelMotion = getFadeSlideSide(shouldReduceMotion, 16)
   const sectionPresenceMotion = getFadeSlideUp(shouldReduceMotion, 8)
   const maxUnitIndex = Math.max(model.timeline.length - 1, 0)
+  const trackedNodeControls = useMemo(
+    () => getTrackedRepoNodeTuningControls(model),
+    [model],
+  )
+  const defaultTuningState = useMemo(
+    () => createDefaultRepoExplorerTuningState(model, trackedNodeControls),
+    [model, trackedNodeControls],
+  )
   const [activeUnitIndex, setActiveUnitIndex] = useState(maxUnitIndex)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackDurationSeconds, setPlaybackDurationSeconds] =
     useState<PlaybackDurationSeconds>(30)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
+  const [tuningState, setTuningState] = useState<RepoExplorerTuningState | null>(
+    null,
+  )
+  const [tuningStatusMessage, setTuningStatusMessage] = useState<string | null>(
+    null,
+  )
   const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, maxUnitIndex)
   const currentUnitIndexRef = useRef(clampedActiveUnitIndex)
   const playbackCarryRef = useRef(0)
@@ -292,6 +355,52 @@ function RepoExplorerCanvas({
     playbackUnitsPerSecond > 0
       ? remainingUnitCount / playbackUnitsPerSecond
       : 0
+  const canTuneLiveScene =
+    enableTuningPanel && trackedNodeControls.length > 0
+  const effectiveTuningState = canTuneLiveScene
+    ? (tuningState ?? defaultTuningState)
+    : defaultTuningState
+  const effectiveSizeTrackingStyle = effectiveTuningState.sizeTrackingStyle
+  const effectiveMaxVisualPercentByNodePath =
+    effectiveTuningState.maxVisualPercentByNodePath
+
+  useEffect(() => {
+    if (!canTuneLiveScene) {
+      setTuningState(null)
+      setTuningStatusMessage(null)
+      return
+    }
+
+    setTuningState(
+      loadRepoExplorerTuningState(defaultTuningState, trackedNodeControls),
+    )
+    setTuningStatusMessage(null)
+  }, [canTuneLiveScene, defaultTuningState, trackedNodeControls])
+
+  useEffect(() => {
+    if (!canTuneLiveScene || !tuningState || typeof window === 'undefined') {
+      return
+    }
+
+    window.localStorage.setItem(
+      REPO_EXPLORER_V2_TUNING_STORAGE_KEY,
+      JSON.stringify(serializeRepoExplorerTuningState(tuningState)),
+    )
+  }, [canTuneLiveScene, tuningState])
+
+  useEffect(() => {
+    if (!tuningStatusMessage || typeof window === 'undefined') {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setTuningStatusMessage(null)
+    }, 2200)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [tuningStatusMessage])
 
   useEffect(() => {
     currentUnitIndexRef.current = clampedActiveUnitIndex
@@ -402,7 +511,77 @@ function RepoExplorerCanvas({
     setIsPlaying(true)
   }
 
-  const progressState = useRepoProgressState(model, clampedActiveUnitIndex)
+  function updateSizeTrackingStyleValue(
+    key: keyof RepoDisplaySizeTrackingStyle,
+    nextValue: number,
+  ) {
+    if (!canTuneLiveScene) {
+      return
+    }
+
+    setTuningState((current) => {
+      const baseState = current ?? defaultTuningState
+
+      return {
+        ...baseState,
+        sizeTrackingStyle: {
+          ...baseState.sizeTrackingStyle,
+          [key]: clampSizeTrackingStyleValue(key, nextValue),
+        },
+      }
+    })
+  }
+
+  function updateTrackedNodeMaxVisualPercent(path: string, nextValue: number) {
+    if (!canTuneLiveScene) {
+      return
+    }
+
+    setTuningState((current) => {
+      const baseState = current ?? defaultTuningState
+
+      return {
+        ...baseState,
+        maxVisualPercentByNodePath: {
+          ...baseState.maxVisualPercentByNodePath,
+          [path]: clampTrackedNodeVisualPercent(nextValue),
+        },
+      }
+    })
+  }
+
+  async function handleCopyTuningConfig() {
+    const didCopy = await copyTextToClipboard(
+      JSON.stringify(
+        buildRepoExplorerTuningConfigSnippet(
+          effectiveTuningState,
+          trackedNodeControls,
+        ),
+        null,
+        2,
+      ),
+    )
+
+    setTuningStatusMessage(
+      didCopy ? 'Copied config JSON.' : 'Copy failed in this browser.',
+    )
+  }
+
+  function handleResetTuning() {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(REPO_EXPLORER_V2_TUNING_STORAGE_KEY)
+    }
+
+    setTuningState(defaultTuningState)
+    setTuningStatusMessage('Reset to model values.')
+  }
+
+  const progressState = useRepoProgressState(
+    model,
+    clampedActiveUnitIndex,
+    effectiveSizeTrackingStyle,
+    effectiveMaxVisualPercentByNodePath,
+  )
   const activeUnit = progressState.activeUnit
   const visibleNodes = progressState.visibleNodes
   const {
@@ -484,6 +663,19 @@ function RepoExplorerCanvas({
         warnings={model.warnings}
         shouldReduceMotion={shouldReduceMotion}
       />
+
+      {canTuneLiveScene ? (
+        <FloatingRepoTuningPanel
+          shouldReduceMotion={shouldReduceMotion}
+          trackedNodeControls={trackedNodeControls}
+          tuningState={effectiveTuningState}
+          statusMessage={tuningStatusMessage}
+          onUpdateStyleValue={updateSizeTrackingStyleValue}
+          onUpdateTrackedNodePercent={updateTrackedNodeMaxVisualPercent}
+          onCopyConfig={handleCopyTuningConfig}
+          onResetTuning={handleResetTuning}
+        />
+      ) : null}
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 xl:grid-cols-[264px_minmax(0,1fr)]">
         <motion.aside
@@ -1002,12 +1194,19 @@ function ExplorerTreeRow({
   row: ExplorerRow
 }) {
   const gutterWidth = row.depth * SIDEBAR_TREE_INDENT
+  const trackedGrowthIntensity = row.sizeTracking?.growthIntensity ?? 0
+  const rowMinHeightRem = row.sizeTracking?.rowHeightRem ?? null
+  const rowFontSizeRem = row.sizeTracking?.fontSizeRem ?? null
+  const rowFontWeight = Math.round(500 + trackedGrowthIntensity * 110)
+  const rowGlowOpacity = trackedGrowthIntensity > 0 ? 0.05 + trackedGrowthIntensity * 0.08 : 0
+  const trackedBaseLineOpacity = 0.3 + trackedGrowthIntensity * 0.14
+  const trackedHighlightLineOpacity = 0.32 + trackedGrowthIntensity * 0.18
   const currentColumnOffset =
     row.depth > 0
       ? (row.depth - 1) * SIDEBAR_TREE_INDENT + SIDEBAR_TREE_INDENT / 2
       : 0
-  const lineColor = 'rgba(148, 163, 184, 0.3)'
-  const highlightLineColor = 'rgba(94, 234, 212, 0.32)'
+  const lineColor = `rgba(148, 163, 184, ${trackedBaseLineOpacity})`
+  const highlightLineColor = `rgba(94, 234, 212, ${trackedHighlightLineOpacity})`
   const connectorColor = row.recentlyChanged ? highlightLineColor : lineColor
 
   return (
@@ -1022,6 +1221,14 @@ function ExplorerTreeRow({
               ? 'text-amber-100'
               : 'text-slate-300'
       }`}
+      style={{
+        minHeight: rowMinHeightRem ? `${rowMinHeightRem}rem` : undefined,
+        fontSize: rowFontSizeRem ? `${rowFontSizeRem}rem` : undefined,
+        boxShadow:
+          rowGlowOpacity > 0
+            ? `inset 0 0 0 1px rgba(45, 212, 191, ${rowGlowOpacity * 0.7}), 0 0 28px rgba(45, 212, 191, ${rowGlowOpacity})`
+            : undefined,
+      }}
     >
       {row.depth > 0 ? (
         <div
@@ -1066,7 +1273,16 @@ function ExplorerTreeRow({
       ) : null}
 
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
-        <span className="min-w-0 truncate pt-[1px]">
+        <span
+          className="min-w-0 truncate pt-[1px]"
+          style={{
+            fontWeight: rowFontWeight,
+            textShadow:
+              rowGlowOpacity > 0
+                ? `0 0 14px rgba(45, 212, 191, ${rowGlowOpacity * 1.6})`
+                : undefined,
+          }}
+        >
           {row.label}
         </span>
         {row.hiddenDescendantCount > 0 && row.type !== 'file' ? (
@@ -1136,6 +1352,232 @@ function FloatingModelWarningsPanel({
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+function FloatingRepoTuningPanel({
+  shouldReduceMotion,
+  trackedNodeControls,
+  tuningState,
+  statusMessage,
+  onUpdateStyleValue,
+  onUpdateTrackedNodePercent,
+  onCopyConfig,
+  onResetTuning,
+}: {
+  shouldReduceMotion: boolean
+  trackedNodeControls: TrackedRepoNodeTuningControl[]
+  tuningState: RepoExplorerTuningState
+  statusMessage: string | null
+  onUpdateStyleValue: (
+    key: keyof RepoDisplaySizeTrackingStyle,
+    nextValue: number,
+  ) => void
+  onUpdateTrackedNodePercent: (path: string, nextValue: number) => void
+  onCopyConfig: () => Promise<void>
+  onResetTuning: () => void
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
+  const presenceMotion = getScaleFade(shouldReduceMotion)
+
+  return (
+    <div className="pointer-events-none absolute bottom-5 right-5 z-20 sm:bottom-6 sm:right-6">
+      <div className="pointer-events-auto flex w-[21rem] max-w-[calc(100vw-2.5rem)] flex-col-reverse items-end gap-2">
+        <button
+          type="button"
+          aria-expanded={isOpen}
+          aria-controls="repo-live-tuning-panel"
+          onClick={() => {
+            setIsOpen((current) => !current)
+          }}
+          className="rounded-full border border-white/10 bg-slate-950/88 px-4 py-2 text-[12px] font-medium uppercase tracking-[0.24em] text-slate-100 shadow-[0_18px_40px_rgba(0,0,0,0.28)] backdrop-blur-md transition hover:bg-slate-900/92"
+        >
+          Tune
+        </button>
+
+        <AnimatePresence initial={false}>
+          {isOpen ? (
+            <motion.aside
+              id="repo-live-tuning-panel"
+              initial={presenceMotion.initial}
+              animate={presenceMotion.animate}
+              exit={presenceMotion.exit}
+              transition={springSoft}
+              className="max-h-[74vh] w-full overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,28,0.96),rgba(4,8,18,0.96))] shadow-[0_28px_90px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-md"
+            >
+              <div className="max-h-[74vh] overflow-y-auto p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                      Live tuning
+                    </div>
+                    <div className="mt-1 text-[13px] leading-5 text-slate-200">
+                      Visual overrides only. Structure still comes from the loaded display model.
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                    {formatNumber(trackedNodeControls.length)} tracked
+                  </span>
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  <section className="space-y-3">
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                      Global style
+                    </div>
+                    <TuningRangeControl
+                      label="Base row height"
+                      value={tuningState.sizeTrackingStyle.baseRowHeightRem}
+                      min={SIZE_TRACKING_STYLE_RANGES.baseRowHeightRem.min}
+                      max={SIZE_TRACKING_STYLE_RANGES.baseRowHeightRem.max}
+                      step={SIZE_TRACKING_STYLE_RANGES.baseRowHeightRem.step}
+                      valueSuffix="rem"
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateStyleValue('baseRowHeightRem', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Max extra height"
+                      value={tuningState.sizeTrackingStyle.maxExtraHeightRem}
+                      min={SIZE_TRACKING_STYLE_RANGES.maxExtraHeightRem.min}
+                      max={SIZE_TRACKING_STYLE_RANGES.maxExtraHeightRem.max}
+                      step={SIZE_TRACKING_STYLE_RANGES.maxExtraHeightRem.step}
+                      valueSuffix="rem"
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateStyleValue('maxExtraHeightRem', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Base font size"
+                      value={tuningState.sizeTrackingStyle.baseFontSizeRem}
+                      min={SIZE_TRACKING_STYLE_RANGES.baseFontSizeRem.min}
+                      max={SIZE_TRACKING_STYLE_RANGES.baseFontSizeRem.max}
+                      step={SIZE_TRACKING_STYLE_RANGES.baseFontSizeRem.step}
+                      valueSuffix="rem"
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateStyleValue('baseFontSizeRem', nextValue)
+                      }}
+                    />
+                    <TuningRangeControl
+                      label="Max extra font"
+                      value={tuningState.sizeTrackingStyle.maxExtraFontSizeRem}
+                      min={SIZE_TRACKING_STYLE_RANGES.maxExtraFontSizeRem.min}
+                      max={SIZE_TRACKING_STYLE_RANGES.maxExtraFontSizeRem.max}
+                      step={SIZE_TRACKING_STYLE_RANGES.maxExtraFontSizeRem.step}
+                      valueSuffix="rem"
+                      valueDecimals={2}
+                      onChange={(nextValue) => {
+                        onUpdateStyleValue('maxExtraFontSizeRem', nextValue)
+                      }}
+                    />
+                  </section>
+
+                  <section className="space-y-3">
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                      Per tracked node
+                    </div>
+                    {trackedNodeControls.map((node) => (
+                      <TuningRangeControl
+                        key={node.path}
+                        label={node.path}
+                        value={tuningState.maxVisualPercentByNodePath[node.path] ?? node.defaultMaxVisualPercent}
+                        min={MAX_VISUAL_PERCENT_RANGE.min}
+                        max={MAX_VISUAL_PERCENT_RANGE.max}
+                        step={MAX_VISUAL_PERCENT_RANGE.step}
+                        valueSuffix="%"
+                        valueDecimals={0}
+                        onChange={(nextValue) => {
+                          onUpdateTrackedNodePercent(node.path, nextValue)
+                        }}
+                      />
+                    ))}
+                  </section>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCopying(true)
+                      void onCopyConfig().finally(() => {
+                        setIsCopying(false)
+                      })
+                    }}
+                    disabled={isCopying}
+                    className="rounded-full border border-teal-300/20 bg-teal-300/12 px-3 py-1.5 text-[11px] text-teal-50 transition hover:bg-teal-300/16 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Copy config JSON
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onResetTuning}
+                    className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[11px] text-slate-200 transition hover:bg-white/[0.06]"
+                  >
+                    Reset tuning
+                  </button>
+                </div>
+
+                <div className="mt-3 min-h-5 text-[11px] text-slate-400">
+                  {statusMessage ?? 'Saved in localStorage for this browser only.'}
+                </div>
+              </div>
+            </motion.aside>
+          ) : null}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+function TuningRangeControl({
+  label,
+  value,
+  min,
+  max,
+  step,
+  valueSuffix,
+  valueDecimals,
+  onChange,
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  step: number
+  valueSuffix: string
+  valueDecimals: number
+  onChange: (nextValue: number) => void
+}) {
+  return (
+    <label className="block">
+      <div className="flex items-start justify-between gap-3">
+        <span
+          title={label}
+          className="min-w-0 truncate text-[12px] leading-5 text-slate-200"
+        >
+          {label}
+        </span>
+        <span className="shrink-0 font-mono text-[11px] text-slate-400">
+          {formatTuningValue(value, valueDecimals)}
+          {valueSuffix}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(event) => {
+          onChange(Number.parseFloat(event.target.value))
+        }}
+        className="mt-1.5 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-teal-300"
+      />
+    </label>
   )
 }
 
@@ -1544,6 +1986,8 @@ function RepoExplorerError({
 function useRepoProgressState(
   model: RepoDisplayModel,
   activeUnitIndex: number,
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  maxVisualPercentByNodePath: Record<string, number>,
 ): RepoProgressState {
   const progressCacheRef = useRef<RepoProgressCache | null>(null)
 
@@ -1556,8 +2000,14 @@ function useRepoProgressState(
 
     progressCacheRef.current = progressCache
 
-    return buildRepoProgressState(model, activeUnitIndex, progressCache.sourceFileStateById)
-  }, [activeUnitIndex, model])
+    return buildRepoProgressState(
+      model,
+      activeUnitIndex,
+      progressCache.sourceFileStateById,
+      sizeTrackingStyle,
+      maxVisualPercentByNodePath,
+    )
+  }, [activeUnitIndex, maxVisualPercentByNodePath, model, sizeTrackingStyle])
 }
 
 function getRepoProgressCache(
@@ -1652,6 +2102,8 @@ function buildRepoProgressState(
   model: RepoDisplayModel,
   activeUnitIndex: number,
   sourceFileStateById: Map<string, SourceFileReplayState>,
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  maxVisualPercentByNodePath: Record<string, number>,
 ): RepoProgressState {
   const visualWeightReference = calculateDisplayWeightReference(model.nodes)
   const nodeById = new Map(model.nodes.map((node) => [node.id, node]))
@@ -1661,7 +2113,12 @@ function buildRepoProgressState(
       activeUnit: null,
       visibleNodes: model.nodes
         .map((node) =>
-          createStaticVisibleRepoNode(node, visualWeightReference),
+          createStaticVisibleRepoNode(
+            node,
+            visualWeightReference,
+            sizeTrackingStyle,
+            maxVisualPercentByNodePath,
+          ),
         )
         .filter((entry): entry is VisibleRepoNode => entry !== null),
       recentTouchedCount: 0,
@@ -1727,6 +2184,8 @@ function buildRepoProgressState(
           recentActivityByDisplayNodeId.get(node.id) ?? 0,
           visualWeightReference,
           getRepoDisplayNodeCountOverrides(node, visibilityFrame),
+          sizeTrackingStyle,
+          maxVisualPercentByNodePath,
         )
       })
       .filter((entry): entry is VisibleRepoNode => entry !== null),
@@ -1798,6 +2257,8 @@ function createVisibleRepoNode(
   highlightStrength: number,
   visualWeightReference: number,
   countOverrides: RepoDisplayNodeCountOverrides | null,
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  maxVisualPercentByNodePath: Record<string, number>,
 ): VisibleRepoNode | null {
   let exists = false
   let currentLineCount = 0
@@ -1827,12 +2288,16 @@ function createVisibleRepoNode(
     highlightStrength,
     visualWeightReference,
     countOverrides,
+    sizeTrackingStyle,
+    maxVisualPercentByNodePath,
   )
 }
 
 function createStaticVisibleRepoNode(
   node: RepoDisplayNode,
   visualWeightReference: number,
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  maxVisualPercentByNodePath: Record<string, number>,
 ): VisibleRepoNode | null {
   if (node.sourceFileIds.length === 0) {
     return null
@@ -1845,6 +2310,8 @@ function createStaticVisibleRepoNode(
     0,
     visualWeightReference,
     null,
+    sizeTrackingStyle,
+    maxVisualPercentByNodePath,
   )
 }
 
@@ -1855,6 +2322,8 @@ function createVisibleRepoNodeEntry(
   highlightStrength: number,
   visualWeightReference: number,
   countOverrides: RepoDisplayNodeCountOverrides | null,
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  maxVisualPercentByNodePath: Record<string, number>,
 ): VisibleRepoNode {
   const effectiveNode = countOverrides
     ? {
@@ -1894,6 +2363,51 @@ function createVisibleRepoNodeEntry(
     currentVisualWeight,
     persistentVisualWeight,
     highlightStrength,
+    sizeTracking: deriveRepoNodeSizeTrackingState(
+      effectiveNode,
+      currentLineCount,
+      sizeTrackingStyle,
+      maxVisualPercentByNodePath[effectiveNode.path],
+    ),
+  }
+}
+
+function deriveRepoNodeSizeTrackingState(
+  node: RepoDisplayNode,
+  currentLineCount: number,
+  sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
+  maxVisualPercentOverride: number | undefined,
+): RepoNodeSizeTrackingState | null {
+  if (!node.sizeTracking?.enabled) {
+    return null
+  }
+
+  const normalizationMaxLines = node.sizeTracking.normalizationMaxLines
+  const ratio =
+    normalizationMaxLines > 0
+      ? clampNumber(currentLineCount / normalizationMaxLines, 0, 1)
+      : 0
+  const maxVisualPercent = clampTrackedNodeVisualPercent(
+    maxVisualPercentOverride ?? node.sizeTracking.maxVisualPercent,
+  )
+  const visualPercentRatio = maxVisualPercent / 100
+  const growthIntensity = clampNumber(ratio * visualPercentRatio, 0, Math.max(1.2, visualPercentRatio))
+  const rowHeightRem =
+    sizeTrackingStyle.baseRowHeightRem +
+    growthIntensity * sizeTrackingStyle.maxExtraHeightRem
+  const fontSizeRem =
+    sizeTrackingStyle.baseFontSizeRem +
+    growthIntensity * sizeTrackingStyle.maxExtraFontSizeRem
+
+  return {
+    enabled: true,
+    ratio,
+    growthIntensity,
+    maxVisualPercent,
+    visualPercentRatio,
+    normalizationMaxLines,
+    rowHeightRem,
+    fontSizeRem,
   }
 }
 
@@ -2200,6 +2714,7 @@ function buildExplorerRows(visibleNodes: VisibleRepoNode[]): ExplorerRow[] {
         recentlyChanged: entry.state.recentlyChanged,
         ancestorHasNextSibling,
         hasNextSibling,
+        sizeTracking: entry.sizeTracking,
       })
 
       if (entry.node.type === 'folder') {
@@ -2286,6 +2801,218 @@ function compareVisibleNodesForCards(
     right.currentVisualWeight - left.currentVisualWeight ||
     left.node.path.localeCompare(right.node.path)
   )
+}
+
+function getTrackedRepoNodeTuningControls(
+  model: RepoDisplayModel,
+): TrackedRepoNodeTuningControl[] {
+  return model.nodes
+    .filter((node) => node.sizeTracking?.enabled)
+    .map((node) => ({
+      path: node.path,
+      label: node.path,
+      defaultMaxVisualPercent: node.sizeTracking?.maxVisualPercent ?? 100,
+    }))
+    .sort((left, right) => left.path.localeCompare(right.path))
+}
+
+function createDefaultRepoExplorerTuningState(
+  model: RepoDisplayModel,
+  trackedNodeControls: TrackedRepoNodeTuningControl[],
+): RepoExplorerTuningState {
+  return {
+    sizeTrackingStyle: {
+      ...(model.config.sizeTrackingStyle ?? {
+        baseRowHeightRem: 1.1,
+        maxExtraHeightRem: 2,
+        baseFontSizeRem: 0.72,
+        maxExtraFontSizeRem: 0.25,
+      }),
+    },
+    maxVisualPercentByNodePath: Object.fromEntries(
+      trackedNodeControls.map((node) => [
+        node.path,
+        clampTrackedNodeVisualPercent(node.defaultMaxVisualPercent),
+      ]),
+    ),
+  }
+}
+
+function loadRepoExplorerTuningState(
+  defaultState: RepoExplorerTuningState,
+  trackedNodeControls: TrackedRepoNodeTuningControl[],
+): RepoExplorerTuningState {
+  if (typeof window === 'undefined') {
+    return defaultState
+  }
+
+  try {
+    const rawValue = window.localStorage.getItem(
+      REPO_EXPLORER_V2_TUNING_STORAGE_KEY,
+    )
+
+    if (!rawValue) {
+      return defaultState
+    }
+
+    const parsed: unknown = JSON.parse(rawValue)
+
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return defaultState
+    }
+
+    const payload = parsed as RepoExplorerTuningStoragePayload
+
+    return {
+      sizeTrackingStyle: {
+        baseRowHeightRem: normalizeLoadedSizeTrackingStyleValue(
+          'baseRowHeightRem',
+          payload.sizeTrackingStyle?.baseRowHeightRem,
+          defaultState.sizeTrackingStyle.baseRowHeightRem,
+        ),
+        maxExtraHeightRem: normalizeLoadedSizeTrackingStyleValue(
+          'maxExtraHeightRem',
+          payload.sizeTrackingStyle?.maxExtraHeightRem,
+          defaultState.sizeTrackingStyle.maxExtraHeightRem,
+        ),
+        baseFontSizeRem: normalizeLoadedSizeTrackingStyleValue(
+          'baseFontSizeRem',
+          payload.sizeTrackingStyle?.baseFontSizeRem,
+          defaultState.sizeTrackingStyle.baseFontSizeRem,
+        ),
+        maxExtraFontSizeRem: normalizeLoadedSizeTrackingStyleValue(
+          'maxExtraFontSizeRem',
+          payload.sizeTrackingStyle?.maxExtraFontSizeRem,
+          defaultState.sizeTrackingStyle.maxExtraFontSizeRem,
+        ),
+      },
+      maxVisualPercentByNodePath: Object.fromEntries(
+        trackedNodeControls.map((node) => [
+          node.path,
+          clampTrackedNodeVisualPercent(
+            payload.sizeTrackedNodes?.[node.path]?.maxVisualPercent ??
+              defaultState.maxVisualPercentByNodePath[node.path] ??
+              node.defaultMaxVisualPercent,
+          ),
+        ]),
+      ),
+    }
+  } catch {
+    return defaultState
+  }
+}
+
+function serializeRepoExplorerTuningState(
+  tuningState: RepoExplorerTuningState,
+): RepoExplorerTuningStoragePayload {
+  return {
+    sizeTrackingStyle: { ...tuningState.sizeTrackingStyle },
+    sizeTrackedNodes: Object.fromEntries(
+      Object.entries(tuningState.maxVisualPercentByNodePath).map(
+        ([path, maxVisualPercent]) => [
+          path,
+          { maxVisualPercent: clampTrackedNodeVisualPercent(maxVisualPercent) },
+        ],
+      ),
+    ),
+  }
+}
+
+function buildRepoExplorerTuningConfigSnippet(
+  tuningState: RepoExplorerTuningState,
+  trackedNodeControls: TrackedRepoNodeTuningControl[],
+) {
+  return {
+    display: {
+      sizeTrackingStyle: {
+        ...tuningState.sizeTrackingStyle,
+      },
+      sizeTrackedNodes: Object.fromEntries(
+        trackedNodeControls.map((node) => [
+          node.path,
+          {
+            maxVisualPercent: clampTrackedNodeVisualPercent(
+              tuningState.maxVisualPercentByNodePath[node.path] ??
+                node.defaultMaxVisualPercent,
+            ),
+          },
+        ]),
+      ),
+    },
+  }
+}
+
+function normalizeLoadedSizeTrackingStyleValue(
+  key: keyof RepoDisplaySizeTrackingStyle,
+  rawValue: number | undefined,
+  defaultValue: number,
+) {
+  return typeof rawValue === 'number' && Number.isFinite(rawValue)
+    ? clampSizeTrackingStyleValue(key, rawValue)
+    : defaultValue
+}
+
+function clampSizeTrackingStyleValue(
+  key: keyof RepoDisplaySizeTrackingStyle,
+  value: number,
+) {
+  const range = SIZE_TRACKING_STYLE_RANGES[key]
+
+  return roundToStep(
+    clampNumber(value, range.min, range.max),
+    range.step,
+  )
+}
+
+function clampTrackedNodeVisualPercent(value: number) {
+  return roundToStep(
+    clampNumber(
+      value,
+      MAX_VISUAL_PERCENT_RANGE.min,
+      MAX_VISUAL_PERCENT_RANGE.max,
+    ),
+    MAX_VISUAL_PERCENT_RANGE.step,
+  )
+}
+
+function roundToStep(value: number, step: number) {
+  if (step <= 0) {
+    return value
+  }
+
+  return Math.round(value / step) * step
+}
+
+async function copyTextToClipboard(text: string) {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+      return true
+    }
+
+    if (typeof document === 'undefined') {
+      return false
+    }
+
+    const textarea = document.createElement('textarea')
+    textarea.value = text
+    textarea.setAttribute('readonly', 'true')
+    textarea.style.position = 'fixed'
+    textarea.style.opacity = '0'
+    document.body.appendChild(textarea)
+    textarea.select()
+
+    const didCopy = document.execCommand('copy')
+    document.body.removeChild(textarea)
+
+    return didCopy
+  } catch {
+    return false
+  }
+}
+
+function formatTuningValue(value: number, decimals: number) {
+  return value.toFixed(decimals)
 }
 
 function formatPlaybackSpeed(speed: PlaybackSpeed) {

@@ -100,6 +100,12 @@ interface InternalVisibilitySnapshot {
   budgetApplied: boolean;
 }
 
+interface SizeTrackingResolution {
+  sizeTrackedNodeCount: number;
+  normalizationMaxLines: number | null;
+  sizeTrackedWarnings: string[];
+}
+
 void main();
 
 async function main(): Promise<void> {
@@ -158,6 +164,12 @@ async function main(): Promise<void> {
     );
     console.log(
       `Collapsed folders: ${displayModelResult.model.summary.collapsedFolderCount}`,
+    );
+    console.log(
+      `Size-tracked nodes: ${displayModelResult.model.summary.sizeTrackedNodeCount ?? 0}`,
+    );
+    console.log(
+      `Size tracking normalization max lines: ${displayModelResult.model.summary.sizeTrackingNormalizationMaxLines ?? 'none'}`,
     );
     console.log(`Timeline units mapped: ${displayModelResult.model.summary.timelineUnitsMapped}`);
 
@@ -401,6 +413,11 @@ function buildDisplayModel(
 
   const finalNodes = flattenVisibleNodes();
   finalizeVisibleNodeStats();
+  const sizeTrackingResolution = applySizeTrackingMetadata(
+    finalNodes,
+    displayConfig,
+    pushWarning,
+  );
   const sourceFolderDescendantFileIdsByPath = new Map<string, string[]>();
 
   for (const folder of folders) {
@@ -457,6 +474,9 @@ function buildDisplayModel(
         maxVisibleRows: displayConfig.maxVisibleRows,
         hideButCount: [...displayConfig.hideButCount],
         maxChildrenByFolder: { ...displayConfig.maxChildrenByFolder },
+        sizeTrackedNodes: { ...displayConfig.sizeTrackedNodes },
+        sizeTrackingStyle: { ...displayConfig.sizeTrackingStyle },
+        sizeNormalization: displayConfig.sizeNormalization,
       },
       nodes: finalNodes,
       timeline: dynamicVisibilityResult.timeline,
@@ -485,6 +505,9 @@ function buildDisplayModel(
         sourceFileCount: model.files.length,
         sourceFolderCount: model.folders.length,
         sourceTimelineUnitCount: model.timeline.length,
+        sizeTrackedNodeCount: sizeTrackingResolution.sizeTrackedNodeCount,
+        sizeTrackingNormalizationMaxLines: sizeTrackingResolution.normalizationMaxLines,
+        sizeTrackedWarnings: [...sizeTrackingResolution.sizeTrackedWarnings],
       },
       warnings,
     },
@@ -935,6 +958,63 @@ function buildFileActivityMap(timeline: VisualTimelineUnit[]): Map<string, numbe
   }
 
   return activityWeightByFileId;
+}
+
+function applySizeTrackingMetadata(
+  nodes: RepoDisplayNode[],
+  displayConfig: LoadedAnimationDisplayConfig,
+  pushWarning: (message: string) => void,
+): SizeTrackingResolution {
+  const nodeByPath = new Map(
+    nodes.map((node) => [normalizePathValue(node.path), node] as const),
+  );
+  const sizeTrackedWarnings: string[] = [];
+  const matchedNodes: Array<{
+    node: RepoDisplayNode;
+    maxVisualPercent: number;
+  }> = [];
+
+  for (const [configuredPath, trackedConfig] of Object.entries(displayConfig.sizeTrackedNodes)) {
+    const normalizedPath = normalizePathValue(configuredPath);
+    const matchedNode = nodeByPath.get(normalizedPath);
+
+    if (!matchedNode) {
+      const warning = `size-tracked path matches no display node: ${configuredPath}`;
+      sizeTrackedWarnings.push(warning);
+      pushWarning(`size-tracking: ${warning}`);
+      continue;
+    }
+
+    matchedNodes.push({
+      node: matchedNode,
+      maxVisualPercent: trackedConfig.maxVisualPercent,
+    });
+  }
+
+  const normalizationMaxLines =
+    displayConfig.sizeNormalization === 'trackedMax' && matchedNodes.length > 0
+      ? Math.max(...matchedNodes.map(({ node }) => node.maxLineCount))
+      : null;
+
+  if (matchedNodes.length > 0 && normalizationMaxLines === null) {
+    const warning = 'size tracking requested but no normalization max could be resolved.';
+    sizeTrackedWarnings.push(warning);
+    pushWarning(`size-tracking: ${warning}`);
+  }
+
+  for (const { node, maxVisualPercent } of matchedNodes) {
+    node.sizeTracking = {
+      enabled: true,
+      maxVisualPercent,
+      normalizationMaxLines: normalizationMaxLines ?? 0,
+    };
+  }
+
+  return {
+    sizeTrackedNodeCount: matchedNodes.length,
+    normalizationMaxLines,
+    sizeTrackedWarnings,
+  };
 }
 
 function buildDisplayTimeline(

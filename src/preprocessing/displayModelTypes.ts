@@ -3,6 +3,19 @@ export type RepoDisplayNodeType =
   | 'file'
   | 'collapsedFolder';
 
+export interface RepoDisplayNodeSizeTracking {
+  enabled: boolean;
+  maxVisualPercent: number;
+  normalizationMaxLines: number;
+}
+
+export interface RepoDisplaySizeTrackingStyle {
+  baseRowHeightRem: number;
+  maxExtraHeightRem: number;
+  baseFontSizeRem: number;
+  maxExtraFontSizeRem: number;
+}
+
 export interface RepoDisplayNode {
   id: string;
   label: string;
@@ -20,6 +33,7 @@ export interface RepoDisplayNode {
   visibleChildCount: number;
   hiddenChildCount: number;
   hiddenDescendantCount: number;
+  sizeTracking?: RepoDisplayNodeSizeTracking;
 }
 
 export interface RepoDisplayTimelineUnit {
@@ -63,6 +77,9 @@ export interface RepoDisplayModel {
     maxVisibleRows: number | null;
     hideButCount: string[];
     maxChildrenByFolder: Record<string, number>;
+    sizeTrackedNodes?: Record<string, { maxVisualPercent: number }>;
+    sizeTrackingStyle?: RepoDisplaySizeTrackingStyle;
+    sizeNormalization?: 'trackedMax';
   };
   nodes: RepoDisplayNode[];
   timeline: RepoDisplayTimelineUnit[];
@@ -90,6 +107,9 @@ export interface RepoDisplayModel {
     sourceFileCount: number;
     sourceFolderCount: number;
     sourceTimelineUnitCount: number;
+    sizeTrackedNodeCount?: number;
+    sizeTrackingNormalizationMaxLines?: number | null;
+    sizeTrackedWarnings?: string[];
   };
   warnings: string[];
 }
