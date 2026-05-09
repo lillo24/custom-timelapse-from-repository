@@ -144,6 +144,8 @@ const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
 const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
 const RECENT_UNIT_WINDOW = 20
 const REPO_EXPLORER_V2_TUNING_STORAGE_KEY = 'repoExplorerV2Tuning'
+// 0.8125rem = 13px at the browser-default 16px root font size.
+const NORMAL_EXPLORER_FONT_REM = 0.8125
 const SIDEBAR_TREE_INDENT = 14
 const FEATURED_SECTION_LIMIT = 4
 const SECTION_CARD_LIMIT = 8
@@ -317,7 +319,8 @@ function RepoExplorerCanvas({
 }) {
   const panelMotion = getFadeSlideSide(shouldReduceMotion, 16)
   const sectionPresenceMotion = getFadeSlideUp(shouldReduceMotion, 8)
-  const maxUnitIndex = Math.max(model.timeline.length - 1, 0)
+  const hasTimeline = model.timeline.length > 0
+  const maxPlaybackIndex = hasTimeline ? model.timeline.length : 0
   const trackedNodeControls = useMemo(
     () => getTrackedRepoNodeTuningControls(model),
     [model],
@@ -326,7 +329,7 @@ function RepoExplorerCanvas({
     () => createDefaultRepoExplorerTuningState(model, trackedNodeControls),
     [model, trackedNodeControls],
   )
-  const [activeUnitIndex, setActiveUnitIndex] = useState(maxUnitIndex)
+  const [activeUnitIndex, setActiveUnitIndex] = useState(maxPlaybackIndex)
   const [isPlaying, setIsPlaying] = useState(false)
   const [playbackDurationSeconds, setPlaybackDurationSeconds] =
     useState<PlaybackDurationSeconds>(30)
@@ -337,24 +340,25 @@ function RepoExplorerCanvas({
   const [tuningStatusMessage, setTuningStatusMessage] = useState<string | null>(
     null,
   )
-  const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, maxUnitIndex)
+  const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, maxPlaybackIndex)
   const currentUnitIndexRef = useRef(clampedActiveUnitIndex)
   const playbackCarryRef = useRef(0)
   const lastAnimationFrameRef = useRef<number | null>(null)
   const playbackUnitsPerSecond =
-    model.timeline.length > 0
+    hasTimeline
       ? (model.timeline.length / playbackDurationSeconds) * playbackSpeed
       : 0
   const fullRunDurationSeconds =
     playbackSpeed > 0 ? playbackDurationSeconds / playbackSpeed : 0
   const remainingUnitCount = Math.max(
     0,
-    model.timeline.length - (clampedActiveUnitIndex + 1),
+    maxPlaybackIndex - clampedActiveUnitIndex,
   )
   const remainingPlaybackSeconds =
     playbackUnitsPerSecond > 0
       ? remainingUnitCount / playbackUnitsPerSecond
       : 0
+  const isRestFrame = hasTimeline && clampedActiveUnitIndex === maxPlaybackIndex
   const canTuneLiveScene =
     enableTuningPanel && trackedNodeControls.length > 0
   const effectiveTuningState = canTuneLiveScene
@@ -407,19 +411,19 @@ function RepoExplorerCanvas({
   }, [clampedActiveUnitIndex])
 
   useEffect(() => {
-    if (model.timeline.length === 0 && isPlaying) {
+    if (!hasTimeline && isPlaying) {
       setIsPlaying(false)
     }
-  }, [isPlaying, model.timeline.length])
+  }, [hasTimeline, isPlaying])
 
   useEffect(() => {
-    if (isPlaying && clampedActiveUnitIndex >= maxUnitIndex) {
+    if (isPlaying && clampedActiveUnitIndex >= maxPlaybackIndex) {
       setIsPlaying(false)
     }
-  }, [clampedActiveUnitIndex, isPlaying, maxUnitIndex])
+  }, [clampedActiveUnitIndex, isPlaying, maxPlaybackIndex])
 
   function updateActiveUnitIndex(nextIndex: number) {
-    const clampedIndex = clampNumber(nextIndex, 0, maxUnitIndex)
+    const clampedIndex = clampNumber(nextIndex, 0, maxPlaybackIndex)
     currentUnitIndexRef.current = clampedIndex
     startTransition(() => {
       setActiveUnitIndex(clampedIndex)
@@ -427,7 +431,7 @@ function RepoExplorerCanvas({
   }
 
   const advancePlaybackFrame = useEffectEvent((timestamp: number) => {
-    if (!isPlaying || model.timeline.length === 0) {
+    if (!isPlaying || !hasTimeline) {
       return
     }
 
@@ -449,7 +453,7 @@ function RepoExplorerCanvas({
     }
 
     const nextIndex = Math.min(
-      maxUnitIndex,
+      maxPlaybackIndex,
       currentUnitIndexRef.current + unitsToAdvance,
     )
 
@@ -457,7 +461,7 @@ function RepoExplorerCanvas({
       updateActiveUnitIndex(nextIndex)
     }
 
-    if (nextIndex >= maxUnitIndex) {
+    if (nextIndex >= maxPlaybackIndex) {
       playbackCarryRef.current = 0
       lastAnimationFrameRef.current = null
       setIsPlaying(false)
@@ -465,7 +469,7 @@ function RepoExplorerCanvas({
   })
 
   useEffect(() => {
-    if (!isPlaying || model.timeline.length === 0) {
+    if (!isPlaying || !hasTimeline) {
       return
     }
 
@@ -488,14 +492,14 @@ function RepoExplorerCanvas({
     }
   }, [
     advancePlaybackFrame,
+    hasTimeline,
     isPlaying,
-    model.timeline.length,
     playbackDurationSeconds,
     playbackSpeed,
   ])
 
   function handleTogglePlayback() {
-    if (model.timeline.length === 0) {
+    if (!hasTimeline) {
       return
     }
 
@@ -504,7 +508,7 @@ function RepoExplorerCanvas({
       return
     }
 
-    if (clampedActiveUnitIndex >= maxUnitIndex) {
+    if (clampedActiveUnitIndex >= maxPlaybackIndex) {
       updateActiveUnitIndex(0)
     }
 
@@ -576,6 +580,11 @@ function RepoExplorerCanvas({
     setTuningStatusMessage('Reset to model values.')
   }
 
+  function handleSetBaseFontToNormal() {
+    updateSizeTrackingStyleValue('baseFontSizeRem', NORMAL_EXPLORER_FONT_REM)
+    setTuningStatusMessage('Base font set to 13px.')
+  }
+
   const progressState = useRepoProgressState(
     model,
     clampedActiveUnitIndex,
@@ -599,13 +608,16 @@ function RepoExplorerCanvas({
   }, [visibleNodes])
   const canStepBackward = model.timeline.length > 0 && clampedActiveUnitIndex > 0
   const canStepForward =
-    model.timeline.length > 0 && clampedActiveUnitIndex < maxUnitIndex
-  const hasTimeline = model.timeline.length > 0
+    hasTimeline && clampedActiveUnitIndex < maxPlaybackIndex
   const activeUnitLabel =
-    hasTimeline
+    isRestFrame
+      ? 'Complete'
+      : hasTimeline
       ? `Unit ${formatNumber(clampedActiveUnitIndex + 1)} / ${formatNumber(model.timeline.length)}`
       : 'No timeline units'
-  const activeOrderLabel = activeUnit
+  const activeOrderLabel = isRestFrame
+    ? 'Rest frame'
+    : activeUnit
     ? `Order ${formatNumber(activeUnit.unitOrder)}`
     : 'Static fallback'
 
@@ -626,7 +638,7 @@ function RepoExplorerCanvas({
         canStepForward={canStepForward}
         hasTimeline={hasTimeline}
         timelineLength={model.timeline.length}
-        maxUnitIndex={maxUnitIndex}
+        maxUnitIndex={maxPlaybackIndex}
         activeUnitIndex={clampedActiveUnitIndex}
         activeUnitLabel={activeUnitLabel}
         activeOrderLabel={activeOrderLabel}
@@ -672,6 +684,7 @@ function RepoExplorerCanvas({
           statusMessage={tuningStatusMessage}
           onUpdateStyleValue={updateSizeTrackingStyleValue}
           onUpdateTrackedNodePercent={updateTrackedNodeMaxVisualPercent}
+          onSetBaseFontToNormal={handleSetBaseFontToNormal}
           onCopyConfig={handleCopyTuningConfig}
           onResetTuning={handleResetTuning}
         />
@@ -1277,6 +1290,7 @@ function ExplorerTreeRow({
           className="min-w-0 truncate pt-[1px]"
           style={{
             fontWeight: rowFontWeight,
+            transform: 'translateY(-2px)',
             textShadow:
               rowGlowOpacity > 0
                 ? `0 0 14px rgba(45, 212, 191, ${rowGlowOpacity * 1.6})`
@@ -1362,6 +1376,7 @@ function FloatingRepoTuningPanel({
   statusMessage,
   onUpdateStyleValue,
   onUpdateTrackedNodePercent,
+  onSetBaseFontToNormal,
   onCopyConfig,
   onResetTuning,
 }: {
@@ -1374,6 +1389,7 @@ function FloatingRepoTuningPanel({
     nextValue: number,
   ) => void
   onUpdateTrackedNodePercent: (path: string, nextValue: number) => void
+  onSetBaseFontToNormal: () => void
   onCopyConfig: () => Promise<void>
   onResetTuning: () => void
 }) {
@@ -1457,11 +1473,20 @@ function FloatingRepoTuningPanel({
                       max={SIZE_TRACKING_STYLE_RANGES.baseFontSizeRem.max}
                       step={SIZE_TRACKING_STYLE_RANGES.baseFontSizeRem.step}
                       valueSuffix="rem"
-                      valueDecimals={2}
+                      valueDecimals={4}
                       onChange={(nextValue) => {
                         onUpdateStyleValue('baseFontSizeRem', nextValue)
                       }}
                     />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={onSetBaseFontToNormal}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-200 transition hover:bg-white/[0.06]"
+                      >
+                        Set base font 13px
+                      </button>
+                    </div>
                     <TuningRangeControl
                       label="Max extra font"
                       value={tuningState.sizeTrackingStyle.maxExtraFontSizeRem}
@@ -1568,6 +1593,7 @@ function TuningRangeControl({
       </div>
       <input
         type="range"
+        aria-label={label}
         min={min}
         max={max}
         step={step}
@@ -1992,9 +2018,13 @@ function useRepoProgressState(
   const progressCacheRef = useRef<RepoProgressCache | null>(null)
 
   return useMemo(() => {
+    const replayUnitIndex =
+      model.timeline.length > 0
+        ? Math.min(activeUnitIndex, model.timeline.length - 1)
+        : activeUnitIndex
     const progressCache = getRepoProgressCache(
       model,
-      activeUnitIndex,
+      replayUnitIndex,
       progressCacheRef.current,
     )
 
@@ -2125,10 +2155,11 @@ function buildRepoProgressState(
     }
   }
 
-  const clampedActiveUnitIndex = clampNumber(activeUnitIndex, 0, model.timeline.length - 1)
-  const activeUnit = model.timeline[clampedActiveUnitIndex] ?? null
+  const replayUnitIndex = clampNumber(activeUnitIndex, 0, model.timeline.length - 1)
+  const isRestFrame = activeUnitIndex >= model.timeline.length
+  const activeUnit = isRestFrame ? null : model.timeline[replayUnitIndex] ?? null
 
-  if (!activeUnit) {
+  if (!activeUnit && !isRestFrame) {
     return {
       activeUnit: null,
       visibleNodes: [],
@@ -2137,30 +2168,33 @@ function buildRepoProgressState(
   }
 
   const recentActivityByDisplayNodeId = new Map<string, number>()
-  const recentUnitStartIndex = Math.max(
-    0,
-    clampedActiveUnitIndex - (RECENT_UNIT_WINDOW - 1),
-  )
   const visibilityFrame = findVisibilityFrameForUnitIndex(
     model.visibilityFrames,
-    clampedActiveUnitIndex,
+    replayUnitIndex,
   )
 
-  for (let index = recentUnitStartIndex; index <= clampedActiveUnitIndex; index += 1) {
-    const unit = model.timeline[index]
+  if (!isRestFrame) {
+    const recentUnitStartIndex = Math.max(
+      0,
+      replayUnitIndex - (RECENT_UNIT_WINDOW - 1),
+    )
 
-    if (!unit) {
-      continue
-    }
+    for (let index = recentUnitStartIndex; index <= replayUnitIndex; index += 1) {
+      const unit = model.timeline[index]
 
-    const distance = clampedActiveUnitIndex - index
-    const recencyFactor = 1 - (distance / RECENT_UNIT_WINDOW) * 0.55
-    const intensity = clampNumber(unit.activityWeight * recencyFactor, 0, 1)
-    const previousIntensity =
-      recentActivityByDisplayNodeId.get(unit.effectiveDisplayNodeId) ?? 0
+      if (!unit) {
+        continue
+      }
 
-    if (intensity > previousIntensity) {
-      recentActivityByDisplayNodeId.set(unit.effectiveDisplayNodeId, intensity)
+      const distance = replayUnitIndex - index
+      const recencyFactor = 1 - (distance / RECENT_UNIT_WINDOW) * 0.55
+      const intensity = clampNumber(unit.activityWeight * recencyFactor, 0, 1)
+      const previousIntensity =
+        recentActivityByDisplayNodeId.get(unit.effectiveDisplayNodeId) ?? 0
+
+      if (intensity > previousIntensity) {
+        recentActivityByDisplayNodeId.set(unit.effectiveDisplayNodeId, intensity)
+      }
     }
   }
 
@@ -2825,7 +2859,7 @@ function createDefaultRepoExplorerTuningState(
       ...(model.config.sizeTrackingStyle ?? {
         baseRowHeightRem: 1.1,
         maxExtraHeightRem: 2,
-        baseFontSizeRem: 0.72,
+        baseFontSizeRem: NORMAL_EXPLORER_FONT_REM,
         maxExtraFontSizeRem: 0.25,
       }),
     },
@@ -2958,10 +2992,7 @@ function clampSizeTrackingStyleValue(
 ) {
   const range = SIZE_TRACKING_STYLE_RANGES[key]
 
-  return roundToStep(
-    clampNumber(value, range.min, range.max),
-    range.step,
-  )
+  return clampNumber(value, range.min, range.max)
 }
 
 function clampTrackedNodeVisualPercent(value: number) {
@@ -3012,7 +3043,7 @@ async function copyTextToClipboard(text: string) {
 }
 
 function formatTuningValue(value: number, decimals: number) {
-  return value.toFixed(decimals)
+  return Number.parseFloat(value.toFixed(decimals)).toString()
 }
 
 function formatPlaybackSpeed(speed: PlaybackSpeed) {

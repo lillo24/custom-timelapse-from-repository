@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-08T20:25:06.710Z",
+  "generatedAt": "2026-05-09T09:42:51.927Z",
   "sourceVisualModelPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-visual-model.json",
   "config": {
     "path": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\repo-animation.config.json",
@@ -34,8 +34,8 @@
     "sizeTrackingStyle": {
       "baseRowHeightRem": 1.1,
       "maxExtraHeightRem": 2,
-      "baseFontSizeRem": 0.72,
-      "maxExtraFontSizeRem": 2
+      "baseFontSizeRem": 0.8125,
+      "maxExtraFontSizeRem": 1
     },
     "sizeNormalization": "trackedMax"
   },

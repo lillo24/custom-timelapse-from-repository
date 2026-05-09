@@ -28,7 +28,7 @@
     "sizeTrackingStyle": {
       "baseRowHeightRem": 1.1,
       "maxExtraHeightRem": 2.0,
-      "baseFontSizeRem": 0.72,
+      "baseFontSizeRem": 0.8125,
       "maxExtraFontSizeRem": 1
     },
     "sizeTrackedNodes": {

@@ -9,6 +9,9 @@ import type {
 } from './animationFilterConfigTypes.ts';
 import { normalizePathPattern } from './pathPattern.ts';
 
+// 0.8125rem = 13px at the browser-default 16px root font size.
+const DEFAULT_TRACKED_BASE_FONT_REM = 0.8125;
+
 export function parseAnimationFilterConfig(
   configPath: string,
   content: string,
@@ -107,7 +110,7 @@ function createDefaultDisplayConfig(): LoadedAnimationDisplayConfig {
     sizeTrackingStyle: {
       baseRowHeightRem: 1.1,
       maxExtraHeightRem: 2,
-      baseFontSizeRem: 0.72,
+      baseFontSizeRem: DEFAULT_TRACKED_BASE_FONT_REM,
       maxExtraFontSizeRem: 0.25,
     },
     sizeNormalization: 'trackedMax',
