@@ -10,7 +10,10 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { LineCounterOverlay } from '../components/repo/LineCounterOverlay'
+import {
+  LineCounterOverlay,
+  type LineCounterOverlayVersion,
+} from '../components/repo/LineCounterOverlay'
 import { PresentationStage } from '../components/presentation/PresentationStage'
 import {
   LIVE_REPO_DISPLAY_MODEL_URL,
@@ -380,6 +383,8 @@ function RepoExplorerCanvas({
   const [playbackDurationSeconds, setPlaybackDurationSeconds] =
     useState<PlaybackDurationSeconds>(30)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
+  const [lineCounterVersion, setLineCounterVersion] =
+    useState<LineCounterOverlayVersion>(1)
   const [tuningState, setTuningState] = useState<RepoExplorerTuningState | null>(
     null,
   )
@@ -704,6 +709,8 @@ function RepoExplorerCanvas({
         playbackSpeed={playbackSpeed}
         shouldReduceMotion={shouldReduceMotion}
         stageBounds={stageBounds}
+        version={lineCounterVersion}
+        onVersionChange={setLineCounterVersion}
       />
 
       <FloatingPlaybackControls

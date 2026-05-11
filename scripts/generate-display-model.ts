@@ -1056,6 +1056,7 @@ function buildDisplayTimeline(
           remappedBecauseHidden: false,
           type: unit.type,
           lineDelta: unit.lineDelta,
+          unitLineAmount: unit.unitLineAmount,
           activityWeight: unit.activityWeight,
           beforeLineCount: unit.beforeLineCount,
           afterLineCount: unit.afterLineCount,

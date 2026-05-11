@@ -33,7 +33,7 @@
     },
     "sizeTrackedNodes": {
       "assistant_runtime": {
-        "maxVisualPercent": 100
+        "maxVisualPercent": 90
       },
       "ingestion_pipeline/crawler": {
         "maxVisualPercent": 110

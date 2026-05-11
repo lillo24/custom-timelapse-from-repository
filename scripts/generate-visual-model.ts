@@ -394,6 +394,7 @@ function buildTimeline(
           folderPath: normalizePath(unit.folder),
           type: unit.type,
           lineDelta: unit.lineDelta ?? 0,
+          unitLineAmount: unit.unitLineAmount,
           activityWeight: calculateActivityWeight(unit),
           beforeLineCount: unit.beforeLineCount,
           afterLineCount: unit.afterLineCount,

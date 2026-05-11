@@ -34,6 +34,7 @@ export interface VisualTimelineUnit {
   folderPath: string;
   type: string;
   lineDelta: number;
+  unitLineAmount: number | null;
   activityWeight: number;
   beforeLineCount: number | null;
   afterLineCount: number | null;
