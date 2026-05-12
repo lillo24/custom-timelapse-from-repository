@@ -171,6 +171,7 @@ type RepoProgressCache = {
 
 const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
 const PLAYBACK_SPEED_OPTIONS = [0.5, 1, 2, 4] as const
+const SLOW_MOTION_MULTIPLIER = 0.2
 const RECENT_UNIT_WINDOW = 20
 const REPO_EXPLORER_V2_TUNING_STORAGE_KEY = 'repoExplorerV2Tuning'
 // 0.8125rem = 13px at the browser-default 16px root font size.
@@ -289,6 +290,7 @@ type RepoExplorerSceneProps = {
   snapshotLabel?: string
   enableTuningPanel?: boolean
   enableActivityFireIndicators?: boolean
+  enableSlowMotionToggle?: boolean
 }
 
 export function RepoExplorerScene({
@@ -296,6 +298,7 @@ export function RepoExplorerScene({
   snapshotLabel,
   enableTuningPanel = false,
   enableActivityFireIndicators = false,
+  enableSlowMotionToggle = false,
 }: RepoExplorerSceneProps) {
   const shouldReduceMotion = useReducedMotion() ?? false
   const overlayMotion = getFadeSlideUp(shouldReduceMotion, 10)
@@ -338,6 +341,7 @@ export function RepoExplorerScene({
                   stageBounds={stageBounds}
                   enableTuningPanel={enableTuningPanel}
                   enableActivityFireIndicators={enableActivityFireIndicators}
+                  enableSlowMotionToggle={enableSlowMotionToggle}
                 />
               ) : (
                 <RepoExplorerError
@@ -359,12 +363,14 @@ function RepoExplorerCanvas({
   stageBounds,
   enableTuningPanel,
   enableActivityFireIndicators,
+  enableSlowMotionToggle,
 }: {
   model: RepoDisplayModel
   shouldReduceMotion: boolean
   stageBounds: ViewportBounds | null
   enableTuningPanel: boolean
   enableActivityFireIndicators: boolean
+  enableSlowMotionToggle: boolean
 }) {
   const panelMotion = getFadeSlideSide(shouldReduceMotion, 16)
   const sectionPresenceMotion = getFadeSlideUp(shouldReduceMotion, 8)
@@ -383,6 +389,7 @@ function RepoExplorerCanvas({
   const [playbackDurationSeconds, setPlaybackDurationSeconds] =
     useState<PlaybackDurationSeconds>(30)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
+  const [isSlowMotionEnabled, setIsSlowMotionEnabled] = useState(false)
   const [lineCounterVersion, setLineCounterVersion] =
     useState<LineCounterOverlayVersion>(1)
   const [tuningState, setTuningState] = useState<RepoExplorerTuningState | null>(
@@ -395,12 +402,16 @@ function RepoExplorerCanvas({
   const currentUnitIndexRef = useRef(clampedActiveUnitIndex)
   const playbackCarryRef = useRef(0)
   const lastAnimationFrameRef = useRef<number | null>(null)
+  const effectivePlaybackSpeed =
+    playbackSpeed * (isSlowMotionEnabled ? SLOW_MOTION_MULTIPLIER : 1)
   const playbackUnitsPerSecond =
     hasTimeline
-      ? (model.timeline.length / playbackDurationSeconds) * playbackSpeed
+      ? (model.timeline.length / playbackDurationSeconds) * effectivePlaybackSpeed
       : 0
   const fullRunDurationSeconds =
-    playbackSpeed > 0 ? playbackDurationSeconds / playbackSpeed : 0
+    effectivePlaybackSpeed > 0
+      ? playbackDurationSeconds / effectivePlaybackSpeed
+      : 0
   const remainingUnitCount = Math.max(
     0,
     maxPlaybackIndex - clampedActiveUnitIndex,
@@ -544,6 +555,7 @@ function RepoExplorerCanvas({
     }
   }, [
     advancePlaybackFrame,
+    effectivePlaybackSpeed,
     hasTimeline,
     isPlaying,
     playbackDurationSeconds,
@@ -706,7 +718,7 @@ function RepoExplorerCanvas({
         timeline={model.timeline}
         activeUnitIndex={clampedActiveUnitIndex}
         isPlaying={isPlaying}
-        playbackSpeed={playbackSpeed}
+        playbackSpeed={effectivePlaybackSpeed}
         shouldReduceMotion={shouldReduceMotion}
         stageBounds={stageBounds}
         version={lineCounterVersion}
@@ -727,6 +739,9 @@ function RepoExplorerCanvas({
         activeOrderLabel={activeOrderLabel}
         playbackDurationSeconds={playbackDurationSeconds}
         playbackSpeed={playbackSpeed}
+        effectivePlaybackSpeed={effectivePlaybackSpeed}
+        isSlowMotionEnabled={isSlowMotionEnabled}
+        enableSlowMotionToggle={enableSlowMotionToggle}
         fullRunDurationSeconds={fullRunDurationSeconds}
         remainingPlaybackSeconds={remainingPlaybackSeconds}
         remainingUnitCount={remainingUnitCount}
@@ -748,6 +763,9 @@ function RepoExplorerCanvas({
         }}
         onSelectSpeed={(speed) => {
           setPlaybackSpeed(speed)
+        }}
+        onToggleSlowMotion={() => {
+          setIsSlowMotionEnabled((current) => !current)
         }}
         onProgressChange={(nextIndex) => {
           updateActiveUnitIndex(nextIndex)
@@ -932,6 +950,9 @@ function FloatingPlaybackControls({
   activeOrderLabel,
   playbackDurationSeconds,
   playbackSpeed,
+  effectivePlaybackSpeed,
+  isSlowMotionEnabled,
+  enableSlowMotionToggle,
   fullRunDurationSeconds,
   remainingPlaybackSeconds,
   remainingUnitCount,
@@ -944,6 +965,7 @@ function FloatingPlaybackControls({
   onStepForward,
   onSelectDuration,
   onSelectSpeed,
+  onToggleSlowMotion,
   onProgressChange,
 }: {
   shouldReduceMotion: boolean
@@ -959,6 +981,9 @@ function FloatingPlaybackControls({
   activeOrderLabel: string
   playbackDurationSeconds: PlaybackDurationSeconds
   playbackSpeed: PlaybackSpeed
+  effectivePlaybackSpeed: number
+  isSlowMotionEnabled: boolean
+  enableSlowMotionToggle: boolean
   fullRunDurationSeconds: number
   remainingPlaybackSeconds: number
   remainingUnitCount: number
@@ -971,6 +996,7 @@ function FloatingPlaybackControls({
   onStepForward: () => void
   onSelectDuration: (durationSeconds: PlaybackDurationSeconds) => void
   onSelectSpeed: (speed: PlaybackSpeed) => void
+  onToggleSlowMotion: () => void
   onProgressChange: (nextIndex: number) => void
 }) {
   const [layout, setLayout] = useState<FloatingPlaybackLayout>('vertical')
@@ -1047,6 +1073,19 @@ function FloatingPlaybackControls({
             >
               {isVertical ? 'Vertical' : 'Horizontal'}
             </button>
+            {enableSlowMotionToggle ? (
+              <button
+                type="button"
+                onClick={onToggleSlowMotion}
+                className={`${utilityButtonClass} ${
+                  isSlowMotionEnabled
+                    ? 'border-amber-300/30 bg-amber-300/14 text-amber-50 hover:bg-amber-300/20'
+                    : ''
+                }`}
+              >
+                {isSlowMotionEnabled ? 'Slow on' : 'Slow'}
+              </button>
+            ) : null}
           </div>
 
           <div
@@ -1205,6 +1244,14 @@ function FloatingPlaybackControls({
                   label="Pulse"
                   value={`${formatNumber(recentTouchedCount)} recent`}
                 />
+                {enableSlowMotionToggle ? (
+                  <PlaybackStatChip
+                    label="Effective speed"
+                    value={`${formatNumberValue(effectivePlaybackSpeed, effectivePlaybackSpeed < 1 ? 2 : 1)}x${
+                      isSlowMotionEnabled ? ' slow' : ''
+                    }`}
+                  />
+                ) : null}
               </div>
             </motion.div>
           ) : null}
@@ -3541,4 +3588,11 @@ function clampNumber(value: number, min: number, max: number) {
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat('en-US').format(value)
+}
+
+function formatNumberValue(value: number, maximumFractionDigits: number) {
+  return new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits,
+  }).format(value)
 }

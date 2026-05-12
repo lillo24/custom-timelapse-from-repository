@@ -23,6 +23,7 @@ function App() {
         modelUrl="/data/snapshots/repo-display-model-v1.json"
         enableTuningPanel={false}
         enableActivityFireIndicators={false}
+        enableSlowMotionToggle={false}
       />
     ) : (
       <RepoExplorerScene
@@ -30,6 +31,7 @@ function App() {
         modelUrl={LIVE_REPO_DISPLAY_MODEL_URL}
         enableTuningPanel
         enableActivityFireIndicators
+        enableSlowMotionToggle
       />
     )
 

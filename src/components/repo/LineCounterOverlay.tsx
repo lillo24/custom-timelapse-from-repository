@@ -75,6 +75,7 @@ const BADGE_HOLD_END =
   BADGE_TOTAL_DURATION_MS
 const SLOT_DIGIT_STAGGER_MS = 35
 const SLOT_CHARACTER_WIDTH_EM = 0.72
+const SLOT_DIGIT_HEIGHT_CLASS = 'h-[2.5em]'
 const ZERO_LINE_CHANGE_TOTALS: LineChangeTotals = {
   addedTotal: 0,
   deletedTotal: 0,
@@ -556,7 +557,7 @@ function SlotNumber({
         ) : (
           <span
             key={character.key}
-            className="inline-flex w-[0.32em] justify-center text-current/70"
+            className={`inline-flex ${SLOT_DIGIT_HEIGHT_CLASS} w-[0.32em] items-center justify-center text-current/70`}
           >
             {character.value}
           </span>
@@ -578,14 +579,22 @@ function SlotDigit({
   shouldReduceMotion: boolean
 }) {
   if (shouldReduceMotion) {
-    return <span className="inline-flex w-[0.68em] justify-center">{digit}</span>
+    return (
+      <span
+        className={`inline-flex ${SLOT_DIGIT_HEIGHT_CLASS} w-[0.68em] items-center justify-center`}
+      >
+        {digit}
+      </span>
+    )
   }
 
   const initialY = direction === 'up' ? '100%' : '-100%'
   const exitY = direction === 'up' ? '-100%' : '100%'
 
   return (
-    <span className="relative inline-block h-[1.18em] w-[0.68em] overflow-hidden">
+    <span
+      className={`relative inline-block ${SLOT_DIGIT_HEIGHT_CLASS} w-[0.68em] overflow-hidden`}
+    >
       <AnimatePresence initial={false}>
         <motion.span
           key={digit}
