@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import type { LoadedAnimationDisplayConfig } from '../src/preprocessing/animationFilterConfigTypes.ts';
+import { normalizeHistoryTrimMetadata } from '../src/preprocessing/historyTrim.ts';
 import type {
   RepoDisplayModel,
   RepoDisplayNode,
@@ -133,6 +134,9 @@ async function main(): Promise<void> {
     await writeFile(publicOutputPath, serializedModel, 'utf8');
 
     console.log('Display model generated');
+    console.log(
+      `History trim: kept ${formatNumber(displayModelResult.model.historyTrim?.keptUnitCount ?? displayModelResult.model.summary.timelineUnitCount)} / ${formatNumber(displayModelResult.model.historyTrim?.sourceUnitCount ?? displayModelResult.model.summary.timelineUnitCount)} units, dropped ${formatPercent(calculateDroppedPercent(displayModelResult.model.historyTrim))}`,
+    );
     console.log(`Max visible rows: ${displayModelResult.model.summary.maxVisibleRows ?? 'none'}`);
     console.log(
       `Visible rows before budget: ${displayModelResult.model.summary.visibleRowsBeforeBudget}`,
@@ -289,10 +293,12 @@ async function loadVisualModel(modelPath: string): Promise<RepoVisualModel> {
     parsed = JSON.parse(await readFile(modelPath, 'utf8'));
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to read or parse visual model JSON: ${error.message}`);
+      throw new Error(`Failed to read or parse visual model JSON: ${error.message}`, {
+        cause: error,
+      });
     }
 
-    throw new Error('Failed to read or parse visual model JSON.');
+    throw new Error('Failed to read or parse visual model JSON.', { cause: error });
   }
 
   if (!isRepoVisualModel(parsed)) {
@@ -326,6 +332,7 @@ function buildDisplayModel(
 ): BuildDisplayModelResult {
   const warnings: string[] = [];
   const warningSet = new Set<string>();
+  const historyTrim = normalizeHistoryTrimMetadata(model.historyTrim, model.timeline.length);
   const pushWarning = (message: string) => {
     if (warningSet.has(message)) {
       return;
@@ -467,6 +474,7 @@ function buildDisplayModel(
     budgetDebugExamples: dynamicVisibilityResult.budgetDebugExamples,
     model: {
       generatedAt: new Date().toISOString(),
+      historyTrim,
       sourceVisualModelPath,
       config: {
         path: configPath,
@@ -1317,17 +1325,14 @@ function applyTimelineUnitToSourceFileState(
     };
   }
 
-  let nextLineCount = fileState.currentLineCount;
-
-  if (unit.afterLineCount !== null) {
-    nextLineCount = Math.max(0, unit.afterLineCount);
-  } else if (unit.beforeLineCount !== null) {
-    nextLineCount = Math.max(0, unit.beforeLineCount + unit.lineDelta);
-  } else if (unit.type === 'create' || unit.type === 'copy') {
-    nextLineCount = Math.max(0, unit.lineDelta);
-  } else {
-    nextLineCount = Math.max(0, fileState.currentLineCount + unit.lineDelta);
-  }
+  const nextLineCount =
+    unit.afterLineCount !== null
+      ? Math.max(0, unit.afterLineCount)
+      : unit.beforeLineCount !== null
+        ? Math.max(0, unit.beforeLineCount + unit.lineDelta)
+        : unit.type === 'create' || unit.type === 'copy'
+          ? Math.max(0, unit.lineDelta)
+          : Math.max(0, fileState.currentLineCount + unit.lineDelta);
 
   return {
     ...fileState,
@@ -1881,4 +1886,22 @@ function stableStringHash(value: string): number {
   }
 
   return hash >>> 0;
+}
+
+function calculateDroppedPercent(
+  historyTrim: RepoDisplayModel['historyTrim'],
+): number {
+  if (!historyTrim || historyTrim.sourceUnitCount === 0) {
+    return 0;
+  }
+
+  return (historyTrim.droppedUnitCount / historyTrim.sourceUnitCount) * 100;
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(value);
+}
+
+function formatPercent(value: number): string {
+  return `${value.toFixed(1)}%`;
 }

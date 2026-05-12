@@ -11,12 +11,8 @@ import type {
 } from '../src/preprocessing/animationDatasetTypes.ts';
 import type { LoadedAnimationFilterConfig } from '../src/preprocessing/animationFilterConfigTypes.ts';
 import type { RepoChangeUnit, RepoChangeUnitsOutput } from '../src/preprocessing/changeUnitTypes.ts';
-import type {
-  FileStateStep,
-  ReconstructedRepoFileStates,
-  RepoFileState,
-} from '../src/preprocessing/fileStateTypes.ts';
-import type { RawGitHistory } from '../src/preprocessing/gitHistoryTypes.ts';
+import type { ReconstructedRepoFileStates } from '../src/preprocessing/fileStateTypes.ts';
+import { resolveHistoryTrim } from '../src/preprocessing/historyTrim.ts';
 import {
   createEmptyAnimationFilterConfig,
   parseAnimationFilterConfig,
@@ -73,6 +69,14 @@ interface ClassifiedFile extends FileDescriptor {
   language?: string;
 }
 
+interface ReplayedAnimationFileState {
+  descriptor: FileDescriptor;
+  maxLineCount: number;
+  finalLineCount: number;
+  createdUnitOrder?: number;
+  deletedUnitOrder?: number;
+}
+
 void main();
 
 async function main(): Promise<void> {
@@ -86,7 +90,6 @@ async function main(): Promise<void> {
       ? resolveInputFile(options.configPath, 'Filter config')
       : undefined;
 
-    const history = await loadRawHistory(historyPath);
     const states = await loadReconstructedStates(statesPath);
     const unitsOutput = await loadChangeUnits(unitsPath);
     const filterConfig = configPath
@@ -98,19 +101,27 @@ async function main(): Promise<void> {
       historyPath,
       statesPath,
       unitsPath,
-      history,
       states,
       unitsOutput,
       options.includeLockfiles,
       filterConfig,
       warnings,
     );
-    const excludedUnitCount = unitsOutput.units.length - dataset.units.length;
+    const excludedUnitCount = dataset.historyTrim
+      ? dataset.historyTrim.keptUnitCount - dataset.units.length
+      : unitsOutput.units.length - dataset.units.length;
+    const droppedPercent =
+      dataset.historyTrim && dataset.historyTrim.sourceUnitCount > 0
+        ? (dataset.historyTrim.droppedUnitCount / dataset.historyTrim.sourceUnitCount) * 100
+        : 0;
 
     await mkdir(path.dirname(outputPath), { recursive: true });
     await writeFile(outputPath, `${JSON.stringify(dataset, null, 2)}\n`, 'utf8');
 
     const categoryCounts = countByCategory(dataset.files);
+    console.log(
+      `History trim: kept ${formatNumber(dataset.historyTrim?.keptUnitCount ?? dataset.units.length)} / ${formatNumber(dataset.historyTrim?.sourceUnitCount ?? dataset.units.length)} units, dropped ${formatPercent(droppedPercent)}`,
+    );
     console.log(`Included files: ${dataset.files.length}`);
     console.log(`Excluded files: ${dataset.excludedFiles.length}`);
     console.log(`Included units: ${dataset.units.length}`);
@@ -246,16 +257,6 @@ function resolveInputFile(inputPath: string, label: string): string {
   return resolvedPath;
 }
 
-async function loadRawHistory(historyPath: string): Promise<RawGitHistory> {
-  const parsed = await loadJsonFile(historyPath);
-
-  if (!isRawGitHistory(parsed)) {
-    throw new Error(`History input does not match the expected raw Git history schema: ${historyPath}`);
-  }
-
-  return parsed;
-}
-
 async function loadReconstructedStates(statesPath: string): Promise<ReconstructedRepoFileStates> {
   const parsed = await loadJsonFile(statesPath);
 
@@ -282,20 +283,15 @@ async function loadJsonFile(filePath: string): Promise<unknown> {
     return JSON.parse(content);
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to read or parse JSON from ${filePath}: ${error.message}`);
+      throw new Error(`Failed to read or parse JSON from ${filePath}: ${error.message}`, {
+        cause: error,
+      });
     }
 
-    throw new Error(`Failed to read or parse JSON from ${filePath}.`);
+    throw new Error(`Failed to read or parse JSON from ${filePath}.`, {
+      cause: error,
+    });
   }
-}
-
-function isRawGitHistory(value: unknown): value is RawGitHistory {
-  if (!value || typeof value !== "object") {
-    return false;
-  }
-
-  const candidate = value as Partial<RawGitHistory>;
-  return candidate.schemaVersion === 1 && Array.isArray(candidate.commits);
 }
 
 function isReconstructedRepoFileStates(
@@ -322,7 +318,6 @@ function buildAnimationDataset(
   historyPath: string,
   statesPath: string,
   unitsPath: string,
-  history: RawGitHistory,
   states: ReconstructedRepoFileStates,
   unitsOutput: RepoChangeUnitsOutput,
   includeLockfiles: boolean,
@@ -330,7 +325,11 @@ function buildAnimationDataset(
   warnings: string[],
 ): RepoAnimationDataset {
   const excludedPatterns = [...DEFAULT_EXCLUDED_PATTERNS];
-  const fileDescriptors = collectFileDescriptors(history, states, unitsOutput);
+  const { historyTrim, retainedUnits } = resolveHistoryTrim(
+    unitsOutput.units,
+    filterConfig.history.trimEndProgressPercent,
+  );
+  const fileDescriptors = collectFileDescriptors(retainedUnits);
   const exclusionMap = new Map<string, ExcludedFile>();
   const includedDescriptors: FileDescriptor[] = [];
 
@@ -354,12 +353,11 @@ function buildAnimationDataset(
   }
 
   const includedPathSet = new Set(includedDescriptors.map((descriptor) => descriptor.path));
-  const statesByPath = buildStateHistoryMap(states.steps);
-  const units = unitsOutput.units
+  const units = retainedUnits
     .filter((unit) => includedPathSet.has(normalizePath(unit.filePath)))
     .map((unit) => enrichUnit(unit));
 
-  for (const unit of unitsOutput.units) {
+  for (const unit of retainedUnits) {
     const previousPath = unit.previousPath ? normalizePath(unit.previousPath) : undefined;
 
     if (previousPath && !includedPathSet.has(previousPath) && !exclusionMap.has(previousPath)) {
@@ -380,10 +378,7 @@ function buildAnimationDataset(
     }
   }
 
-  const files = includedDescriptors
-    .map((descriptor) =>
-      buildAnimationFile(descriptor, statesByPath.get(descriptor.path) ?? [], units),
-    )
+  const files = replayAnimationFiles(units)
     .sort((left, right) => left.path.localeCompare(right.path));
 
   const excludedFiles = Array.from(exclusionMap.values()).sort((left, right) =>
@@ -402,6 +397,7 @@ function buildAnimationDataset(
 
   return {
     generatedAt: new Date().toISOString(),
+    historyTrim,
     sourceFiles: {
       history: historyPath,
       states: statesPath,
@@ -428,30 +424,10 @@ function buildAnimationDataset(
   };
 }
 
-function collectFileDescriptors(
-  history: RawGitHistory,
-  states: ReconstructedRepoFileStates,
-  unitsOutput: RepoChangeUnitsOutput,
-): FileDescriptor[] {
+function collectFileDescriptors(units: RepoChangeUnit[]): FileDescriptor[] {
   const descriptors = new Map<string, FileDescriptor>();
 
-  for (const commit of history.commits) {
-    for (const changedFile of commit.changedFiles) {
-      addDescriptor(descriptors, changedFile.path);
-
-      if (changedFile.oldPath) {
-        addDescriptor(descriptors, changedFile.oldPath);
-      }
-    }
-  }
-
-  for (const step of states.steps) {
-    for (const file of step.files) {
-      descriptors.set(normalizePath(file.path), descriptorFromState(file));
-    }
-  }
-
-  for (const unit of unitsOutput.units) {
+  for (const unit of units) {
     addDescriptor(descriptors, unit.filePath);
 
     if (unit.previousPath) {
@@ -467,15 +443,6 @@ function collectFileDescriptors(
 function addDescriptor(descriptors: Map<string, FileDescriptor>, filePath: string): void {
   const descriptor = createDescriptor(filePath);
   descriptors.set(descriptor.path, descriptor);
-}
-
-function descriptorFromState(file: RepoFileState): FileDescriptor {
-  return {
-    path: normalizePath(file.path),
-    name: file.name,
-    folder: file.folder,
-    extension: file.extension,
-  };
 }
 
 function createDescriptor(filePath: string): FileDescriptor {
@@ -546,51 +513,77 @@ function enrichUnit(unit: RepoChangeUnit): AnimationUnit {
   };
 }
 
-function buildStateHistoryMap(
-  steps: FileStateStep[],
-): Map<string, RepoFileState[]> {
-  const statesByPath = new Map<string, RepoFileState[]>();
+function replayAnimationFiles(
+  units: AnimationUnit[],
+): AnimationFile[] {
+  const replayStateByPath = new Map<string, ReplayedAnimationFileState>();
 
-  for (const step of steps) {
-    for (const file of step.files) {
-      const filePath = normalizePath(file.path);
-      const existing = statesByPath.get(filePath) ?? [];
-      existing.push(file);
-      statesByPath.set(filePath, existing);
-    }
+  for (const unit of units) {
+    const filePath = normalizePath(unit.filePath);
+    const existingState = replayStateByPath.get(filePath);
+    const descriptor = existingState?.descriptor ?? createDescriptor(filePath);
+    const currentLineCount = existingState?.finalLineCount ?? 0;
+    const nextLineCount = deriveNextLineCount(currentLineCount, unit);
+    const maxLineCount = Math.max(
+      existingState?.maxLineCount ?? 0,
+      currentLineCount,
+      unit.beforeLineCount ?? 0,
+      unit.afterLineCount ?? 0,
+      nextLineCount,
+    );
+
+    replayStateByPath.set(filePath, {
+      descriptor,
+      maxLineCount,
+      finalLineCount: nextLineCount,
+      createdUnitOrder:
+        existingState?.createdUnitOrder ??
+        (unit.type === 'create' || unit.type === 'copy' ? unit.unitOrder : undefined),
+      deletedUnitOrder:
+        unit.type === 'delete' ? unit.unitOrder : existingState?.deletedUnitOrder,
+    });
   }
 
-  return statesByPath;
+  return Array.from(replayStateByPath.values()).map((state) => {
+    const classified = classifyFile(state.descriptor.path);
+
+    return {
+      ...state.descriptor,
+      category: classified.category,
+      language: classified.language,
+      maxLineCount: state.maxLineCount,
+      finalLineCount: state.finalLineCount,
+      createdUnitOrder: state.createdUnitOrder,
+      deletedUnitOrder: state.deletedUnitOrder,
+    };
+  });
 }
 
-function buildAnimationFile(
-  descriptor: FileDescriptor,
-  stateHistory: RepoFileState[],
-  units: AnimationUnit[],
-): AnimationFile {
-  const classified = classifyFile(descriptor.path);
-  const fileUnits = units.filter((unit) => normalizePath(unit.filePath) === descriptor.path);
-  const maxLineCount = stateHistory.reduce(
-    (max, state) => Math.max(max, state.lineCount ?? 0),
-    0,
-  );
-  const finalState = stateHistory.at(-1);
-  const finalLineCount = finalState?.lineCount ?? 0;
-  const createdUnitOrder = fileUnits.find((unit) => unit.type === 'create' || unit.type === 'copy')
-    ?.unitOrder;
-  const deletedUnitOrder = [...fileUnits]
-    .reverse()
-    .find((unit) => unit.type === 'delete')?.unitOrder;
+function deriveNextLineCount(
+  currentLineCount: number,
+  unit: Pick<RepoChangeUnit, 'beforeLineCount' | 'afterLineCount' | 'lineDelta' | 'type'>,
+): number {
+  if (unit.type === 'delete') {
+    return 0;
+  }
 
-  return {
-    ...descriptor,
-    category: classified.category,
-    language: classified.language,
-    maxLineCount,
-    finalLineCount,
-    createdUnitOrder,
-    deletedUnitOrder,
-  };
+  if (unit.afterLineCount !== null) {
+    return Math.max(0, unit.afterLineCount);
+  }
+
+  if (unit.beforeLineCount !== null && unit.lineDelta !== null) {
+    return Math.max(0, unit.beforeLineCount + unit.lineDelta);
+  }
+
+  if (unit.beforeLineCount !== null) {
+    return Math.max(0, unit.beforeLineCount);
+  }
+
+  if (unit.lineDelta !== null) {
+    return Math.max(0, currentLineCount + unit.lineDelta);
+  }
+
+  return Math.max(0, currentLineCount);
 }
 
 function classifyFile(filePath: string): ClassifiedFile {
@@ -805,4 +798,12 @@ function formatCategoryCounts(counts: Map<AnimationFileCategory, number>): strin
 
 function normalizePath(filePath: string): string {
   return filePath.replace(/\\/g, '/');
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(value);
+}
+
+function formatPercent(value: number): string {
+  return `${value.toFixed(1)}%`;
 }

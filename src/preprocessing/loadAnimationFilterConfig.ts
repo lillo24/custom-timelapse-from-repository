@@ -1,8 +1,10 @@
 import type {
   AnimationDisplayConfigFile,
+  AnimationHistoryConfigFile,
   AnimationDisplaySizeNormalization,
   AnimationFilterConfigFile,
   LoadedAnimationDisplayConfig,
+  LoadedAnimationHistoryConfig,
   LoadedAnimationFilterConfig,
   LoadedAnimationDisplaySizeTrackedNodeConfig,
   LoadedAnimationDisplaySizeTrackingStyleConfig,
@@ -22,10 +24,15 @@ export function parseAnimationFilterConfig(
     parsed = JSON.parse(content);
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to read or parse animation filter config ${configPath}: ${error.message}`);
+      throw new Error(
+        `Failed to read or parse animation filter config ${configPath}: ${error.message}`,
+        { cause: error },
+      );
     }
 
-    throw new Error(`Failed to read or parse animation filter config ${configPath}.`);
+    throw new Error(`Failed to read or parse animation filter config ${configPath}.`, {
+      cause: error,
+    });
   }
 
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
@@ -35,12 +42,14 @@ export function parseAnimationFilterConfig(
   const config = parsed as AnimationFilterConfigFile;
   const include = normalizePatternArray(config.include, 'include', configPath);
   const exclude = normalizePatternArray(config.exclude, 'exclude', configPath);
+  const history = normalizeHistoryConfig(config.history, configPath);
   const display = normalizeDisplayConfig(config.display, configPath);
 
   return {
     path: configPath,
     include,
     exclude,
+    history,
     display,
   };
 }
@@ -49,7 +58,44 @@ export function createEmptyAnimationFilterConfig(): LoadedAnimationFilterConfig 
   return {
     include: [],
     exclude: [],
+    history: createDefaultHistoryConfig(),
     display: createDefaultDisplayConfig(),
+  };
+}
+
+function normalizeHistoryConfig(
+  value: AnimationHistoryConfigFile | undefined,
+  configPath: string,
+): LoadedAnimationHistoryConfig {
+  if (value === undefined) {
+    return createDefaultHistoryConfig();
+  }
+
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error(`Animation filter config field "history" must be a JSON object: ${configPath}`);
+  }
+
+  const trimEndProgressPercent = value.trimEndProgressPercent ?? 0;
+
+  if (
+    typeof trimEndProgressPercent !== 'number' ||
+    !Number.isFinite(trimEndProgressPercent) ||
+    trimEndProgressPercent < 0 ||
+    trimEndProgressPercent >= 100
+  ) {
+    throw new Error(
+      `Animation filter config field "history.trimEndProgressPercent" must be a number >= 0 and < 100: ${configPath}`,
+    );
+  }
+
+  return {
+    trimEndProgressPercent,
+  };
+}
+
+function createDefaultHistoryConfig(): LoadedAnimationHistoryConfig {
+  return {
+    trimEndProgressPercent: 0,
   };
 }
 

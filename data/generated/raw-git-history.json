@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "sourceRepo": {
     "path": "C:/Users/leona/Documents/GitHub/thesis-disi-chatbot",
-    "currentHead": "d9b9082ff39d2337c427bfb8cbc1fb2981108701"
+    "currentHead": "59431d0e83fd34a1db275baa36c43f1bd69eec49"
   },
-  "generatedAt": "2026-05-09T09:42:47.355Z",
+  "generatedAt": "2026-05-12T13:22:10.417Z",
   "commits": [
     {
       "order": 0,
@@ -12472,6 +12472,2722 @@
           "status": "modified",
           "addedLines": 97,
           "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 96,
+      "hash": "19b7f37bb905a75af738dcc06f442e9c53f8e10b",
+      "shortHash": "19b7f37",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T11:26:33+02:00",
+      "message": "- Shell for Bugs Page",
+      "parentHashes": [
+        "d9b9082ff39d2337c427bfb8cbc1fb2981108701"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_bugs_01-ui-shell.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 255,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/impl_plan_bugs_02-backend-ambiguity-logging.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 286,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/impl_plan_course_selector_01-ui-mock-selector.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 249,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 18,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 32,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/NavRail.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 30,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelector.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 64,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelectorMock.v1.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 74,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantCourseSelector.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 101,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 28,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 25,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAmbiguityView.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 35,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsFeedbacksView.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 35,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsViewToggle.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 39,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/pages/BugsPage.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 26,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/SpiderConfigRoute.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/pages/SpiderConfigPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/routes/BugsRoute.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 5,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 169,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 97,
+      "hash": "e83d05b706bb22971541532c9c8902526c8a74f0",
+      "shortHash": "e83d05b",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T12:02:23+02:00",
+      "message": "Wiring Backend to Bug UI",
+      "parentHashes": [
+        "19b7f37bb905a75af738dcc06f442e9c53f8e10b"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_course_selector_03-modal-chooser-and-language-switch.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 301,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/__init__.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/ambiguity_log.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 118,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/retrieval_bridge.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 47,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_ambiguity_log.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 87,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_retrieval_bridge.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 120,
+          "deletedLines": 4,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 98,
+      "hash": "84d057c2122340a73382ce510fccd8c4fdebaa16",
+      "shortHash": "84d057c",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T15:26:34+02:00",
+      "message": "When the user submits a question from the assistant UI, include the currently selected course value",
+      "parentHashes": [
+        "e83d05b706bb22971541532c9c8902526c8a74f0"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_course_selector_02-wire-selected-course.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 214,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 142,
+          "deletedLines": 12,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 22,
+          "deletedLines": 11,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantAnswerLanguage.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelector.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 148,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelectorMock.v1.json",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 76,
+          "deletedLines": 66,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantCourseSelector.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 435,
+          "deletedLines": 56,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantLanguageSwitch.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 48,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 306,
+          "deletedLines": 33,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 99,
+      "hash": "6990593b939bf3c32ddfd20fd55129f5674317b6",
+      "shortHash": "6990593",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T17:55:08+02:00",
+      "message": "The next architectural correction is to separate two different language concepts:",
+      "parentHashes": [
+        "84d057c2122340a73382ce510fccd8c4fdebaa16"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_bugs_03-wire-ambiguity-view.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 342,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/impl_plan_course_selector_04-rewrite-language-derivation.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 323,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 9,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api_models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 28,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 14,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/retrieval_bridge.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/assistant_ambiguity.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 105,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/spider_config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 63,
+          "deletedLines": 7,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantAnswerLanguage.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelector.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelectorMock.v1.json",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 10,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 153,
+          "deletedLines": 11,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/api.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 28,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAmbiguityView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 90,
+          "deletedLines": 25,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/queries.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 90,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_ambiguity_api.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 145,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_query_contract.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 267,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 100,
+      "hash": "18e2f8cd5802ffed1325948dc6b83a271a09f081",
+      "shortHash": "18e2f8c",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "80243470+lillo24@users.noreply.github.com",
+      "date": "2026-05-11T17:55:32+02:00",
+      "message": "Merge pull request #15 from lillo24/codex/bugs-03-wire-ambiguity-view",
+      "parentHashes": [
+        "84d057c2122340a73382ce510fccd8c4fdebaa16",
+        "6990593b939bf3c32ddfd20fd55129f5674317b6"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/impl_plan_bugs_03-wire-ambiguity-view.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 342,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/impl_plan_course_selector_04-rewrite-language-derivation.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 323,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 9,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api_models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 28,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 14,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/retrieval_bridge.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/assistant_ambiguity.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 105,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/spider_config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 63,
+          "deletedLines": 7,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantAnswerLanguage.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelector.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelectorMock.v1.json",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 10,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 153,
+          "deletedLines": 11,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/api.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 28,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAmbiguityView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 90,
+          "deletedLines": 25,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/queries.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 90,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_ambiguity_api.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 145,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_query_contract.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 267,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 101,
+      "hash": "d03d862a53836a279b28e317d7f33a178e82cccf",
+      "shortHash": "d03d862",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T18:18:29+02:00",
+      "message": "Final version of prompts probably for now",
+      "parentHashes": [
+        "18e2f8cd5802ffed1325948dc6b83a271a09f081"
+      ],
+      "changedFiles": [
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 102,
+      "hash": "9cebc99dc278a95467b575b2777cfaaf39f3f197",
+      "shortHash": "9cebc99",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T20:12:59+02:00",
+      "message": "More providers available",
+      "parentHashes": [
+        "d03d862a53836a279b28e317d7f33a178e82cccf"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_azure_university_providers.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 632,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 20,
+          "deletedLines": 14,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/__init__.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 24,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 164,
+          "deletedLines": 13,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 23,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/__init__.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_anthropic_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 136,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_anthropic_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 111,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_openai_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 149,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_openai_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 132,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/json_contracts.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 252,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_query.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 40,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_retrieve.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 59,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 211,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_anthropic_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 251,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_anthropic_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 229,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_openai_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 245,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_openai_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 243,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_query.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 101,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 112,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 287,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "poetry.lock",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 45,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "pyproject.toml",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 103,
+      "hash": "f42e54cc6fffe728cd6d56da0a23943741cc0dd7",
+      "shortHash": "f42e54c",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "80243470+lillo24@users.noreply.github.com",
+      "date": "2026-05-11T20:13:19+02:00",
+      "message": "Merge pull request #16 from lillo24/codex/azure-university-providers",
+      "parentHashes": [
+        "d03d862a53836a279b28e317d7f33a178e82cccf",
+        "9cebc99dc278a95467b575b2777cfaaf39f3f197"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_azure_university_providers.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 632,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 20,
+          "deletedLines": 14,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/__init__.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 24,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 164,
+          "deletedLines": 13,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 23,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/__init__.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_anthropic_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 136,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_anthropic_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 111,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_openai_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 149,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/azure_openai_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 132,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/json_contracts.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 252,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_query.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 40,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_retrieve.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 59,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 211,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_anthropic_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 251,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_anthropic_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 229,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_openai_grounded_answer.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 245,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_openai_rewriter.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 243,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_query.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 101,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 112,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 287,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "poetry.lock",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 45,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "pyproject.toml",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 104,
+      "hash": "0f94b95ff68a3c3a8925ab0d32336ab261a9967b",
+      "shortHash": "0f94b95",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T20:43:04+02:00",
+      "message": "Do **not** treat this as a model-strength problem first. The rewrite task is tiny and should be enforceable with Gemini structured output. The likely issue is that the rewrite provider uses a weaker / older schema configuration than the grounded-answer provider.",
+      "parentHashes": [
+        "f42e54cc6fffe728cd6d56da0a23943741cc0dd7"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_fix_gemini_rewrite_json_enforcement.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 228,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/gemini_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 9,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_gemini_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 13,
+          "deletedLines": 5,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 105,
+      "hash": "03f05e7033cc55300601ff68b16162a939a64dbc",
+      "shortHash": "03f05e7",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-11T21:41:02+02:00",
+      "message": "01 provider default fix 02 Bugs storage skeleton 03 capture Assistant Errors",
+      "parentHashes": [
+        "0f94b95ff68a3c3a8925ab0d32336ab261a9967b"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_01_fix_provider_default.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 258,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_02_bugs_page_storage_skeleton.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 393,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_03_capture_assistant_errors.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 526,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/__init__.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 9,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 9,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/gemini_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/openai_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_query.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/run_rewrite_retrieve_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_openai_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_run_rewrite_query.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 50,
+          "deletedLines": 13,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/assistant_bug_logs.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 192,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 58,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 13,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/assistant.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 15,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/assistant_bug_events.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 107,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 45,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 10,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 10,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 36,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 7,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAssistantErrorsView.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 16,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsDebuggingsView.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 16,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsViewToggle.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 27,
+          "deletedLines": 25,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/pages/BugsPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_bug_events_api.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 225,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_error_capture.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 225,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_provider_defaults.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 284,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_backend_app.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 106,
+      "hash": "651331471ce3ce9cb0f083309152977d6862ec7f",
+      "shortHash": "6513314",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T09:16:47+02:00",
+      "message": "Now implement the next narrow step: make the `Assistant Errors` Bugs section actually read and render saved assistant error events.",
+      "parentHashes": [
+        "03f05e7033cc55300601ff68b16162a939a64dbc"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_04_assistant_errors_ui_plus_capture_fix.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 398,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_05_assistant_debug_mode_capture_plus_unexpected_error_fix.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 369,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/assistant.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 217,
+          "deletedLines": 31,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 14,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 39,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAssistantErrorsView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 172,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/queries.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_error_capture.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 65,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 107,
+      "hash": "d3b4ef1beeef99ffa176d4bd359cdd802e2e2230",
+      "shortHash": "d3b4ef1",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T10:00:47+02:00",
+      "message": "- normal `AssistantApiError` failures are captured; - but an unexpected server-side exception inside `/assistant/query` can still return a 500 response without being written to `assistant_errors.jsonl`.",
+      "parentHashes": [
+        "651331471ce3ce9cb0f083309152977d6862ec7f"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_06_debuggings_ui.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 354,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 9,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/assistant_bug_logs.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 177,
+          "deletedLines": 31,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/assistant.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 32,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 54,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 7,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantDebugMode.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 22,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantDebugModeToggle.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 50,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 18,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_assistant_error_capture.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 201,
+          "deletedLines": 8,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 108,
+      "hash": "99f1bac812d56f4500b9538b1b54966884afbab2",
+      "shortHash": "99f1bac",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T10:52:17+02:00",
+      "message": "Beatiful Debugging Page for Assistant Page.",
+      "parentHashes": [
+        "d3b4ef1beeef99ffa176d4bd359cdd802e2e2230"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_07_debuggings_compact_mode_and_csv_export.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 380,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_assistant_language_field_contract.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 239,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_config_fallbacks_01.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 446,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/config/fallback_resources.json",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/gemini_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/gemini_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/json_contracts.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/providers/openai_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/configs/unitn_discovery_multiscope_smoke.toml",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_anthropic_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_anthropic_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_openai_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_azure_openai_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_gemini_grounded_answer.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_gemini_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/tests/test_assistant_runtime_openai_rewriter.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/fallback_resources.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 236,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 148,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 6,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/routes/config.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 47,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 80,
+          "deletedLines": 17,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantCourseSelectorMock.v1.json",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantCourseSelector.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 45,
+          "deletedLines": 15,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 203,
+          "deletedLines": 11,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 15,
+          "deletedLines": 13,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 25,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsDebuggingsView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 400,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/queries.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 23,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/SpiderConfigRoute.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 120,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/api.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 41,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/components/FallbackResourcesPanel.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 607,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/pages/SpiderConfigPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 20,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/queries.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/validation.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 114,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 180,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_fallback_resources_api.py",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 252,
+          "deletedLines": 0,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 109,
+      "hash": "f6817aef3b129f4d2aeeabe79d2e56264a3c7841",
+      "shortHash": "f6817ae",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T11:22:58+02:00",
+      "message": "- better UI for Bugs Page. - Other stuff idk too much stuff",
+      "parentHashes": [
+        "99f1bac812d56f4500b9538b1b54966884afbab2"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_config_fallbacks_02_hardening.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 259,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 149,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 9,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/assistantDebuggingsCsv.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 213,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsDebuggingsView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 280,
+          "deletedLines": 54,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/SpiderConfigRoute.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/components/FallbackResourcesPanel.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 40,
+          "deletedLines": 33,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 101,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 110,
+      "hash": "59431d0e83fd34a1db275baa36c43f1bd69eec49",
+      "shortHash": "59431d0",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T14:27:53+02:00",
+      "message": "Wired Fallbacks to backend (no assistant usage still)",
+      "parentHashes": [
+        "f6817aef3b129f4d2aeeabe79d2e56264a3c7841"
+      ],
+      "changedFiles": [
+        {
+          "path": "tools/ingestion_debug_ui_react_3/backend/models.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 21,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsDebuggingsView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/SpiderConfigRoute.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 121,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/components/FallbackResourcesPanel.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 119,
+          "deletedLines": 65,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/validation.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/tests/backend/test_fallback_resources_api.py",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 61,
+          "deletedLines": 1,
           "isBinary": false
         }
       ]

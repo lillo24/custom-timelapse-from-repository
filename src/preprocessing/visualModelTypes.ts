@@ -1,3 +1,5 @@
+import type { HistoryTrimMetadata } from './historyTrim.ts';
+
 export type VisualFileSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export interface VisualFile {
@@ -42,6 +44,7 @@ export interface VisualTimelineUnit {
 
 export interface RepoVisualModel {
   generatedAt: string;
+  historyTrim?: HistoryTrimMetadata;
   sourceDatasetPath: string;
   files: VisualFile[];
   folders: VisualFolder[];

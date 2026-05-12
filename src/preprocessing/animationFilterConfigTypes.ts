@@ -1,6 +1,7 @@
 export interface AnimationFilterConfigFile {
   include?: string[];
   exclude?: string[];
+  history?: AnimationHistoryConfigFile;
   display?: AnimationDisplayConfigFile;
 }
 
@@ -8,7 +9,16 @@ export interface LoadedAnimationFilterConfig {
   path?: string;
   include: string[];
   exclude: string[];
+  history: LoadedAnimationHistoryConfig;
   display: LoadedAnimationDisplayConfig;
+}
+
+export interface AnimationHistoryConfigFile {
+  trimEndProgressPercent?: number;
+}
+
+export interface LoadedAnimationHistoryConfig {
+  trimEndProgressPercent: number;
 }
 
 export interface AnimationDisplayConfigFile {

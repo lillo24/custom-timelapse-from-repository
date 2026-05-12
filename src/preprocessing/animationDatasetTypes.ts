@@ -1,4 +1,5 @@
 import type { RepoChangeUnit } from './changeUnitTypes.ts';
+import type { HistoryTrimMetadata } from './historyTrim.ts';
 
 export type AnimationFileCategory =
   | 'source'
@@ -40,6 +41,7 @@ export interface ExcludedFile {
 
 export interface RepoAnimationDataset {
   generatedAt: string;
+  historyTrim?: HistoryTrimMetadata;
   sourceFiles: {
     history: string;
     states: string;

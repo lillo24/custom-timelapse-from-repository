@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import type { RepoAnimationDataset } from '../src/preprocessing/animationDatasetTypes.ts';
 import type { RepoChangeUnitsOutput } from '../src/preprocessing/changeUnitTypes.ts';
+import { normalizeHistoryTrimMetadata } from '../src/preprocessing/historyTrim.ts';
 import type { RepoAnimationSummary } from '../src/preprocessing/animationSummaryTypes.ts';
 
 const DEFAULT_DATASET_PATH = 'data/generated/repo-animation-dataset.json';
@@ -44,6 +45,9 @@ async function main(): Promise<void> {
 
     const topCategory = summary.byCategory[0]?.category ?? 'none';
     console.log('Repository animation summary');
+    console.log(
+      `History trim: kept ${formatNumber(summary.historyTrim?.keptUnitCount ?? summary.totals.includedUnits)} / ${formatNumber(summary.historyTrim?.sourceUnitCount ?? summary.totals.includedUnits)} units, dropped ${formatPercent(calculateDroppedPercent(summary.historyTrim))}`,
+    );
     console.log(`Included files: ${summary.totals.includedFiles}`);
     console.log(`Included units: ${summary.totals.includedUnits}`);
     console.log(`Final lines: ${formatNumber(summary.totals.totalFinalLines)}`);
@@ -164,10 +168,14 @@ async function loadJsonFile(filePath: string): Promise<unknown> {
     return JSON.parse(content);
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to read or parse JSON from ${filePath}: ${error.message}`);
+      throw new Error(`Failed to read or parse JSON from ${filePath}: ${error.message}`, {
+        cause: error,
+      });
     }
 
-    throw new Error(`Failed to read or parse JSON from ${filePath}.`);
+    throw new Error(`Failed to read or parse JSON from ${filePath}.`, {
+      cause: error,
+    });
   }
 }
 
@@ -201,9 +209,13 @@ function buildSummary(
   sourceUnits: RepoChangeUnitsOutput,
 ): RepoAnimationSummary {
   const warnings = [...dataset.warnings];
+  const historyTrim = normalizeHistoryTrimMetadata(
+    dataset.historyTrim,
+    sourceUnits.units.length,
+  );
   const includedFilePaths = new Set(dataset.files.map((file) => normalizePath(file.path)));
   const includedUnitCount = dataset.units.length;
-  const excludedUnitCount = sourceUnits.units.length - includedUnitCount;
+  const excludedUnitCount = historyTrim.keptUnitCount - includedUnitCount;
   const totalFinalLines = dataset.files.reduce((sum, file) => sum + file.finalLineCount, 0);
   const totalMaxLines = dataset.files.reduce((sum, file) => sum + file.maxLineCount, 0);
   const excludedReasons = Array.from(groupExcludedReasons(dataset).entries())
@@ -220,7 +232,13 @@ function buildSummary(
     })
     .slice(0, SUMMARY_LIMIT);
 
-  validateDataset(dataset, sourceUnits.units.length, warnings, includedFilePaths);
+  validateDataset(dataset, historyTrim.keptUnitCount, warnings, includedFilePaths);
+
+  if (historyTrim.sourceUnitCount !== sourceUnits.units.length) {
+    warnings.push(
+      `History trim metadata sourceUnitCount (${historyTrim.sourceUnitCount}) does not match source units file (${sourceUnits.units.length}).`,
+    );
+  }
 
   const byCategory = Array.from(groupByCategory(dataset).entries())
     .map(([category, bucket]) => ({
@@ -297,6 +315,7 @@ function buildSummary(
 
   return {
     generatedAt: new Date().toISOString(),
+    historyTrim,
     inputDatasetPath: datasetPath,
     filterConfig: dataset.filters.filterConfig
       ? {
@@ -519,4 +538,18 @@ function normalizePath(filePath: string): string {
 
 function formatNumber(value: number): string {
   return new Intl.NumberFormat('en-US').format(value);
+}
+
+function calculateDroppedPercent(
+  historyTrim: RepoAnimationSummary['historyTrim'],
+): number {
+  if (!historyTrim || historyTrim.sourceUnitCount === 0) {
+    return 0;
+  }
+
+  return (historyTrim.droppedUnitCount / historyTrim.sourceUnitCount) * 100;
+}
+
+function formatPercent(value: number): string {
+  return `${value.toFixed(1)}%`;
 }

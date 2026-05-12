@@ -7,6 +7,7 @@ import type {
   AnimationUnit,
   RepoAnimationDataset,
 } from '../src/preprocessing/animationDatasetTypes.ts';
+import { normalizeHistoryTrimMetadata } from '../src/preprocessing/historyTrim.ts';
 import type {
   RepoVisualModel,
   VisualFile,
@@ -43,6 +44,9 @@ async function main(): Promise<void> {
     await writeFile(publicOutputPath, serializedModel, 'utf8');
 
     console.log('Repository visual model');
+    console.log(
+      `History trim: kept ${formatNumber(visualModel.historyTrim?.keptUnitCount ?? visualModel.summary.unitCount)} / ${formatNumber(visualModel.historyTrim?.sourceUnitCount ?? visualModel.summary.unitCount)} units, dropped ${formatPercent(calculateDroppedPercent(visualModel.historyTrim))}`,
+    );
     console.log(`Files: ${visualModel.summary.fileCount}`);
     console.log(`Folders: ${visualModel.summary.folderCount}`);
     console.log(`Timeline units: ${visualModel.summary.unitCount}`);
@@ -136,10 +140,12 @@ async function loadDataset(datasetPath: string): Promise<RepoAnimationDataset> {
     parsed = JSON.parse(await readFile(datasetPath, 'utf8'));
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to read or parse dataset JSON: ${error.message}`);
+      throw new Error(`Failed to read or parse dataset JSON: ${error.message}`, {
+        cause: error,
+      });
     }
 
-    throw new Error('Failed to read or parse dataset JSON.');
+    throw new Error('Failed to read or parse dataset JSON.', { cause: error });
   }
 
   if (!isRepoAnimationDataset(parsed)) {
@@ -168,6 +174,7 @@ function buildVisualModel(
   dataset: RepoAnimationDataset,
 ): RepoVisualModel {
   const warnings = [...dataset.warnings];
+  const historyTrim = normalizeHistoryTrimMetadata(dataset.historyTrim, dataset.units.length);
   const unitOrdersByPath = new Map<string, number[]>();
 
   for (const unit of dataset.units) {
@@ -199,6 +206,7 @@ function buildVisualModel(
 
   return {
     generatedAt: new Date().toISOString(),
+    historyTrim,
     sourceDatasetPath: datasetPath,
     files,
     folders,
@@ -436,4 +444,22 @@ function normalizePath(filePath: string): string {
 
 function clampNumber(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function calculateDroppedPercent(
+  historyTrim: RepoVisualModel['historyTrim'],
+): number {
+  if (!historyTrim || historyTrim.sourceUnitCount === 0) {
+    return 0;
+  }
+
+  return (historyTrim.droppedUnitCount / historyTrim.sourceUnitCount) * 100;
+}
+
+function formatNumber(value: number): string {
+  return new Intl.NumberFormat('en-US').format(value);
+}
+
+function formatPercent(value: number): string {
+  return `${value.toFixed(1)}%`;
 }

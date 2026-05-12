@@ -19,6 +19,9 @@
     "*.tsbuildinfo"
   ],
   "include": [],
+  "history": {
+    "trimEndProgressPercent": 0
+  },
   "display": {
     "maxDepth": 4,
     "maxVisibleRows": 25,

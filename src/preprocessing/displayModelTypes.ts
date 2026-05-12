@@ -1,3 +1,5 @@
+import type { HistoryTrimMetadata } from './historyTrim.ts';
+
 export type RepoDisplayNodeType =
   | 'folder'
   | 'file'
@@ -71,6 +73,7 @@ export interface RepoDisplayVisibilityFrame {
 
 export interface RepoDisplayModel {
   generatedAt: string;
+  historyTrim?: HistoryTrimMetadata;
   sourceVisualModelPath: string;
   config: {
     path?: string;

@@ -1,3 +1,5 @@
+import type { HistoryTrimMetadata } from './historyTrim.ts';
+
 export interface RepoAnimationSummaryTotals {
   includedFiles: number;
   excludedFiles: number;
@@ -33,6 +35,7 @@ export interface RepoAnimationSummaryMostChangedFile {
 
 export interface RepoAnimationSummary {
   generatedAt: string;
+  historyTrim?: HistoryTrimMetadata;
   inputDatasetPath: string;
   filterConfig?: {
     path?: string;
