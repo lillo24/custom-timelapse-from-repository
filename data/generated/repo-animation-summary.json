@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-12T13:22:14.167Z",
+  "generatedAt": "2026-05-13T09:55:03.906Z",
   "historyTrim": {
     "trimEndProgressPercent": 0,
-    "sourceUnitCount": 18089,
-    "keptUnitCount": 18089,
+    "sourceUnitCount": 18782,
+    "keptUnitCount": 18782,
     "droppedUnitCount": 0,
-    "cutoffUnitOrder": 18088
+    "cutoffUnitOrder": 18781
   },
   "inputDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
   "filterConfig": {
@@ -15,11 +15,11 @@
   },
   "totals": {
     "includedFiles": 140,
-    "excludedFiles": 368,
-    "includedUnits": 6229,
-    "excludedUnits": 11860,
-    "totalFinalLines": 36872,
-    "totalMaxLines": 37552
+    "excludedFiles": 391,
+    "includedUnits": 6236,
+    "excludedUnits": 12546,
+    "totalFinalLines": 36902,
+    "totalMaxLines": 37575
   },
   "byCategory": [
     {
@@ -37,14 +37,14 @@
     {
       "category": "data",
       "fileCount": 8,
-      "unitCount": 121,
-      "finalLines": 328
+      "unitCount": 122,
+      "finalLines": 333
     },
     {
       "category": "docs",
       "fileCount": 6,
-      "unitCount": 135,
-      "finalLines": 363
+      "unitCount": 141,
+      "finalLines": 388
     }
   ],
   "byLanguage": [
@@ -57,14 +57,14 @@
     {
       "language": "TOML",
       "fileCount": 7,
-      "unitCount": 119,
-      "finalLines": 325
+      "unitCount": 120,
+      "finalLines": 330
     },
     {
       "language": "Markdown",
       "fileCount": 6,
-      "unitCount": 135,
-      "finalLines": 363
+      "unitCount": 141,
+      "finalLines": 388
     },
     {
       "language": "JSON",
@@ -262,15 +262,15 @@
   "excludedReasons": [
     {
       "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**",
-      "fileCount": 206
+      "fileCount": 218
     },
     {
       "reason": "config-exclude: History_Implementation_plans/**",
-      "fileCount": 120
+      "fileCount": 128
     },
     {
       "reason": "config-exclude: **/README.md",
-      "fileCount": 36
+      "fileCount": 39
     },
     {
       "reason": "Excluded by pattern \"*.tsbuildinfo\".",
@@ -292,7 +292,7 @@
   "warnings": [
     "change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",
     "file-states: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Renamed file source tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx was not present in current state.",
-    "Excluded units (11860) exceed included units (6229).",
+    "Excluded units (12546) exceed included units (6236).",
     "ingestion_pipeline/tests/test_discovery_spider.py: unusually large filtered file (3177 lines)."
   ]
 }

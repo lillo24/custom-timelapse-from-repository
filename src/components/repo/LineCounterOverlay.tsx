@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { springSoft } from '../../lib/motionPresets'
 import type { RepoDisplayTimelineUnit } from '../../preprocessing/displayModelTypes'
+import type { RepoLineMetricsFrame } from '../../preprocessing/repoLineMetrics'
 
 type ViewportBounds = {
   top: number
@@ -13,17 +14,18 @@ type ViewportBounds = {
   height: number
 }
 
-export type LineCounterOverlayVersion = 1 | 2
+export type LineCounterMetricMode = 'currentLoc' | 'churn'
 
 type LineCounterOverlayProps = {
   timeline: RepoDisplayTimelineUnit[]
+  lineMetricsTimeline?: RepoLineMetricsFrame[]
   activeUnitIndex: number
+  currentLoc: number
   isPlaying: boolean
   playbackSpeed: number
   shouldReduceMotion: boolean
   stageBounds: ViewportBounds | null
-  version: LineCounterOverlayVersion
-  onVersionChange: (version: LineCounterOverlayVersion) => void
+  metricMode: LineCounterMetricMode
 }
 
 type CounterBadgeState = {
@@ -75,7 +77,7 @@ const BADGE_HOLD_END =
   BADGE_TOTAL_DURATION_MS
 const SLOT_DIGIT_STAGGER_MS = 35
 const SLOT_CHARACTER_WIDTH_EM = 0.72
-const SLOT_DIGIT_HEIGHT_CLASS = 'h-[2.5em]'
+const SLOT_DIGIT_HEIGHT_CLASS = 'h-[1.15em]'
 const ZERO_LINE_CHANGE_TOTALS: LineChangeTotals = {
   addedTotal: 0,
   deletedTotal: 0,
@@ -87,29 +89,43 @@ const ZERO_LINE_CHANGE_INCREMENT: LineChangeIncrement = {
 
 export function LineCounterOverlay({
   timeline,
+  lineMetricsTimeline,
   activeUnitIndex,
+  currentLoc,
   isPlaying,
   playbackSpeed,
   shouldReduceMotion,
   stageBounds,
-  version,
-  onVersionChange,
+  metricMode,
 }: LineCounterOverlayProps) {
-  const cumulativeLineTotals = useMemo(() => buildCumulativeLineTotals(timeline), [timeline])
-  const cumulativeLineChangeTotals = useMemo(
+  const fallbackLineChangeTotals = useMemo(
     () => buildCumulativeLineChangeTotals(timeline),
     [timeline],
   )
-  const clampedActiveUnitIndex =
+  const explicitLineMetricsTimeline =
+    Array.isArray(lineMetricsTimeline) && lineMetricsTimeline.length === timeline.length
+      ? lineMetricsTimeline
+      : null
+  const hasExplicitLineMetrics = explicitLineMetricsTimeline !== null
+  const clampedMetricUnitIndex =
     timeline.length > 0 ? clampNumber(activeUnitIndex, 0, timeline.length - 1) : -1
-  const targetTotal =
-    clampedActiveUnitIndex >= 0 ? cumulativeLineTotals[clampedActiveUnitIndex] ?? 0 : 0
-  const clampedTimelinePosition =
-    timeline.length > 0 ? clampNumber(activeUnitIndex, 0, timeline.length) : 0
-  const v2LineTotals =
-    cumulativeLineChangeTotals[clampedTimelinePosition] ?? ZERO_LINE_CHANGE_TOTALS
-  const finalV2LineTotals =
-    cumulativeLineChangeTotals[timeline.length] ?? ZERO_LINE_CHANGE_TOTALS
+  const explicitActiveLineMetricsFrame =
+    explicitLineMetricsTimeline !== null && clampedMetricUnitIndex >= 0
+      ? explicitLineMetricsTimeline[clampedMetricUnitIndex]
+      : undefined
+  const explicitFinalLineMetricsFrame =
+    explicitLineMetricsTimeline !== null && timeline.length > 0
+      ? explicitLineMetricsTimeline[timeline.length - 1]
+      : undefined
+  const fallbackTimelinePosition =
+    timeline.length > 0 ? clampNumber(activeUnitIndex + 1, 0, timeline.length) : 0
+  const targetTotal = Math.max(0, Math.round(currentLoc))
+  const churnLineTotals = explicitActiveLineMetricsFrame
+    ? getLineChangeTotalsFromMetricsFrame(explicitActiveLineMetricsFrame)
+    : fallbackLineChangeTotals[fallbackTimelinePosition] ?? ZERO_LINE_CHANGE_TOTALS
+  const finalChurnLineTotals = explicitFinalLineMetricsFrame
+    ? getLineChangeTotalsFromMetricsFrame(explicitFinalLineMetricsFrame)
+    : fallbackLineChangeTotals[timeline.length] ?? ZERO_LINE_CHANGE_TOTALS
   const initialTimelineTotal = useMemo(() => targetTotal, [timeline])
   const [displayedTotal, setDisplayedTotal] = useState(targetTotal)
   const [badge, setBadge] = useState<CounterBadgeState | null>(null)
@@ -300,139 +316,116 @@ export function LineCounterOverlay({
       style={floatingStyle}
       className="pointer-events-none fixed z-20"
     >
-      <div className="flex flex-col items-center gap-2">
-        <div className="pointer-events-auto inline-flex items-center gap-1 rounded-full border border-white/10 bg-slate-950/82 p-1 shadow-[0_12px_28px_rgba(2,6,23,0.34)] backdrop-blur-md">
-          {[1, 2].map((option) => {
-            const isActive = version === option
+      <div className="relative">
+        {metricMode === 'currentLoc' ? (
+          <motion.div
+            initial={
+              shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={springSoft}
+            className="relative overflow-hidden rounded-[22px] border border-emerald-300/16 bg-[linear-gradient(180deg,rgba(2,6,23,0.88),rgba(2,6,23,0.76))] px-4 py-3 shadow-[0_20px_60px_rgba(2,6,23,0.34),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.18),transparent_42%),linear-gradient(90deg,rgba(45,212,191,0.08),transparent_55%)]" />
 
-            return (
-              <button
-                key={option}
-                type="button"
-                onClick={() => {
-                  onVersionChange(option as LineCounterOverlayVersion)
-                }}
-                aria-pressed={isActive}
-                aria-label={`Switch repo line counter to version ${option}`}
-                className={`min-w-8 rounded-full px-2.5 py-1 font-mono text-[11px] font-semibold tabular-nums transition ${
-                  isActive
-                    ? 'bg-emerald-300/18 text-emerald-50 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]'
-                    : 'text-slate-400 hover:text-slate-100'
-                }`}
-              >
-                {option}
-              </button>
-            )
-          })}
-        </div>
+            <div className="relative flex items-center gap-2.5">
+              <span className="font-mono text-[13px] text-emerald-100/55">[</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
+                Current LOC
+              </span>
+              <span className="grid min-w-[6.25rem] justify-items-end">
+                <AnimatePresence initial={false} mode="popLayout">
+                  <motion.span
+                    key={displayedTotal}
+                    initial={
+                      shouldReduceMotion
+                        ? { opacity: 0 }
+                        : { opacity: 0.7, y: 5, scale: 0.96 }
+                    }
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={
+                      shouldReduceMotion
+                        ? { opacity: 0 }
+                        : { opacity: 0, y: -4, scale: 1.03 }
+                    }
+                    transition={{
+                      ...springSoft,
+                      opacity: { duration: shouldReduceMotion ? 0.12 : 0.18 },
+                    }}
+                    className="font-mono text-[20px] font-semibold tracking-[-0.05em] text-emerald-50 tabular-nums"
+                  >
+                    {formatNumber(displayedTotal)}
+                  </motion.span>
+                </AnimatePresence>
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.24em] text-emerald-100/55">
+                LOC
+              </span>
+              <span className="font-mono text-[13px] text-emerald-100/55">]</span>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={
+              shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }
+            }
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={springSoft}
+            className="relative min-w-[15rem] overflow-hidden rounded-[22px] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(2,6,23,0.8))] px-4 py-3 shadow-[0_20px_60px_rgba(2,6,23,0.34),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-md"
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(148,163,184,0.14),transparent_46%),linear-gradient(90deg,rgba(148,163,184,0.08),transparent_55%)]" />
 
-        <div className="relative">
-          {version === 1 ? (
+            <ChurnCounter
+              addedTotal={churnLineTotals.addedTotal}
+              deletedTotal={churnLineTotals.deletedTotal}
+              maxAddedTotal={finalChurnLineTotals.addedTotal}
+              maxDeletedTotal={finalChurnLineTotals.deletedTotal}
+              hasExplicitMetrics={hasExplicitLineMetrics}
+              shouldReduceMotion={shouldReduceMotion}
+            />
+          </motion.div>
+        )}
+
+        <AnimatePresence initial={false}>
+          {metricMode === 'currentLoc' && badge && badge.delta !== 0 ? (
             <motion.div
+              key={badge.id}
               initial={
-                shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }
+                shouldReduceMotion
+                  ? { opacity: 0, scale: 0.92 }
+                  : { opacity: 0, scale: 0.88, x: 0 }
               }
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={springSoft}
-              className="relative overflow-hidden rounded-[22px] border border-emerald-300/16 bg-[linear-gradient(180deg,rgba(2,6,23,0.88),rgba(2,6,23,0.76))] px-4 py-3 shadow-[0_20px_60px_rgba(2,6,23,0.34),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md"
-            >
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(52,211,153,0.18),transparent_42%),linear-gradient(90deg,rgba(45,212,191,0.08),transparent_55%)]" />
-
-              <div className="relative flex items-center gap-2.5">
-                <span className="font-mono text-[13px] text-emerald-100/55">[</span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
-                  Lines
-                </span>
-                <span className="grid min-w-[6.25rem] justify-items-end">
-                  <AnimatePresence initial={false} mode="popLayout">
-                    <motion.span
-                      key={displayedTotal}
-                      initial={
-                        shouldReduceMotion
-                          ? { opacity: 0 }
-                          : { opacity: 0.7, y: 5, scale: 0.96 }
-                      }
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={
-                        shouldReduceMotion
-                          ? { opacity: 0 }
-                          : { opacity: 0, y: -4, scale: 1.03 }
-                      }
-                      transition={{
-                        ...springSoft,
-                        opacity: { duration: shouldReduceMotion ? 0.12 : 0.18 },
-                      }}
-                      className="font-mono text-[20px] font-semibold tracking-[-0.05em] text-emerald-50 tabular-nums"
-                    >
-                      {formatNumber(displayedTotal)}
-                    </motion.span>
-                  </AnimatePresence>
-                </span>
-                <span className="font-mono text-[13px] text-emerald-100/55">]</span>
-              </div>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={
-                shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }
+              animate={
+                shouldReduceMotion
+                  ? {
+                      opacity: [0, 1, 1, 0],
+                      scale: [0.92, 1, 1, 0.94],
+                    }
+                  : {
+                      opacity: [0, 1, 1, 0],
+                      scale: [0.88, 1, 1, 0.82],
+                      x: [0, 0, -96, -132],
+                    }
               }
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={springSoft}
-              className="relative min-w-[15rem] overflow-hidden rounded-[22px] border border-slate-700/70 bg-[linear-gradient(180deg,rgba(2,6,23,0.9),rgba(2,6,23,0.8))] px-4 py-3 shadow-[0_20px_60px_rgba(2,6,23,0.34),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-md"
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: BADGE_TOTAL_DURATION_MS / 1000,
+                times: [0, BADGE_APPEAR_END, BADGE_HOLD_END, 1],
+                ease: 'easeOut',
+              }}
+              className={`pointer-events-none absolute bottom-0 left-[calc(100%+0.8rem)] top-0 flex items-center rounded-full border px-3 py-1.5 font-mono text-[16px] font-semibold tabular-nums shadow-[0_16px_32px_rgba(2,6,23,0.28)] ${
+                badge.delta > 0
+                  ? 'border-emerald-300/24 bg-emerald-300/14 text-emerald-50'
+                  : 'border-rose-300/24 bg-rose-300/14 text-rose-50'
+              }`}
+              style={{
+                transformOrigin: 'right center',
+              }}
             >
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(148,163,184,0.14),transparent_46%),linear-gradient(90deg,rgba(148,163,184,0.08),transparent_55%)]" />
-
-              <LineCounterV2
-                addedTotal={v2LineTotals.addedTotal}
-                deletedTotal={v2LineTotals.deletedTotal}
-                maxAddedTotal={finalV2LineTotals.addedTotal}
-                maxDeletedTotal={finalV2LineTotals.deletedTotal}
-                shouldReduceMotion={shouldReduceMotion}
-              />
+              {formatSignedNumber(badge.delta)}
             </motion.div>
-          )}
-
-          <AnimatePresence initial={false}>
-            {version === 1 && badge && badge.delta !== 0 ? (
-              <motion.div
-                key={badge.id}
-                initial={
-                  shouldReduceMotion
-                    ? { opacity: 0, scale: 0.92 }
-                    : { opacity: 0, scale: 0.88, x: 0 }
-                }
-                animate={
-                  shouldReduceMotion
-                    ? {
-                        opacity: [0, 1, 1, 0],
-                        scale: [0.92, 1, 1, 0.94],
-                      }
-                    : {
-                        opacity: [0, 1, 1, 0],
-                        scale: [0.88, 1, 1, 0.82],
-                        x: [0, 0, -96, -132],
-                      }
-                }
-                exit={{ opacity: 0 }}
-                transition={{
-                  duration: BADGE_TOTAL_DURATION_MS / 1000,
-                  times: [0, BADGE_APPEAR_END, BADGE_HOLD_END, 1],
-                  ease: 'easeOut',
-                }}
-                className={`pointer-events-none absolute bottom-0 left-[calc(100%+0.8rem)] top-0 flex items-center rounded-full border px-3 py-1.5 font-mono text-[16px] font-semibold tabular-nums shadow-[0_16px_32px_rgba(2,6,23,0.28)] ${
-                  badge.delta > 0
-                    ? 'border-emerald-300/24 bg-emerald-300/14 text-emerald-50'
-                    : 'border-rose-300/24 bg-rose-300/14 text-rose-50'
-                }`}
-                style={{
-                  transformOrigin: 'right center',
-                }}
-              >
-                {formatSignedNumber(badge.delta)}
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
-        </div>
+          ) : null}
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -444,27 +437,36 @@ export function LineCounterOverlay({
   return createPortal(content, document.body)
 }
 
-function LineCounterV2({
+function ChurnCounter({
   addedTotal,
   deletedTotal,
   maxAddedTotal,
   maxDeletedTotal,
+  hasExplicitMetrics,
   shouldReduceMotion,
 }: {
   addedTotal: number
   deletedTotal: number
   maxAddedTotal: number
   maxDeletedTotal: number
+  hasExplicitMetrics: boolean
   shouldReduceMotion: boolean
 }) {
   return (
     <div className="relative font-mono tabular-nums">
-      <div className="mb-2 text-center text-[10px] uppercase tracking-[0.28em] text-slate-400">
-        Lines
+      <div
+        title={
+          hasExplicitMetrics
+            ? "Counts follow the animation dataset filters, so they may differ from GitHub's full-repo summary."
+            : 'Legacy snapshot: churn falls back to the available display-timeline data.'
+        }
+        className="mb-2 text-center text-[10px] uppercase tracking-[0.28em] text-slate-400"
+      >
+        Filtered churn
       </div>
 
       <div className="flex items-center justify-center gap-4">
-        <LineCounterV2Row
+        <ChurnCounterRow
           sign="+"
           value={addedTotal}
           maxValue={maxAddedTotal}
@@ -473,7 +475,8 @@ function LineCounterV2({
           className="text-emerald-300 drop-shadow-[0_0_14px_rgba(110,231,183,0.42)]"
           shouldReduceMotion={shouldReduceMotion}
         />
-        <LineCounterV2Row
+        <span className="text-[14px] text-slate-600">/</span>
+        <ChurnCounterRow
           sign="-"
           value={deletedTotal}
           maxValue={maxDeletedTotal}
@@ -487,7 +490,7 @@ function LineCounterV2({
   )
 }
 
-function LineCounterV2Row({
+function ChurnCounterRow({
   sign,
   value,
   maxValue,
@@ -615,15 +618,6 @@ function SlotDigit({
   )
 }
 
-function buildCumulativeLineTotals(timeline: RepoDisplayTimelineUnit[]) {
-  let runningTotal = 0
-
-  return timeline.map((unit) => {
-    runningTotal = Math.max(0, runningTotal + getTimelineUnitNetLineDelta(unit))
-    return runningTotal
-  })
-}
-
 function buildCumulativeLineChangeTotals(
   timeline: RepoDisplayTimelineUnit[],
 ): LineChangeTotals[] {
@@ -642,6 +636,19 @@ function buildCumulativeLineChangeTotals(
   }
 
   return cumulativeTotals
+}
+
+function getLineChangeTotalsFromMetricsFrame(
+  lineMetricsFrame: RepoLineMetricsFrame | undefined,
+): LineChangeTotals {
+  if (!lineMetricsFrame) {
+    return ZERO_LINE_CHANGE_TOTALS
+  }
+
+  return {
+    addedTotal: Math.max(0, Math.round(lineMetricsFrame.addedTotal)),
+    deletedTotal: Math.max(0, Math.round(lineMetricsFrame.deletedTotal)),
+  }
 }
 
 function buildTimelineLineChangeIncrements(

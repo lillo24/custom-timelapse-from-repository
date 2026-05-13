@@ -12,7 +12,7 @@ import {
 import { createPortal } from 'react-dom'
 import {
   LineCounterOverlay,
-  type LineCounterOverlayVersion,
+  type LineCounterMetricMode,
 } from '../components/repo/LineCounterOverlay'
 import { PresentationStage } from '../components/presentation/PresentationStage'
 import {
@@ -34,6 +34,11 @@ import type {
   RepoDisplayTimelineUnit,
   RepoDisplayVisibilityFrame,
 } from '../preprocessing/displayModelTypes'
+import {
+  applyTimelineUnitToSourceFileState,
+  sumCurrentLocFromSourceFileStates,
+  type RepoSourceFileReplayState,
+} from '../preprocessing/repoLineMetrics'
 
 type RepoVisualSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
 type PlaybackSpeed = (typeof PLAYBACK_SPEED_OPTIONS)[number]
@@ -47,11 +52,6 @@ type ViewportBounds = {
   left: number
   width: number
   height: number
-}
-
-type SourceFileReplayState = {
-  exists: boolean
-  currentLineCount: number
 }
 
 type CurrentRepoNodeState = {
@@ -98,12 +98,17 @@ type RepoExplorerTuningState = {
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle
   fireTuning: RepoExplorerFireTuningState
   maxVisualPercentByNodePath: Record<string, number>
+  showExplorerClusters: boolean
+  lineMetricMode: LineCounterMetricMode
 }
 
 type RepoExplorerTuningStoragePayload = {
   sizeTrackingStyle?: Partial<RepoDisplaySizeTrackingStyle>
   fireTuning?: Partial<RepoExplorerFireTuningState>
   sizeTrackedNodes?: Record<string, { maxVisualPercent?: number }>
+  showExplorerClusters?: boolean
+  lineMetricMode?: LineCounterMetricMode
+  lineCounterVersion?: 1 | 2
 }
 
 type TrackedRepoNodeTuningControl = {
@@ -138,6 +143,7 @@ type RepoProgressState = {
   activeUnit: RepoDisplayTimelineUnit | null
   visibleNodes: VisibleRepoNode[]
   recentTouchedCount: number
+  currentLoc: number
 }
 
 type RepoExplorerFireDebugState = {
@@ -166,7 +172,7 @@ type ExplorerRow = {
 type RepoProgressCache = {
   model: RepoDisplayModel
   activeUnitIndex: number
-  sourceFileStateById: Map<string, SourceFileReplayState>
+  sourceFileStateById: Map<string, RepoSourceFileReplayState>
 }
 
 const PLAYBACK_DURATION_OPTIONS = [15, 30, 45, 60] as const
@@ -390,8 +396,6 @@ function RepoExplorerCanvas({
     useState<PlaybackDurationSeconds>(30)
   const [playbackSpeed, setPlaybackSpeed] = useState<PlaybackSpeed>(1)
   const [isSlowMotionEnabled, setIsSlowMotionEnabled] = useState(false)
-  const [lineCounterVersion, setLineCounterVersion] =
-    useState<LineCounterOverlayVersion>(1)
   const [tuningState, setTuningState] = useState<RepoExplorerTuningState | null>(
     null,
   )
@@ -421,8 +425,7 @@ function RepoExplorerCanvas({
       ? remainingUnitCount / playbackUnitsPerSecond
       : 0
   const isRestFrame = hasTimeline && clampedActiveUnitIndex === maxPlaybackIndex
-  const canTuneLiveScene =
-    enableTuningPanel && trackedNodeControls.length > 0
+  const canTuneLiveScene = enableTuningPanel
   const effectiveTuningState = canTuneLiveScene
     ? (tuningState ?? defaultTuningState)
     : defaultTuningState
@@ -430,6 +433,8 @@ function RepoExplorerCanvas({
   const effectiveFireTuning = effectiveTuningState.fireTuning
   const effectiveMaxVisualPercentByNodePath =
     effectiveTuningState.maxVisualPercentByNodePath
+  const showExplorerClusters = effectiveTuningState.showExplorerClusters
+  const lineMetricMode = effectiveTuningState.lineMetricMode
 
   useEffect(() => {
     if (!canTuneLiveScene) {
@@ -639,6 +644,36 @@ function RepoExplorerCanvas({
     })
   }
 
+  function updateShowExplorerClusters(nextValue: boolean) {
+    if (!canTuneLiveScene) {
+      return
+    }
+
+    setTuningState((current) => {
+      const baseState = current ?? defaultTuningState
+
+      return {
+        ...baseState,
+        showExplorerClusters: nextValue,
+      }
+    })
+  }
+
+  function updateLineMetricMode(nextValue: LineCounterMetricMode) {
+    if (!canTuneLiveScene) {
+      return
+    }
+
+    setTuningState((current) => {
+      const baseState = current ?? defaultTuningState
+
+      return {
+        ...baseState,
+        lineMetricMode: nextValue,
+      }
+    })
+  }
+
   async function handleCopyTuningConfig() {
     const didCopy = await copyTextToClipboard(
       JSON.stringify(
@@ -716,13 +751,14 @@ function RepoExplorerCanvas({
     <>
       <LineCounterOverlay
         timeline={model.timeline}
+        lineMetricsTimeline={model.lineMetricsTimeline}
         activeUnitIndex={clampedActiveUnitIndex}
+        currentLoc={progressState.currentLoc}
         isPlaying={isPlaying}
         playbackSpeed={effectivePlaybackSpeed}
         shouldReduceMotion={shouldReduceMotion}
         stageBounds={stageBounds}
-        version={lineCounterVersion}
-        onVersionChange={setLineCounterVersion}
+        metricMode={lineMetricMode}
       />
 
       <FloatingPlaybackControls
@@ -787,7 +823,11 @@ function RepoExplorerCanvas({
           onUpdateStyleValue={updateSizeTrackingStyleValue}
           onUpdateFireTuningValue={updateFireTuningValue}
           onUpdateTrackedNodePercent={updateTrackedNodeMaxVisualPercent}
+          showExplorerClusters={showExplorerClusters}
+          lineMetricMode={lineMetricMode}
           onSetBaseFontToNormal={handleSetBaseFontToNormal}
+          onUpdateShowExplorerClusters={updateShowExplorerClusters}
+          onUpdateLineMetricMode={updateLineMetricMode}
           onCopyConfig={handleCopyTuningConfig}
           onResetTuning={handleResetTuning}
         />
@@ -826,78 +866,85 @@ function RepoExplorerCanvas({
           className="min-h-0"
         >
           <div className="flex h-full flex-col gap-4">
-            <div
-              className={`grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 2xl:grid-cols-2 ${SUBTLE_SCROLLBAR_CLASS}`}
-            >
-              <AnimatePresence initial={false}>
-                {featuredSections.length > 0 ? (
-                  featuredSections.map((section, index) => (
-                    <motion.article
-                      key={section.id}
-                      layout
+            {showExplorerClusters ? (
+              <div
+                className={`grid min-h-0 flex-1 grid-cols-1 gap-4 overflow-y-auto pr-1 2xl:grid-cols-2 ${SUBTLE_SCROLLBAR_CLASS}`}
+              >
+                <AnimatePresence initial={false}>
+                  {featuredSections.length > 0 ? (
+                    featuredSections.map((section, index) => (
+                      <motion.article
+                        key={section.id}
+                        layout
+                        initial={sectionPresenceMotion.initial}
+                        animate={sectionPresenceMotion.animate}
+                        exit={sectionPresenceMotion.exit}
+                        transition={{
+                          layout: springSoft,
+                          opacity: { duration: 0.2 },
+                          y: { duration: 0.22 },
+                          scale: springSoft,
+                          delay: getStaggerDelay(index, 0.02),
+                        }}
+                        className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-4"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
+                                {section.kindLabel}
+                              </span>
+                              <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-slate-400">
+                                {formatNumber(section.visibleNodeCount)} nodes
+                              </span>
+                            </div>
+                            <h2 className="mt-2 truncate font-display text-xl tracking-[-0.04em] text-white">
+                              {section.title}
+                            </h2>
+                            <p className="mt-1 text-[12px] leading-5 text-slate-400">
+                              {formatNumber(section.nodes.length)} visible cards from the simplified
+                              display tree
+                            </p>
+                          </div>
+
+                          <span className="rounded-full border border-teal-400/20 bg-teal-400/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-teal-100">
+                            {section.totalVisualWeight.toFixed(1)} weight
+                          </span>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-4 gap-3 xl:grid-cols-5">
+                          <AnimatePresence initial={false} mode="popLayout">
+                            {section.nodes.map((entry) => (
+                              <RepoDisplayCard
+                                key={entry.node.id}
+                                entry={entry}
+                                sectionPath={section.path}
+                                shouldReduceMotion={shouldReduceMotion}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      </motion.article>
+                    ))
+                  ) : (
+                    <motion.div
+                      key="empty-repo-state"
                       initial={sectionPresenceMotion.initial}
                       animate={sectionPresenceMotion.animate}
                       exit={sectionPresenceMotion.exit}
-                      transition={{
-                        layout: springSoft,
-                        opacity: { duration: 0.2 },
-                        y: { duration: 0.22 },
-                        scale: springSoft,
-                        delay: getStaggerDelay(index, 0.02),
-                      }}
-                      className="rounded-[24px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.02))] p-4"
+                      className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] p-6 text-sm leading-6 text-slate-400"
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] uppercase tracking-[0.26em] text-slate-500">
-                              {section.kindLabel}
-                            </span>
-                            <span className="rounded-full border border-white/10 px-2 py-0.5 font-mono text-[10px] text-slate-400">
-                              {formatNumber(section.visibleNodeCount)} nodes
-                            </span>
-                          </div>
-                          <h2 className="mt-2 truncate font-display text-xl tracking-[-0.04em] text-white">
-                            {section.title}
-                          </h2>
-                          <p className="mt-1 text-[12px] leading-5 text-slate-400">
-                            {formatNumber(section.nodes.length)} visible cards from the simplified
-                            display tree
-                          </p>
-                        </div>
-
-                        <span className="rounded-full border border-teal-400/20 bg-teal-400/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.24em] text-teal-100">
-                          {section.totalVisualWeight.toFixed(1)} weight
-                        </span>
-                      </div>
-
-                      <div className="mt-4 grid grid-cols-4 gap-3 xl:grid-cols-5">
-                        <AnimatePresence initial={false} mode="popLayout">
-                          {section.nodes.map((entry) => (
-                            <RepoDisplayCard
-                              key={entry.node.id}
-                              entry={entry}
-                              sectionPath={section.path}
-                              shouldReduceMotion={shouldReduceMotion}
-                            />
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </motion.article>
-                  ))
-                ) : (
-                  <motion.div
-                    key="empty-repo-state"
-                    initial={sectionPresenceMotion.initial}
-                    animate={sectionPresenceMotion.animate}
-                    exit={sectionPresenceMotion.exit}
-                    className="rounded-[24px] border border-dashed border-white/10 bg-white/[0.02] p-6 text-sm leading-6 text-slate-400"
-                  >
-                    No repository nodes are visible at the selected position yet.
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                      No repository nodes are visible at the selected position yet.
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div
+                aria-hidden="true"
+                className="min-h-0 flex-1"
+              />
+            )}
           </div>
         </motion.section>
       </div>
@@ -1506,7 +1553,11 @@ function FloatingRepoTuningPanel({
   onUpdateStyleValue,
   onUpdateFireTuningValue,
   onUpdateTrackedNodePercent,
+  showExplorerClusters,
+  lineMetricMode,
   onSetBaseFontToNormal,
+  onUpdateShowExplorerClusters,
+  onUpdateLineMetricMode,
   onCopyConfig,
   onResetTuning,
 }: {
@@ -1524,7 +1575,11 @@ function FloatingRepoTuningPanel({
     nextValue: number,
   ) => void
   onUpdateTrackedNodePercent: (path: string, nextValue: number) => void
+  showExplorerClusters: boolean
+  lineMetricMode: LineCounterMetricMode
   onSetBaseFontToNormal: () => void
+  onUpdateShowExplorerClusters: (nextValue: boolean) => void
+  onUpdateLineMetricMode: (nextValue: LineCounterMetricMode) => void
   onCopyConfig: () => Promise<void>
   onResetTuning: () => void
 }) {
@@ -1573,6 +1628,50 @@ function FloatingRepoTuningPanel({
                 </div>
 
                 <div className="mt-4 space-y-4">
+                  <section className="space-y-3">
+                    <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                      View
+                    </div>
+                    <TuningChoiceControl
+                      label="Explorer clusters"
+                      options={[
+                        {
+                          label: 'Show',
+                          isActive: showExplorerClusters,
+                          onClick: () => {
+                            onUpdateShowExplorerClusters(true)
+                          },
+                        },
+                        {
+                          label: 'Hide',
+                          isActive: !showExplorerClusters,
+                          onClick: () => {
+                            onUpdateShowExplorerClusters(false)
+                          },
+                        },
+                      ]}
+                    />
+                    <TuningChoiceControl
+                      label="Line metric"
+                      options={[
+                        {
+                          label: 'Current LOC',
+                          isActive: lineMetricMode === 'currentLoc',
+                          onClick: () => {
+                            onUpdateLineMetricMode('currentLoc')
+                          },
+                        },
+                        {
+                          label: 'Churn (+/-)',
+                          isActive: lineMetricMode === 'churn',
+                          onClick: () => {
+                            onUpdateLineMetricMode('churn')
+                          },
+                        },
+                      ]}
+                    />
+                  </section>
+
                   <section className="space-y-3">
                     <div className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
                       Global style
@@ -1830,6 +1929,43 @@ function TuningRangeControl({
         className="mt-1.5 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-800 accent-teal-300"
       />
     </label>
+  )
+}
+
+function TuningChoiceControl({
+  label,
+  options,
+}: {
+  label: string
+  options: Array<{
+    label: string
+    isActive: boolean
+    onClick: () => void
+  }>
+}) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <span className="min-w-0 text-[12px] leading-5 text-slate-200">
+        {label}
+      </span>
+      <div className="inline-flex rounded-full border border-white/10 bg-white/[0.03] p-1">
+        {options.map((option) => (
+          <button
+            key={option.label}
+            type="button"
+            onClick={option.onClick}
+            aria-pressed={option.isActive}
+            className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] transition ${
+              option.isActive
+                ? 'bg-teal-300/16 text-teal-50'
+                : 'text-slate-400 hover:text-slate-100'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -2392,7 +2528,7 @@ function getRepoProgressCache(
 }
 
 function createInitialSourceFileStateById(model: RepoDisplayModel) {
-  const sourceFileStateById = new Map<string, SourceFileReplayState>()
+  const sourceFileStateById = new Map<string, RepoSourceFileReplayState>()
 
   for (const node of model.nodes) {
     for (const sourceFileId of node.sourceFileIds) {
@@ -2411,7 +2547,7 @@ function createInitialSourceFileStateById(model: RepoDisplayModel) {
 function buildRepoProgressState(
   model: RepoDisplayModel,
   activeUnitIndex: number,
-  sourceFileStateById: Map<string, SourceFileReplayState>,
+  sourceFileStateById: Map<string, RepoSourceFileReplayState>,
   sizeTrackingStyle: RepoDisplaySizeTrackingStyle,
   fireTuning: RepoExplorerFireTuningState,
   maxVisualPercentByNodePath: Record<string, number>,
@@ -2434,6 +2570,7 @@ function buildRepoProgressState(
         )
         .filter((entry): entry is VisibleRepoNode => entry !== null),
       recentTouchedCount: 0,
+      currentLoc: model.lineMetricsTimeline?.at(-1)?.currentLoc ?? 0,
     }
   }
 
@@ -2446,6 +2583,7 @@ function buildRepoProgressState(
       activeUnit: null,
       visibleNodes: [],
       recentTouchedCount: 0,
+      currentLoc: 0,
     }
   }
 
@@ -2507,6 +2645,7 @@ function buildRepoProgressState(
   const visibleNodeIds = visibilityFrame
     ? visibilityFrame.visibleNodeIds
     : model.nodes.map((node) => node.id)
+  const currentLoc = sumCurrentLocFromSourceFileStates(sourceFileStateById.values())
 
   return {
     activeUnit,
@@ -2533,6 +2672,7 @@ function buildRepoProgressState(
       })
       .filter((entry): entry is VisibleRepoNode => entry !== null),
     recentTouchedCount: recentActivityByDisplayNodeId.size,
+    currentLoc,
   }
 }
 
@@ -2596,7 +2736,7 @@ function getRepoDisplayNodeCountOverrides(
 
 function createVisibleRepoNode(
   node: RepoDisplayNode,
-  sourceFileStateById: Map<string, SourceFileReplayState>,
+  sourceFileStateById: Map<string, RepoSourceFileReplayState>,
   highlightStrength: number,
   recentFireHits: number,
   visualWeightReference: number,
@@ -2801,41 +2941,10 @@ function deriveRepoNodeActivityFireState(
   }
 }
 
-function applyTimelineUnitToSourceFileState(
-  fileState: SourceFileReplayState,
-  unit: RepoDisplayTimelineUnit,
-): SourceFileReplayState {
-  if (unit.type === 'delete') {
-    return {
-      ...fileState,
-      exists: false,
-      currentLineCount: 0,
-    }
-  }
-
-  let nextLineCount = fileState.currentLineCount
-
-  if (unit.afterLineCount !== null) {
-    nextLineCount = Math.max(0, unit.afterLineCount)
-  } else if (unit.beforeLineCount !== null) {
-    nextLineCount = Math.max(0, unit.beforeLineCount + unit.lineDelta)
-  } else if (unit.type === 'create' || unit.type === 'copy') {
-    nextLineCount = Math.max(0, unit.lineDelta)
-  } else {
-    nextLineCount = Math.max(0, fileState.currentLineCount + unit.lineDelta)
-  }
-
-  return {
-    ...fileState,
-    exists: true,
-    currentLineCount: nextLineCount,
-  }
-}
-
 function revertTimelineUnitFromSourceFileState(
-  fileState: SourceFileReplayState,
+  fileState: RepoSourceFileReplayState,
   unit: RepoDisplayTimelineUnit,
-): SourceFileReplayState {
+): RepoSourceFileReplayState {
   if (unit.type === 'create' || unit.type === 'copy') {
     return {
       ...fileState,
@@ -3268,6 +3377,8 @@ function createDefaultRepoExplorerTuningState(
         clampTrackedNodeVisualPercent(node.defaultMaxVisualPercent),
       ]),
     ),
+    showExplorerClusters: true,
+    lineMetricMode: 'currentLoc',
   }
 }
 
@@ -3353,8 +3464,16 @@ function loadRepoExplorerTuningState(
             payload.sizeTrackedNodes?.[node.path]?.maxVisualPercent ??
               defaultState.maxVisualPercentByNodePath[node.path] ??
               node.defaultMaxVisualPercent,
-          ),
+            ),
         ]),
+      ),
+      showExplorerClusters:
+        typeof payload.showExplorerClusters === 'boolean'
+          ? payload.showExplorerClusters
+          : defaultState.showExplorerClusters,
+      lineMetricMode: normalizeLoadedLineMetricMode(
+        payload.lineMetricMode ?? payload.lineCounterVersion,
+        defaultState.lineMetricMode,
       ),
     }
   } catch {
@@ -3376,6 +3495,8 @@ function serializeRepoExplorerTuningState(
         ],
       ),
     ),
+    showExplorerClusters: tuningState.showExplorerClusters,
+    lineMetricMode: tuningState.lineMetricMode,
   }
 }
 
@@ -3468,6 +3589,25 @@ function normalizeLoadedFireTuningValue(
   return typeof rawValue === 'number' && Number.isFinite(rawValue)
     ? clampFireTuningValue(key, rawValue)
     : defaultValue
+}
+
+function normalizeLoadedLineMetricMode(
+  rawValue: LineCounterMetricMode | 1 | 2 | undefined,
+  defaultValue: LineCounterMetricMode,
+) {
+  if (rawValue === 'currentLoc' || rawValue === 'churn') {
+    return rawValue
+  }
+
+  if (rawValue === 1) {
+    return 'currentLoc'
+  }
+
+  if (rawValue === 2) {
+    return 'churn'
+  }
+
+  return defaultValue
 }
 
 function clampSizeTrackingStyleValue(

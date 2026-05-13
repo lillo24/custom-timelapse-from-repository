@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-12T13:22:15.041Z",
+  "generatedAt": "2026-05-13T09:55:04.622Z",
   "historyTrim": {
     "trimEndProgressPercent": 0,
-    "sourceUnitCount": 18089,
-    "keptUnitCount": 18089,
+    "sourceUnitCount": 18782,
+    "keptUnitCount": 18782,
     "droppedUnitCount": 0,
-    "cutoffUnitOrder": 18088
+    "cutoffUnitOrder": 18781
   },
   "sourceDatasetPath": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\repo-animation-dataset.json",
   "files": [
@@ -167,12 +167,12 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "finalLineCount": 25,
-      "maxLineCount": 25,
-      "visualSize": "xs",
-      "visualWeight": 0.19611613513818404,
+      "finalLineCount": 31,
+      "maxLineCount": 31,
+      "visualSize": "sm",
+      "visualWeight": 0.21838568563966754,
       "firstUnitOrder": 11031,
-      "lastUnitOrder": 17594
+      "lastUnitOrder": 18382
     },
     {
       "id": "file:assistant_runtime/prompts/rewrite_default.md",
@@ -182,12 +182,12 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "finalLineCount": 15,
-      "maxLineCount": 22,
-      "visualSize": "xs",
-      "visualWeight": 0.18397324220155997,
+      "finalLineCount": 34,
+      "maxLineCount": 34,
+      "visualSize": "sm",
+      "visualWeight": 0.22870874995874624,
       "firstUnitOrder": 7148,
-      "lastUnitOrder": 17596
+      "lastUnitOrder": 18185
     },
     {
       "id": "file:assistant_runtime/providers/__init__.py",
@@ -512,12 +512,12 @@
       "extension": "toml",
       "category": "data",
       "language": "TOML",
-      "finalLineCount": 120,
-      "maxLineCount": 120,
+      "finalLineCount": 125,
+      "maxLineCount": 125,
       "visualSize": "md",
-      "visualWeight": 0.4296689244236597,
+      "visualWeight": 0.4385290096535146,
       "firstUnitOrder": 1337,
-      "lastUnitOrder": 17606
+      "lastUnitOrder": 18549
     },
     {
       "id": "file:ingestion_pipeline/configs/unitn_discovery_smoke.toml",
@@ -2118,7 +2118,7 @@
       "depth": 0,
       "parentPath": null,
       "fileCount": 140,
-      "totalFinalLines": 36872,
+      "totalFinalLines": 36902,
       "categories": [
         "data",
         "docs",
@@ -2133,7 +2133,7 @@
       "depth": 1,
       "parentPath": "",
       "fileCount": 29,
-      "totalFinalLines": 4664,
+      "totalFinalLines": 4689,
       "categories": [
         "data",
         "docs",
@@ -2159,7 +2159,7 @@
       "depth": 2,
       "parentPath": "assistant_runtime",
       "fileCount": 2,
-      "totalFinalLines": 40,
+      "totalFinalLines": 65,
       "categories": [
         "docs"
       ]
@@ -2183,7 +2183,7 @@
       "depth": 1,
       "parentPath": "",
       "fileCount": 85,
-      "totalFinalLines": 24692,
+      "totalFinalLines": 24697,
       "categories": [
         "data",
         "docs",
@@ -2198,7 +2198,7 @@
       "depth": 2,
       "parentPath": "ingestion_pipeline",
       "fileCount": 5,
-      "totalFinalLines": 252,
+      "totalFinalLines": 257,
       "categories": [
         "data"
       ]
@@ -77111,14 +77111,98 @@
       "activityWeight": 0.31622776601683794,
       "beforeLineCount": 196,
       "afterLineCount": 198
+    },
+    {
+      "unitOrder": 18089,
+      "fileId": "file:assistant_runtime/prompts/rewrite_default.md",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "grow",
+      "lineDelta": 7,
+      "unitLineAmount": 7,
+      "activityWeight": 0.8366600265340756,
+      "beforeLineCount": 15,
+      "afterLineCount": 22
+    },
+    {
+      "unitOrder": 18183,
+      "fileId": "file:assistant_runtime/prompts/rewrite_default.md",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "grow",
+      "lineDelta": 12,
+      "unitLineAmount": 10,
+      "activityWeight": 1,
+      "beforeLineCount": 22,
+      "afterLineCount": 34
+    },
+    {
+      "unitOrder": 18184,
+      "fileId": "file:assistant_runtime/prompts/rewrite_default.md",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "grow",
+      "lineDelta": 12,
+      "unitLineAmount": 3,
+      "activityWeight": 0.5477225575051661,
+      "beforeLineCount": 22,
+      "afterLineCount": 34
+    },
+    {
+      "unitOrder": 18185,
+      "fileId": "file:assistant_runtime/prompts/rewrite_default.md",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "shrink",
+      "lineDelta": 12,
+      "unitLineAmount": 1,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 22,
+      "afterLineCount": 34
+    },
+    {
+      "unitOrder": 18381,
+      "fileId": "file:assistant_runtime/prompts/answer_grounded_default.md",
+      "filePath": "assistant_runtime/prompts/answer_grounded_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "grow",
+      "lineDelta": 6,
+      "unitLineAmount": 7,
+      "activityWeight": 0.8366600265340756,
+      "beforeLineCount": 25,
+      "afterLineCount": 31
+    },
+    {
+      "unitOrder": 18382,
+      "fileId": "file:assistant_runtime/prompts/answer_grounded_default.md",
+      "filePath": "assistant_runtime/prompts/answer_grounded_default.md",
+      "folderPath": "assistant_runtime/prompts",
+      "type": "shrink",
+      "lineDelta": 6,
+      "unitLineAmount": 1,
+      "activityWeight": 0.31622776601683794,
+      "beforeLineCount": 25,
+      "afterLineCount": 31
+    },
+    {
+      "unitOrder": 18549,
+      "fileId": "file:ingestion_pipeline/configs/unitn_discovery_multiscope_smoke.toml",
+      "filePath": "ingestion_pipeline/configs/unitn_discovery_multiscope_smoke.toml",
+      "folderPath": "ingestion_pipeline/configs",
+      "type": "grow",
+      "lineDelta": 5,
+      "unitLineAmount": 5,
+      "activityWeight": 0.7071067811865476,
+      "beforeLineCount": 120,
+      "afterLineCount": 125
     }
   ],
   "summary": {
     "fileCount": 140,
     "folderCount": 20,
-    "unitCount": 6229,
+    "unitCount": 6236,
     "maxFileLines": 3177,
-    "totalFinalLines": 36872
+    "totalFinalLines": 36902
   },
   "warnings": [
     "change-units: [commit 81 09cd803] tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx: Missing source file for rename from tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantForm.tsx.",

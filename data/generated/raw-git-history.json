@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "sourceRepo": {
     "path": "C:/Users/leona/Documents/GitHub/thesis-disi-chatbot",
-    "currentHead": "59431d0e83fd34a1db275baa36c43f1bd69eec49"
+    "currentHead": "8a182f0dfd18635f4ee26fdaea62e00ce79f7c1b"
   },
-  "generatedAt": "2026-05-12T13:22:10.417Z",
+  "generatedAt": "2026-05-13T09:55:00.741Z",
   "commits": [
     {
       "order": 0,
@@ -15188,6 +15188,804 @@
           "status": "modified",
           "addedLines": 61,
           "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 111,
+      "hash": "d1d14365f882e6f4164435c17e23dc5d9da2afef",
+      "shortHash": "d1d1436",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T16:46:01+02:00",
+      "message": "Tiny fixes",
+      "parentHashes": [
+        "59431d0e83fd34a1db275baa36c43f1bd69eec49"
+      ],
+      "changedFiles": [
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 194,
+          "deletedLines": 8,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 9,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAmbiguityView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 56,
+          "deletedLines": 12,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsAssistantErrorsView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 69,
+          "deletedLines": 18,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsDebuggingsView.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 17,
+          "deletedLines": 12,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsListDividerToggle.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 31,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 162,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 112,
+      "hash": "880f444e73954ccbb270e3c59ba5adb421c9690e",
+      "shortHash": "880f444",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T18:07:01+02:00",
+      "message": "We want a **frontend-only role visibility shell** now. This is **not authentication** and **not security**. Do not pretend it protects backend data. Real auth / server-side permissions will be a later chapter.",
+      "parentHashes": [
+        "d1d14365f882e6f4164435c17e23dc5d9da2afef"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_ui_roles_01_foundation.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 213,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/rewrite_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 13,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/AppProviders.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/AppShell.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 6,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 85,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantChatThread.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantComposer.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantCourseSelector.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantError.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 16,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantLanguageSwitch.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 0,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 8,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 19,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/UiRoleContext.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 54,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/UiRoleSwitcher.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 47,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/uiRoles.test.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 96,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/uiRoles.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 94,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 103,
+          "deletedLines": 37,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 113,
+      "hash": "ab3d0794c60b7e46689fd608c678961e6eb8e637",
+      "shortHash": "ab3d079",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T18:29:06+02:00",
+      "message": "## Goal Improve the product behavior when the grounded answer step returns `not_enough_evidence`.",
+      "parentHashes": [
+        "880f444e73954ccbb270e3c59ba5adb421c9690e"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_assistant_not_enough_evidence_01.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 524,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_ui_preferences_01_session_bugs_section.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 212,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_ui_roles_02_apply_visibility_v2.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 295,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "assistant_runtime/prompts/answer_grounded_default.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 214,
+          "deletedLines": 16,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 13,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantChatThread.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 29,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantInsufficientEvidenceHelp.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 155,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 12,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantFallbackResources.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 72,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/BugsPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 96,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 10,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/pages/BugsPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 43,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/UiRoleSwitcher.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 7,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 14,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/README.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 21,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/preferenceKeys.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 5,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/storage.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 37,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/useSessionPreference.ts",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 77,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 43,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 114,
+      "hash": "f2e3f3679f14775c4a1609dfa954d857883d8769",
+      "shortHash": "f2e3f36",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T19:10:16+02:00",
+      "message": "Persist the Config page active section during the current browser tab/session only.",
+      "parentHashes": [
+        "ab3d0794c60b7e46689fd608c678961e6eb8e637"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_assistant_debug_trace_01_session_only.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 187,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_debug_ui_full_truncated_cells.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 102,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "History_Implementation_plans/codex_prompt_ui_preferences_02_session_config_section.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 196,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "ingestion_pipeline/configs/unitn_discovery_multiscope_smoke.toml",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 111,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 38,
+          "deletedLines": 9,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/AppShell.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 19,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/NavRail.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 60,
+          "deletedLines": 11,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 64,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 6,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 84,
+          "deletedLines": 57,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/RoleGate.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 42,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/SpiderConfigRoute.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 99,
+          "deletedLines": 5,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/spider-config/pages/SpiderConfigPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 35,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/components.test.tsx",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 102,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/components.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 401,
+          "deletedLines": 113,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/preferenceKeys.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 86,
+          "deletedLines": 16,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/tsconfig.tsbuildinfo",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 1,
+          "isBinary": false
+        }
+      ]
+    },
+    {
+      "order": 115,
+      "hash": "8a182f0dfd18635f4ee26fdaea62e00ce79f7c1b",
+      "shortHash": "8a182f0",
+      "authorName": "Leonardo Colli",
+      "authorEmail": "leonardo.colli04@gmail.com",
+      "date": "2026-05-12T19:24:23+02:00",
+      "message": "Make source-status/default-source bootstrapping and source-config query parameters **developer-only in practice**, while keeping the current developer behavior unchanged.",
+      "parentHashes": [
+        "f2e3f3679f14775c4a1609dfa954d857883d8769"
+      ],
+      "changedFiles": [
+        {
+          "path": "History_Implementation_plans/codex_prompt_ui_roles_03_source_status_hardening.md",
+          "oldPath": null,
+          "status": "added",
+          "addedLines": 265,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/router.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 32,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/AppShell.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/app/shell/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 2,
+          "deletedLines": 2,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/AssistantPage.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 55,
+          "deletedLines": 6,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 14,
+          "deletedLines": 7,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/assistantDebugMode.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 24,
+          "deletedLines": 10,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/pages/AssistantPage.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 5,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/sources/README.md",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 4,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/sources/SourceBootstrapper.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 19,
+          "deletedLines": 4,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/sources/queries.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 11,
+          "deletedLines": 3,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/components.test.tsx",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 3,
+          "deletedLines": 1,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/preferenceKeys.ts",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 1,
+          "deletedLines": 0,
+          "isBinary": false
+        },
+        {
+          "path": "tools/ingestion_debug_ui_react_3/frontend/src/styles.css",
+          "oldPath": null,
+          "status": "modified",
+          "addedLines": 23,
+          "deletedLines": 9,
           "isBinary": false
         }
       ]

@@ -19,6 +19,7 @@ import {
   matchesPathPattern,
   normalizePathValue,
 } from '../src/preprocessing/pathPattern.ts';
+import { buildRepoLineMetricsTimeline } from '../src/preprocessing/repoLineMetrics.ts';
 import type {
   RepoVisualModel,
   VisualFile,
@@ -454,6 +455,7 @@ function buildDisplayModel(
   const folderNodeCount = finalNodes.filter(
     (node) => node.type === 'folder' || node.type === 'collapsedFolder',
   ).length;
+  const lineMetricsTimeline = buildRepoLineMetricsTimeline(dynamicVisibilityResult.timeline);
 
   if (baseTimeline.length !== model.timeline.length) {
     pushWarning(
@@ -488,6 +490,7 @@ function buildDisplayModel(
       },
       nodes: finalNodes,
       timeline: dynamicVisibilityResult.timeline,
+      lineMetricsTimeline,
       visibilityFrames: dynamicVisibilityResult.visibilityFrames,
       summary: {
         visibleNodeCount: finalNodes.length,

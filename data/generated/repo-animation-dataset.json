@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-12T13:22:13.264Z",
+  "generatedAt": "2026-05-13T09:55:03.192Z",
   "historyTrim": {
     "trimEndProgressPercent": 0,
-    "sourceUnitCount": 18089,
-    "keptUnitCount": 18089,
+    "sourceUnitCount": 18782,
+    "keptUnitCount": 18782,
     "droppedUnitCount": 0,
-    "cutoffUnitOrder": 18088
+    "cutoffUnitOrder": 18781
   },
   "sourceFiles": {
     "history": "C:\\Users\\leona\\Documents\\GitHub\\custom-timelapse-from-repository\\data\\generated\\raw-git-history.json",
@@ -176,8 +176,8 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "maxLineCount": 25,
-      "finalLineCount": 25,
+      "maxLineCount": 31,
+      "finalLineCount": 31,
       "createdUnitOrder": 11031
     },
     {
@@ -187,8 +187,8 @@
       "extension": "md",
       "category": "docs",
       "language": "Markdown",
-      "maxLineCount": 22,
-      "finalLineCount": 15,
+      "maxLineCount": 34,
+      "finalLineCount": 34,
       "createdUnitOrder": 7148
     },
     {
@@ -429,8 +429,8 @@
       "extension": "toml",
       "category": "data",
       "language": "TOML",
-      "maxLineCount": 120,
-      "finalLineCount": 120,
+      "maxLineCount": 125,
+      "finalLineCount": 125,
       "createdUnitOrder": 1337
     },
     {
@@ -113752,6 +113752,132 @@
       "name": "test_assistant_runtime_openai_rewriter.py",
       "category": "test",
       "language": "Python"
+    },
+    {
+      "unitOrder": 18089,
+      "commitOrder": 111,
+      "commitHash": "d1d14365f882e6f4164435c17e23dc5d9da2afef",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "type": "grow",
+      "statusFromGit": "modified",
+      "lineDelta": 7,
+      "unitLineAmount": 7,
+      "beforeLineCount": 15,
+      "afterLineCount": 22,
+      "extension": "md",
+      "folder": "assistant_runtime/prompts",
+      "visualMass": 0.7,
+      "name": "rewrite_default.md",
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "unitOrder": 18183,
+      "commitOrder": 112,
+      "commitHash": "880f444e73954ccbb270e3c59ba5adb421c9690e",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "type": "grow",
+      "statusFromGit": "modified",
+      "lineDelta": 12,
+      "unitLineAmount": 10,
+      "beforeLineCount": 22,
+      "afterLineCount": 34,
+      "extension": "md",
+      "folder": "assistant_runtime/prompts",
+      "visualMass": 1,
+      "name": "rewrite_default.md",
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "unitOrder": 18184,
+      "commitOrder": 112,
+      "commitHash": "880f444e73954ccbb270e3c59ba5adb421c9690e",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "type": "grow",
+      "statusFromGit": "modified",
+      "lineDelta": 12,
+      "unitLineAmount": 3,
+      "beforeLineCount": 22,
+      "afterLineCount": 34,
+      "extension": "md",
+      "folder": "assistant_runtime/prompts",
+      "visualMass": 0.4,
+      "name": "rewrite_default.md",
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "unitOrder": 18185,
+      "commitOrder": 112,
+      "commitHash": "880f444e73954ccbb270e3c59ba5adb421c9690e",
+      "filePath": "assistant_runtime/prompts/rewrite_default.md",
+      "type": "shrink",
+      "statusFromGit": "modified",
+      "lineDelta": 12,
+      "unitLineAmount": 1,
+      "beforeLineCount": 22,
+      "afterLineCount": 34,
+      "extension": "md",
+      "folder": "assistant_runtime/prompts",
+      "visualMass": 0.4,
+      "name": "rewrite_default.md",
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "unitOrder": 18381,
+      "commitOrder": 113,
+      "commitHash": "ab3d0794c60b7e46689fd608c678961e6eb8e637",
+      "filePath": "assistant_runtime/prompts/answer_grounded_default.md",
+      "type": "grow",
+      "statusFromGit": "modified",
+      "lineDelta": 6,
+      "unitLineAmount": 7,
+      "beforeLineCount": 25,
+      "afterLineCount": 31,
+      "extension": "md",
+      "folder": "assistant_runtime/prompts",
+      "visualMass": 0.7,
+      "name": "answer_grounded_default.md",
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "unitOrder": 18382,
+      "commitOrder": 113,
+      "commitHash": "ab3d0794c60b7e46689fd608c678961e6eb8e637",
+      "filePath": "assistant_runtime/prompts/answer_grounded_default.md",
+      "type": "shrink",
+      "statusFromGit": "modified",
+      "lineDelta": 6,
+      "unitLineAmount": 1,
+      "beforeLineCount": 25,
+      "afterLineCount": 31,
+      "extension": "md",
+      "folder": "assistant_runtime/prompts",
+      "visualMass": 0.4,
+      "name": "answer_grounded_default.md",
+      "category": "docs",
+      "language": "Markdown"
+    },
+    {
+      "unitOrder": 18549,
+      "commitOrder": 114,
+      "commitHash": "f2e3f3679f14775c4a1609dfa954d857883d8769",
+      "filePath": "ingestion_pipeline/configs/unitn_discovery_multiscope_smoke.toml",
+      "type": "grow",
+      "statusFromGit": "modified",
+      "lineDelta": 5,
+      "unitLineAmount": 5,
+      "beforeLineCount": 120,
+      "afterLineCount": 125,
+      "extension": "toml",
+      "folder": "ingestion_pipeline/configs",
+      "visualMass": 0.5,
+      "name": "unitn_discovery_multiscope_smoke.toml",
+      "category": "data",
+      "language": "TOML"
     }
   ],
   "excludedFiles": [
@@ -114155,8 +114281,22 @@
       "reason": "config-exclude: History_Implementation_plans/**"
     },
     {
+      "path": "History_Implementation_plans/codex_prompt_assistant_debug_trace_01_session_only.md",
+      "name": "codex_prompt_assistant_debug_trace_01_session_only.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
       "path": "History_Implementation_plans/codex_prompt_assistant_language_field_contract.md",
       "name": "codex_prompt_assistant_language_field_contract.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_assistant_not_enough_evidence_01.md",
+      "name": "codex_prompt_assistant_not_enough_evidence_01.md",
       "folder": "History_Implementation_plans",
       "extension": "md",
       "reason": "config-exclude: History_Implementation_plans/**"
@@ -114185,6 +114325,13 @@
     {
       "path": "History_Implementation_plans/codex_prompt_debug_ui_filters_scrollbars.md",
       "name": "codex_prompt_debug_ui_filters_scrollbars.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_debug_ui_full_truncated_cells.md",
+      "name": "codex_prompt_debug_ui_full_truncated_cells.md",
       "folder": "History_Implementation_plans",
       "extension": "md",
       "reason": "config-exclude: History_Implementation_plans/**"
@@ -114234,6 +114381,41 @@
     {
       "path": "History_Implementation_plans/codex_prompt_ui_cleanup_assistant_catalogue.md",
       "name": "codex_prompt_ui_cleanup_assistant_catalogue.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_ui_preferences_01_session_bugs_section.md",
+      "name": "codex_prompt_ui_preferences_01_session_bugs_section.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_ui_preferences_02_session_config_section.md",
+      "name": "codex_prompt_ui_preferences_02_session_config_section.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_ui_roles_01_foundation.md",
+      "name": "codex_prompt_ui_roles_01_foundation.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_ui_roles_02_apply_visibility_v2.md",
+      "name": "codex_prompt_ui_roles_02_apply_visibility_v2.md",
+      "folder": "History_Implementation_plans",
+      "extension": "md",
+      "reason": "config-exclude: History_Implementation_plans/**"
+    },
+    {
+      "path": "History_Implementation_plans/codex_prompt_ui_roles_03_source_status_hardening.md",
+      "name": "codex_prompt_ui_roles_03_source_status_hardening.md",
       "folder": "History_Implementation_plans",
       "extension": "md",
       "reason": "config-exclude: History_Implementation_plans/**"
@@ -115632,6 +115814,13 @@
       "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
     },
     {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantInsufficientEvidenceHelp.tsx",
+      "name": "AssistantInsufficientEvidenceHelp.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components",
+      "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components/AssistantLanguageSwitch.tsx",
       "name": "AssistantLanguageSwitch.tsx",
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/components",
@@ -115686,6 +115875,13 @@
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
       "extension": "md",
       "reason": "config-exclude: **/README.md"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantFallbackResources.ts",
+      "name": "useAssistantFallbackResources.ts",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant",
+      "extension": "ts",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
     },
     {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/assistant/useAssistantQuery.ts",
@@ -115751,6 +115947,13 @@
       "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
     },
     {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsListDividerToggle.tsx",
+      "name": "BugsListDividerToggle.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components",
+      "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components/BugsViewToggle.tsx",
       "name": "BugsViewToggle.tsx",
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/bugs/components",
@@ -115784,6 +115987,48 @@
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features",
       "extension": "md",
       "reason": "config-exclude: **/README.md"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/README.md",
+      "name": "README.md",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles",
+      "extension": "md",
+      "reason": "config-exclude: **/README.md"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/RoleGate.tsx",
+      "name": "RoleGate.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles",
+      "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/UiRoleContext.tsx",
+      "name": "UiRoleContext.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles",
+      "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/uiRoles.test.tsx",
+      "name": "uiRoles.test.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles",
+      "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/uiRoles.ts",
+      "name": "uiRoles.ts",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles",
+      "extension": "ts",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles/UiRoleSwitcher.tsx",
+      "name": "UiRoleSwitcher.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/roles",
+      "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
     },
     {
       "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/sources/api.ts",
@@ -115951,6 +116196,13 @@
       "name": "api.ts",
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
       "extension": "ts",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench/components.test.tsx",
+      "name": "components.test.tsx",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/features/workbench",
+      "extension": "tsx",
       "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
     },
     {
@@ -116133,6 +116385,41 @@
       "name": "TrailRoute.tsx",
       "folder": "tools/ingestion_debug_ui_react_3/frontend/src/routes",
       "extension": "tsx",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/README.md",
+      "name": "README.md",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/shared",
+      "extension": "md",
+      "reason": "config-exclude: **/README.md"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/preferenceKeys.ts",
+      "name": "preferenceKeys.ts",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences",
+      "extension": "ts",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/README.md",
+      "name": "README.md",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences",
+      "extension": "md",
+      "reason": "config-exclude: **/README.md"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/storage.ts",
+      "name": "storage.ts",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences",
+      "extension": "ts",
+      "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
+    },
+    {
+      "path": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences/useSessionPreference.ts",
+      "name": "useSessionPreference.ts",
+      "folder": "tools/ingestion_debug_ui_react_3/frontend/src/shared/ui-preferences",
+      "extension": "ts",
       "reason": "config-exclude: tools/ingestion_debug_ui_react_3/**"
     },
     {

@@ -1,4 +1,5 @@
 import type { HistoryTrimMetadata } from './historyTrim.ts';
+import type { RepoLineMetricsFrame } from './repoLineMetrics.ts';
 
 export type RepoDisplayNodeType =
   | 'folder'
@@ -87,6 +88,7 @@ export interface RepoDisplayModel {
   };
   nodes: RepoDisplayNode[];
   timeline: RepoDisplayTimelineUnit[];
+  lineMetricsTimeline?: RepoLineMetricsFrame[];
   visibilityFrames: RepoDisplayVisibilityFrame[];
   summary: {
     visibleNodeCount: number;
